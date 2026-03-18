@@ -165,7 +165,7 @@ spec:
       image:
         repository: git.pmon.dev/schnappy/api-gateway
         pullPolicy: IfNotPresent
-        tag: "unchanged"  # api-gateway
+        tag: "de502d2"  # api-gateway
       replicas: 1
       javaOpts: -Xmx256m -XX:+UseZGC
       resources:
