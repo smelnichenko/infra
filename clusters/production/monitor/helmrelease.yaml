@@ -30,7 +30,7 @@ spec:
       replicas: 1
       gitHash: "df740a2"
       buildTime: "2026-03-18T18:18:59Z"
-      javaOpts: -Xmx6g -XX:+UseZGC
+      javaOpts: -Xmx3g -XX:+UseZGC
       image:
         pullPolicy: IfNotPresent
         repository: git.pmon.dev/schnappy/monitor
@@ -50,8 +50,8 @@ spec:
         idleTimeout: 300000
         maxLifetime: 1200000
       resources:
-        requests: { cpu: 500m, memory: 2Gi }
-        limits: { cpu: 6000m, memory: 8Gi }
+        requests: { cpu: 500m, memory: 1Gi }
+        limits: { cpu: 6000m, memory: 4Gi }
 
     frontend:
       enabled: true
@@ -191,10 +191,10 @@ spec:
         pullPolicy: IfNotPresent
         tag: "dedce60"  # chat-service
       replicas: 1
-      javaOpts: -Xmx512m -XX:+UseZGC
+      javaOpts: -Xmx1g -XX:+UseZGC
       resources:
-        requests: { cpu: 250m, memory: 512Mi }
-        limits: { cpu: 2000m, memory: 1Gi }
+        requests: { cpu: 250m, memory: 1Gi }
+        limits: { cpu: 2000m, memory: 2Gi }
 
     chessService:
       enabled: true
