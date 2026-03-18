@@ -68,7 +68,7 @@ spec:
     kubectl:
       image:
         repository: docker.io/bitnami/kubectl
-        tag: "1.32"
+        tag: latest
     resources:
       requests:
         cpu: 100m
