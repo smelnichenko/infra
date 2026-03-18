@@ -78,37 +78,37 @@ spec:
               prometheus_retention_time = "24h"
               disable_hostname = true
             }
-        readinessProbe:
-          enabled: true
-          exec:
-            command:
-              - /bin/sh
-              - -ec
-              - |
-                VAULT_CACERT=/vault/userconfig/vault-tls/ca.crt vault status
-        affinity: |
-          podAntiAffinity:
-            preferredDuringSchedulingIgnoredDuringExecution:
-              - weight: 100
-                podAffinityTerm:
-                  labelSelector:
-                    matchLabels:
-                      app.kubernetes.io/name: vault
-                      component: server
-                  topologyKey: kubernetes.io/hostname
-        dataStorage:
-          enabled: true
-          size: 10Gi
-          storageClass: local-path
-        resources:
-          requests:
-            memory: 256Mi
-            cpu: 100m
-          limits:
-            memory: 512Mi
-            cpu: 500m
-      ui:
+      readinessProbe:
         enabled: true
-        serviceType: ClusterIP
+        exec:
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              VAULT_CACERT=/vault/userconfig/vault-tls/ca.crt vault status
+      affinity: |
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: vault
+                    component: server
+                topologyKey: kubernetes.io/hostname
+      dataStorage:
+        enabled: true
+        size: 10Gi
+        storageClass: local-path
+      resources:
+        requests:
+          memory: 256Mi
+          cpu: 100m
+        limits:
+          memory: 512Mi
+          cpu: 500m
+    ui:
+      enabled: true
+      serviceType: ClusterIP
     injector:
       enabled: false
