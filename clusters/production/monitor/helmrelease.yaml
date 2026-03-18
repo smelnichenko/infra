@@ -161,7 +161,7 @@ spec:
         limits: { cpu: 1000m, memory: 1Gi }
 
     gateway:
-      enabled: false
+      enabled: true
       image:
         repository: git.pmon.dev/schnappy/api-gateway
         pullPolicy: IfNotPresent
@@ -173,7 +173,7 @@ spec:
         limits: { cpu: 1000m, memory: 512Mi }
 
     admin:
-      enabled: false
+      enabled: true
       image:
         repository: git.pmon.dev/schnappy/admin
         pullPolicy: IfNotPresent
@@ -185,7 +185,7 @@ spec:
         limits: { cpu: 2000m, memory: 1Gi }
 
     chatService:
-      enabled: false
+      enabled: true
       image:
         repository: git.pmon.dev/schnappy/chat
         pullPolicy: IfNotPresent
@@ -197,7 +197,7 @@ spec:
         limits: { cpu: 2000m, memory: 1Gi }
 
     chessService:
-      enabled: false
+      enabled: true
       image:
         repository: git.pmon.dev/schnappy/chess
         pullPolicy: IfNotPresent
