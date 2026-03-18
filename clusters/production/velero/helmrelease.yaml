@@ -65,6 +65,7 @@ spec:
           includedNamespaces:
             - "*"
           defaultVolumesToFsBackup: true
+    upgradeCRDs: false
     kubectl:
       image:
         repository: docker.io/bitnami/kubectl
