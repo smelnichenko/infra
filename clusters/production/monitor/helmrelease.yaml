@@ -167,10 +167,10 @@ spec:
         pullPolicy: IfNotPresent
         tag: "de502d2"  # api-gateway
       replicas: 1
-      javaOpts: -Xmx256m -XX:+UseZGC
+      javaOpts: -Xmx512m -XX:+UseZGC
       resources:
-        requests: { cpu: 100m, memory: 256Mi }
-        limits: { cpu: 1000m, memory: 512Mi }
+        requests: { cpu: 100m, memory: 512Mi }
+        limits: { cpu: 1000m, memory: 1Gi }
 
     admin:
       enabled: true
