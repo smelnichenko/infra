@@ -65,6 +65,9 @@ spec:
           includedNamespaces:
             - "*"
           defaultVolumesToFsBackup: true
+    kubectl:
+      image:
+        repository: docker.io/bitnami/kubectl
     resources:
       requests:
         cpu: 100m
