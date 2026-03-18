@@ -212,7 +212,7 @@ spec:
       enabled: true
       existingSecret: monitor-kafka
       image: apache/kafka:4.2.0
-      javaOpts: -Xmx1g -Xms1g
+      javaOpts: -Xmx1536m -Xms1536m
       retention:
         hours: 168
         bytes: "10737418240"
@@ -220,8 +220,8 @@ spec:
         size: 10Gi
         storageClass: local-path
       resources:
-        requests: { cpu: 250m, memory: 1Gi }
-        limits: { cpu: 2000m, memory: 2Gi }
+        requests: { cpu: 250m, memory: 1536Mi }
+        limits: { cpu: 2000m, memory: 3Gi }
       topics:
         - name: chat.messages
           partitions: 12
