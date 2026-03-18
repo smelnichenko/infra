@@ -6,7 +6,8 @@ metadata:
   name: cert-manager-webhook-porkbun
   namespace: cert-manager
 spec:
-  suspend: true
+  # Porkbun webhook is already Helm-managed — Flux adopts it
+
   interval: 1h
   timeout: 5m
   dependsOn:

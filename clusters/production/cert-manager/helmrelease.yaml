@@ -1,20 +1,18 @@
-# NOTE: cert-manager is currently installed via kubectl apply (not Helm).
-# Switching to this HelmRelease requires first removing the existing installation:
-#   kubectl delete -f https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml
-# Then unsuspend this HelmRelease. CRDs will be reinstalled by the chart.
+# cert-manager Helm release (migrated from kubectl apply)
+# CRDs managed by the chart (crds.enabled + install/upgrade CreateReplace)
+# Porkbun secret (porkbun-secret) created by Ansible setup-k3s.yml
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: cert-manager
   namespace: cert-manager
 spec:
-  suspend: true
   interval: 1h
   timeout: 10m
   chart:
     spec:
       chart: cert-manager
-      version: "1.17.2"
+      version: "v1.19.3"
       sourceRef:
         kind: HelmRepository
         name: jetstack
