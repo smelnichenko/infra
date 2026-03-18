@@ -1,0 +1,24 @@
+# Porkbun DNS-01 webhook for cert-manager
+# Requires porkbun-secret in cert-manager namespace (created by Ansible)
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cert-manager-webhook-porkbun
+  namespace: cert-manager
+spec:
+  suspend: true
+  interval: 1h
+  timeout: 5m
+  dependsOn:
+    - name: cert-manager
+      namespace: cert-manager
+  chart:
+    spec:
+      chart: cert-manager-webhook-porkbun
+      sourceRef:
+        kind: HelmRepository
+        name: porkbun-webhook
+        namespace: flux-system
+  install:
+    remediation:
+      retries: 3
