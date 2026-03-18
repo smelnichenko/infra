@@ -1,0 +1,350 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: monitor
+  namespace: monitor
+spec:
+  interval: 5m
+  timeout: 10m
+  chart:
+    spec:
+      chart: infra/helm
+      sourceRef:
+        kind: GitRepository
+        name: monitor
+        namespace: flux-system
+      reconcileStrategy: Revision
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  driftDetection:
+    mode: warn
+  values:
+    vault:
+      secretsEnabled: true
+
+    app:
+      replicas: 1
+      gitHash: "51202cd"
+      buildTime: "2026-03-18T01:37:08Z"
+      javaOpts: -Xmx6g -XX:+UseZGC
+      image:
+        pullPolicy: IfNotPresent
+        repository: git.pmon.dev/schnappy/monitor
+        tag: "51202cd"  # monitor-backend
+      ingress:
+        enabled: true
+        className: traefik
+        host: pmon.dev
+        tls:
+          enabled: true
+          clusterIssuer: letsencrypt-prod
+          secretName: pmon-dev-tls
+      hikari:
+        maximumPoolSize: 20
+        minimumIdle: 5
+        connectionTimeout: 20000
+        idleTimeout: 300000
+        maxLifetime: 1200000
+      resources:
+        requests: { cpu: 500m, memory: 2Gi }
+        limits: { cpu: 6000m, memory: 8Gi }
+
+    frontend:
+      enabled: true
+      replicas: 1
+      image:
+        pullPolicy: IfNotPresent
+        repository: git.pmon.dev/schnappy/monitor-frontend
+        tag: "a8cdcb5"  # monitor-frontend
+      resources:
+        requests: { cpu: 100m, memory: 64Mi }
+        limits: { cpu: 500m, memory: 256Mi }
+
+    aptCache:
+      enabled: true
+      storage:
+        size: 10Gi
+        storageClass: local-path
+
+    auth:
+      existingSecret: monitor-auth
+      registrationEnabled: true
+      secureCookies: true
+      tokenExpiration: 1h
+      registrationApproval:
+        mode: ai
+        defaultGroup: Users
+
+    captcha:
+      enabled: true
+
+    chess:
+      enabled: true
+
+    chat:
+      e2eEnabled: false
+
+    linkerd:
+      enabled: false
+      authorizationPolicy: false
+
+    postgres:
+      enabled: true
+      existingSecret: monitor-postgres
+      image: postgres:17-alpine
+      sharedBuffers: 4GB
+      effectiveCacheSize: 12GB
+      workMem: 64MB
+      maintenanceWorkMem: 512MB
+      maxParallelWorkersPerGather: 4
+      maxParallelWorkers: 6
+      maxWorkerProcesses: 10
+      effectiveIoConcurrency: 200
+      randomPageCost: "1.1"
+      storage:
+        size: 20Gi
+        storageClass: local-path
+      resources:
+        requests: { cpu: 500m, memory: 4Gi }
+        limits: { cpu: 6000m, memory: 16Gi }
+
+    redis:
+      enabled: true
+      existingSecret: monitor-redis
+      image: redis:7-alpine
+      resources:
+        requests: { cpu: 100m, memory: 256Mi }
+        limits: { cpu: 1000m, memory: 4Gi }
+
+    monitor:
+      enabled: true
+      http:
+        connectTimeout: 10s
+        readTimeout: 30s
+        userAgent: MonitorBot/1.0
+
+    networkPolicies:
+      enabled: true
+
+    ai:
+      enabled: true
+      existingSecret: monitor-ai
+      model: claude-haiku-4-5-20251001
+
+    mail:
+      enabled: true
+      existingSecret: monitor-mail
+      host: smtp.resend.com
+      port: "587"
+      username: resend
+      fromAddress: noreply@pmon.dev
+      appUrl: https://pmon.dev
+
+    webhook:
+      enabled: true
+      existingSecret: monitor-webhook
+
+    minio:
+      enabled: true
+      existingSecret: monitor-minio
+      bucket: email-attachments
+      image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
+      storage:
+        size: 20Gi
+        storageClass: local-path
+      resources:
+        requests: { cpu: 100m, memory: 256Mi }
+        limits: { cpu: 1000m, memory: 1Gi }
+
+    gateway:
+      enabled: false
+      image:
+        repository: git.pmon.dev/schnappy/api-gateway
+        pullPolicy: IfNotPresent
+        tag: "unchanged"  # api-gateway
+      replicas: 1
+      javaOpts: -Xmx256m -XX:+UseZGC
+      resources:
+        requests: { cpu: 100m, memory: 256Mi }
+        limits: { cpu: 1000m, memory: 512Mi }
+
+    admin:
+      enabled: false
+      image:
+        repository: git.pmon.dev/schnappy/admin
+        pullPolicy: IfNotPresent
+        tag: "unchanged"  # admin-service
+      replicas: 1
+      javaOpts: -Xmx512m -XX:+UseZGC
+      resources:
+        requests: { cpu: 250m, memory: 512Mi }
+        limits: { cpu: 2000m, memory: 1Gi }
+
+    chatService:
+      enabled: false
+      image:
+        repository: git.pmon.dev/schnappy/chat
+        pullPolicy: IfNotPresent
+        tag: "unchanged"  # chat-service
+      replicas: 1
+      javaOpts: -Xmx512m -XX:+UseZGC
+      resources:
+        requests: { cpu: 250m, memory: 512Mi }
+        limits: { cpu: 2000m, memory: 1Gi }
+
+    chessService:
+      enabled: false
+      image:
+        repository: git.pmon.dev/schnappy/chess
+        pullPolicy: IfNotPresent
+        tag: "unchanged"  # chess-service
+      replicas: 1
+      javaOpts: -Xmx512m -XX:+UseZGC
+      resources:
+        requests: { cpu: 250m, memory: 512Mi }
+        limits: { cpu: 2000m, memory: 1Gi }
+
+    kafka:
+      enabled: true
+      existingSecret: monitor-kafka
+      image: apache/kafka:4.2.0
+      javaOpts: -Xmx1g -Xms1g
+      retention:
+        hours: 168
+        bytes: "10737418240"
+      storage:
+        size: 10Gi
+        storageClass: local-path
+      resources:
+        requests: { cpu: 250m, memory: 1Gi }
+        limits: { cpu: 2000m, memory: 2Gi }
+      topics:
+        - name: chat.messages
+          partitions: 12
+          replicationFactor: 1
+        - name: chat.events
+          partitions: 6
+          replicationFactor: 1
+        - name: chat.notifications
+          partitions: 3
+          replicationFactor: 1
+        - name: chess.moves
+          partitions: 6
+          replicationFactor: 1
+        - name: user.events
+          partitions: 3
+          replicationFactor: 1
+
+    scylla:
+      enabled: true
+      image: scylladb/scylla:6.2
+      args:
+        - --smp=2
+        - --memory=2G
+        - --overprovisioned=1
+      storage:
+        size: 20Gi
+        storageClass: local-path
+      resources:
+        requests: { cpu: 500m, memory: 2Gi }
+        limits: { cpu: 4000m, memory: 4Gi }
+
+    elk:
+      enabled: true
+      elasticsearch:
+        existingSecret: monitor-elasticsearch
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.19.8
+        javaOpts: -Xms2g -Xmx2g
+        replicas: 1
+        retention:
+          days: 30
+        storage:
+          size: 50Gi
+          storageClass: local-path
+        resources:
+          requests: { cpu: 500m, memory: 4Gi }
+          limits: { cpu: 4000m, memory: 8Gi }
+      kibana:
+        image: docker.elastic.co/kibana/kibana:8.19.8
+        replicas: 1
+        ingress:
+          enabled: true
+          className: traefik
+          host: logs.pmon.dev
+          tls:
+            enabled: true
+            clusterIssuer: letsencrypt-dns
+            secretName: logs-pmon-dev-tls
+        resources:
+          requests: { cpu: 100m, memory: 1Gi }
+          limits: { cpu: 1000m, memory: 2Gi }
+      fluentbit:
+        image: cr.fluentbit.io/fluent/fluent-bit:4.2.3
+        resources:
+          requests: { cpu: 50m, memory: 128Mi }
+          limits: { cpu: 200m, memory: 256Mi }
+
+    prometheus:
+      enabled: true
+      image: prom/prometheus:v3.10.0
+      retention: 30d
+      scrapeInterval: 15s
+      storage:
+        size: 20Gi
+        storageClass: local-path
+      resources:
+        requests: { cpu: 250m, memory: 512Mi }
+        limits: { cpu: 2000m, memory: 4Gi }
+      vault:
+        enabled: true
+
+    grafana:
+      enabled: true
+      existingSecret: monitor-grafana
+      image: grafana/grafana:12.4.0
+      ingress:
+        enabled: true
+        className: traefik
+        host: grafana.pmon.dev
+        tls:
+          enabled: true
+          clusterIssuer: letsencrypt-dns
+          secretName: grafana-pmon-dev-tls
+      storage:
+        size: 5Gi
+        storageClass: local-path
+      resources:
+        requests: { cpu: 100m, memory: 256Mi }
+        limits: { cpu: 1000m, memory: 1Gi }
+
+    sonarqube:
+      enabled: true
+      existingSecret: monitor-sonarqube
+      image: sonarqube:26.3.0.120487-community
+      javaOpts: -Xms1g -Xmx1g
+      ingress:
+        enabled: true
+        className: traefik
+        host: sonar.pmon.dev
+        tls:
+          enabled: true
+          clusterIssuer: letsencrypt-dns
+          secretName: sonar-pmon-dev-tls
+      storage:
+        size: 10Gi
+        storageClass: local-path
+      resources:
+        requests: { cpu: 500m, memory: 3Gi }
+        limits: { cpu: 4000m, memory: 6Gi }
+      postgres:
+        image: postgres:17-alpine
+        storage:
+          size: 5Gi
+          storageClass: local-path
+        resources:
+          requests: { cpu: 100m, memory: 256Mi }
+          limits: { cpu: 1000m, memory: 512Mi }
