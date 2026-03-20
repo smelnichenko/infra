@@ -168,6 +168,8 @@ spec:
         tag: "5d9d897"  # api-gateway
       replicas: 1
       javaOpts: -Xmx1g -XX:+UseZGC
+      cors:
+        allowedOrigins: "https://pmon.dev"
       resources:
         requests: { cpu: 100m, memory: 1Gi }
         limits: { cpu: 1000m, memory: 2Gi }
