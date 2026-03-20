@@ -28,8 +28,8 @@ spec:
 
     app:
       replicas: 1
-      gitHash: "9df70c1"
-      buildTime: "2026-03-20T10:01:00Z"
+      gitHash: "c5c09ca"
+      buildTime: "2026-03-20T10:42:06Z"
       javaOpts: -Xmx3g -XX:+UseZGC
       image:
         pullPolicy: IfNotPresent
@@ -59,7 +59,7 @@ spec:
       image:
         pullPolicy: IfNotPresent
         repository: git.pmon.dev/schnappy/monitor-frontend
-        tag: "a8cdcb5"  # monitor-frontend
+        tag: "c5c09ca"  # monitor-frontend
       resources:
         requests: { cpu: 100m, memory: 64Mi }
         limits: { cpu: 500m, memory: 256Mi }
