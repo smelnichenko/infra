@@ -62,7 +62,7 @@ spec:
         tag: "bc9641e"  # monitor-frontend
       resources:
         requests: { cpu: 100m, memory: 64Mi }
-        limits: { cpu: 500m, memory: 256Mi }
+        limits: { cpu: 2000m, memory: 256Mi }
 
     aptCache:
       enabled: true
