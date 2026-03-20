@@ -318,6 +318,14 @@ spec:
           enabled: true
           clusterIssuer: letsencrypt-dns
           secretName: grafana-pmon-dev-tls
+      oauth:
+        enabled: true
+        name: Forgejo
+        authUrl: https://git.pmon.dev/login/oauth/authorize
+        tokenUrl: https://git.pmon.dev/login/oauth/access_token
+        apiUrl: https://git.pmon.dev/api/v1/user
+        scopes: "openid profile email"
+        autoLogin: false
       storage:
         size: 5Gi
         storageClass: local-path
