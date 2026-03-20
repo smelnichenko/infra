@@ -109,7 +109,7 @@ spec:
         size: 20Gi
         storageClass: local-path
       resources:
-        requests: { cpu: 500m, memory: 2Gi }
+        requests: { cpu: 1000m, memory: 4Gi }
         limits: { cpu: 4000m, memory: 8Gi }
 
     redis:
