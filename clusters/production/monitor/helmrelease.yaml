@@ -58,8 +58,8 @@ spec:
       replicas: 1
       image:
         pullPolicy: IfNotPresent
-        repository: git.pmon.dev/schnappy/frontend
-        tag: "bc9641e"  # monitor-frontend
+        repository: git.pmon.dev/schnappy/site
+        tag: "bc9641e"  # site
       resources:
         requests: { cpu: 100m, memory: 64Mi }
         limits: { cpu: 2000m, memory: 256Mi }
