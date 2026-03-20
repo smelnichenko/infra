@@ -28,8 +28,8 @@ spec:
 
     app:
       replicas: 1
-      gitHash: "f833e12"
-      buildTime: "2026-03-20T17:58:22Z"
+      gitHash: "0a9c1a7"
+      buildTime: "2026-03-20T18:09:01Z"
       javaOpts: -Xmx3g -XX:+UseZGC
       image:
         pullPolicy: IfNotPresent
