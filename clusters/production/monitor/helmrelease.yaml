@@ -28,13 +28,13 @@ spec:
 
     app:
       replicas: 1
-      gitHash: "c5c09ca"
-      buildTime: "2026-03-20T10:42:06Z"
+      gitHash: "a683fdb"
+      buildTime: "2026-03-20T10:58:57Z"
       javaOpts: -Xmx3g -XX:+UseZGC
       image:
         pullPolicy: IfNotPresent
         repository: git.pmon.dev/schnappy/monitor
-        tag: "235f1de"  # monitor-backend
+        tag: "a683fdb"  # monitor-backend
       ingress:
         enabled: true
         className: traefik
@@ -59,7 +59,7 @@ spec:
       image:
         pullPolicy: IfNotPresent
         repository: git.pmon.dev/schnappy/monitor-frontend
-        tag: "c5c09ca"  # monitor-frontend
+        tag: "a683fdb"  # monitor-frontend
       resources:
         requests: { cpu: 100m, memory: 64Mi }
         limits: { cpu: 500m, memory: 256Mi }
