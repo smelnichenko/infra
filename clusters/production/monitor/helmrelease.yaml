@@ -8,10 +8,10 @@ spec:
   timeout: 5m
   chart:
     spec:
-      chart: infra/helm
+      chart: helm
       sourceRef:
         kind: GitRepository
-        name: monitor
+        name: platform
         namespace: flux-system
       reconcileStrategy: Revision
   install:
