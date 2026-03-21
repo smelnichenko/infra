@@ -53,7 +53,7 @@ spec:
         requests: { cpu: 500m, memory: 2Gi }
         limits: { cpu: 4000m, memory: 4Gi }
 
-    frontend:
+    site:
       enabled: true
       replicas: 1
       image:
