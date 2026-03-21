@@ -41,7 +41,8 @@ spec:
         webhook:
           ALLOWED_HOST_LIST: private
         repository:
-          DEFAULT_BRANCH: master
+          DEFAULT_BRANCH: main
+          DEFAULT_PRIVATE: true
         log:
           LEVEL: Warn
     image:
