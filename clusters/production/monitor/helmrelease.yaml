@@ -70,7 +70,7 @@ spec:
       image:
         pullPolicy: IfNotPresent
         repository: git.pmon.dev/schnappy/game-scp
-        tag: "latest"  # game-scp
+        tag: "d5f6fdf"  # game-scp
       resources:
         requests: { cpu: 25m, memory: 32Mi }
         limits: { cpu: 100m, memory: 64Mi }
