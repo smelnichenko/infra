@@ -64,6 +64,17 @@ spec:
         requests: { cpu: 100m, memory: 64Mi }
         limits: { cpu: 2000m, memory: 256Mi }
 
+    game:
+      enabled: true
+      replicas: 1
+      image:
+        pullPolicy: IfNotPresent
+        repository: git.pmon.dev/schnappy/game-scp
+        tag: "latest"  # game-scp
+      resources:
+        requests: { cpu: 25m, memory: 32Mi }
+        limits: { cpu: 100m, memory: 64Mi }
+
     aptCache:
       enabled: true
       storage:
