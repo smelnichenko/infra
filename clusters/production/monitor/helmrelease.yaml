@@ -203,7 +203,7 @@ spec:
       image:
         repository: git.pmon.dev/schnappy/chess
         pullPolicy: IfNotPresent
-        tag: "89290a2"  # chess-service
+        tag: "56f85c6"  # chess-service
       replicas: 1
       javaOpts: -Xmx2g -XX:+UseZGC
       resources:
