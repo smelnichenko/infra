@@ -395,8 +395,8 @@ spec:
         size: 10Gi
         storageClass: local-path
       resources:
-        requests: { cpu: 500m, memory: 4Gi }
-        limits: { cpu: 4000m, memory: 8Gi }
+        requests: { cpu: 500m, memory: 6Gi }
+        limits: { cpu: 4000m, memory: 10Gi }
       postgres:
         image: postgres:17-alpine
         storage:
