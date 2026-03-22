@@ -330,11 +330,12 @@ spec:
           secretName: grafana-pmon-dev-tls
       oauth:
         enabled: true
-        name: Forgejo
-        authUrl: https://git.pmon.dev/login/oauth/authorize
-        tokenUrl: http://forgejo-http.forgejo.svc:3000/login/oauth/access_token
-        apiUrl: http://forgejo-http.forgejo.svc:3000/api/v1/user
+        name: Keycloak
+        authUrl: https://auth.pmon.dev/realms/schnappy/protocol/openid-connect/auth
+        tokenUrl: http://schnappy-keycloak.schnappy.svc:8080/realms/schnappy/protocol/openid-connect/token
+        apiUrl: http://schnappy-keycloak.schnappy.svc:8080/realms/schnappy/protocol/openid-connect/userinfo
         scopes: "openid profile email"
+        autoLogin: false
         autoLogin: false
       storage:
         size: 5Gi
