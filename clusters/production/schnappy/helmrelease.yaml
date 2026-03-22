@@ -65,7 +65,7 @@ spec:
         limits: { cpu: 2000m, memory: 256Mi }
 
     game:
-      enabled: false
+      enabled: true
       replicas: 1
       image:
         pullPolicy: IfNotPresent
