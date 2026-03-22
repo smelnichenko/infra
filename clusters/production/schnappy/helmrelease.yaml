@@ -406,3 +406,5 @@ spec:
             gate: Frontend
           - key: schnappy-infrastructure
             name: Schnappy Infrastructure
+          - key: schnappy-ops
+            name: Schnappy Ops
