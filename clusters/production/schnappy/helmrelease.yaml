@@ -364,7 +364,7 @@ spec:
     keycloak:
       enabled: true
       existingSecret: schnappy-keycloak
-      image: git.pmon.dev/schnappy/keycloak-theme:79dbf5b  # keycloak-theme
+      image: git.pmon.dev/schnappy/keycloak-theme:ce251a9  # keycloak-theme
       hostname: auth.pmon.dev
       resources:
         requests: { cpu: 500m, memory: 1Gi }
