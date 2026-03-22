@@ -389,3 +389,21 @@ spec:
         resources:
           requests: { cpu: 100m, memory: 256Mi }
           limits: { cpu: 1000m, memory: 512Mi }
+      setup:
+        enabled: true
+        projects:
+          - key: schnappy-monitor
+            name: Schnappy Monitor
+          - key: schnappy-admin
+            name: Schnappy Admin
+          - key: schnappy-chat
+            name: Schnappy Chat
+          - key: schnappy-chess
+            name: Schnappy Chess
+          - key: schnappy-gateway
+            name: Schnappy Gateway
+          - key: schnappy-site
+            name: Schnappy Site
+            gate: Frontend
+          - key: schnappy-infrastructure
+            name: Schnappy Infrastructure
