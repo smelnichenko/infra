@@ -47,14 +47,14 @@ spec:
     deployNodeAgent: true
     snapshotsEnabled: false
     schedules:
-      monitor-daily:
+      schnappy-daily:
         disabled: false
         schedule: "0 2 * * *"
         useOwnerReferencesInBackup: false
         template:
           ttl: 168h
           includedNamespaces:
-            - monitor
+            - schnappy
           defaultVolumesToFsBackup: true
       full-weekly:
         disabled: false

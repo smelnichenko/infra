@@ -1,8 +1,8 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: monitor
-  namespace: monitor
+  name: schnappy
+  namespace: schnappy
 spec:
   interval: 5m
   timeout: 5m
@@ -34,7 +34,7 @@ spec:
       image:
         pullPolicy: IfNotPresent
         repository: git.pmon.dev/schnappy/monitor
-        tag: "b160193"  # monitor-backend
+        tag: "b160193"  # schnappy-monitor
       ingress:
         enabled: true
         className: traefik
@@ -82,7 +82,7 @@ spec:
         storageClass: local-path
 
     auth:
-      existingSecret: monitor-auth
+      existingSecret: schnappy-auth
       registrationEnabled: true
       secureCookies: true
       tokenExpiration: 1h
@@ -105,7 +105,7 @@ spec:
 
     postgres:
       enabled: true
-      existingSecret: monitor-postgres
+      existingSecret: schnappy-postgres
       image: postgres:17-alpine
       sharedBuffers: 4GB
       effectiveCacheSize: 12GB
@@ -125,7 +125,7 @@ spec:
 
     redis:
       enabled: true
-      existingSecret: monitor-redis
+      existingSecret: schnappy-redis
       image: redis:7-alpine
       resources:
         requests: { cpu: 100m, memory: 256Mi }
@@ -143,12 +143,12 @@ spec:
 
     ai:
       enabled: true
-      existingSecret: monitor-ai
+      existingSecret: schnappy-ai
       model: claude-haiku-4-5-20251001
 
     mail:
       enabled: true
-      existingSecret: monitor-mail
+      existingSecret: schnappy-mail
       host: smtp.resend.com
       port: "587"
       username: resend
@@ -157,11 +157,11 @@ spec:
 
     webhook:
       enabled: true
-      existingSecret: monitor-webhook
+      existingSecret: schnappy-webhook
 
     minio:
       enabled: true
-      existingSecret: monitor-minio
+      existingSecret: schnappy-minio
       bucket: email-attachments
       image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
       storage:
@@ -223,7 +223,7 @@ spec:
 
     kafka:
       enabled: true
-      existingSecret: monitor-kafka
+      existingSecret: schnappy-kafka
       image: apache/kafka:4.2.0
       javaOpts: -Xmx3g -Xms3g
       retention:
@@ -269,7 +269,7 @@ spec:
     elk:
       enabled: true
       elasticsearch:
-        existingSecret: monitor-elasticsearch
+        existingSecret: schnappy-elasticsearch
         image: docker.elastic.co/elasticsearch/elasticsearch:8.19.8
         javaOpts: -Xms2g -Xmx2g
         replicas: 1
@@ -319,7 +319,7 @@ spec:
 
     grafana:
       enabled: true
-      existingSecret: monitor-grafana
+      existingSecret: schnappy-grafana
       image: grafana/grafana:12.4.0
       ingress:
         enabled: true
@@ -346,7 +346,7 @@ spec:
 
     alertmanager:
       enabled: true
-      existingSecret: monitor-alertmanager
+      existingSecret: schnappy-alertmanager
       alertEmailTo: sergei.melnichenko@gmail.com
       alertEmailFrom: alerts@pmon.dev
       resources:
@@ -364,7 +364,7 @@ spec:
 
     sonarqube:
       enabled: true
-      existingSecret: monitor-sonarqube
+      existingSecret: schnappy-sonarqube
       image: sonarqube:26.3.0.120487-community
       javaOpts: -Xms1g -Xmx1g
       ingress:
