@@ -189,7 +189,7 @@ spec:
       image:
         repository: git.pmon.dev/schnappy/admin
         pullPolicy: IfNotPresent
-        tag: "d8d2772"  # admin-service
+        tag: "a4060d6"  # admin-service
       replicas: 1
       javaOpts: -Xmx1g -XX:+UseZGC
       resources:
