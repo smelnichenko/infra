@@ -336,7 +336,6 @@ spec:
         apiUrl: http://schnappy-keycloak.schnappy.svc:8080/realms/schnappy/protocol/openid-connect/userinfo
         scopes: "openid profile email"
         autoLogin: false
-        autoLogin: false
       storage:
         size: 5Gi
         storageClass: local-path
