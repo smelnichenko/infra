@@ -404,7 +404,7 @@ spec:
           - key: schnappy-site
             name: Schnappy Site
             gate: Frontend
-          - key: schnappy-infrastructure
-            name: Schnappy Infrastructure
+          - key: schnappy-platform
+            name: Schnappy Platform
           - key: schnappy-ops
             name: Schnappy Ops
