@@ -1,0 +1,223 @@
+---
+# Default deny all ingress and egress
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: woodpecker-default-deny
+  namespace: woodpecker
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  egress:
+    # Allow DNS for all pods
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# Woodpecker server: ingress from Traefik + agent
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: woodpecker-server
+  namespace: woodpecker
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: server
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # From Traefik ingress controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: TCP
+          port: 8000
+    # From agent (gRPC)
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: agent
+      ports:
+        - protocol: TCP
+          port: 9000
+    # From Prometheus (metrics scraping)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: schnappy
+      ports:
+        - protocol: TCP
+          port: 8000
+  egress:
+    # To Forgejo (webhooks, API — direct service access)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: forgejo
+      ports:
+        - protocol: TCP
+          port: 3000
+    # HTTPS egress (OAuth via Traefik — git.pmon.dev resolves to Traefik ClusterIP via CoreDNS)
+    # Port 443 for ClusterIP pre-DNAT, port 8443 for post-DNAT (Traefik websecure targetPort)
+    - ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 8443
+    # DNS
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# Woodpecker agent: egress to server + k8s API
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: woodpecker-agent
+  namespace: woodpecker
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: agent
+  policyTypes:
+    - Egress
+  egress:
+    # To server (gRPC)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: server
+      ports:
+        - protocol: TCP
+          port: 9000
+    # To Kubernetes API (pod creation)
+    - ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 6443
+    # DNS
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# Pipeline pods: egress to services they need
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: woodpecker-pipeline
+  namespace: woodpecker
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: NotIn
+        values: [server, agent]
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow inter-pod communication (service containers <-> step pods)
+    - from:
+        - podSelector: {}
+  egress:
+    # To Traefik / k8s API (kube-system namespace)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: TCP
+          port: 8443
+        - protocol: TCP
+          port: 8000
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 6443
+    # To Kubernetes API (node IP + ClusterIP, belt-and-suspenders)
+    - to:
+        - ipBlock:
+            cidr: 192.168.11.2/32
+      ports:
+        - protocol: TCP
+          port: 6443
+    - to:
+        - ipBlock:
+            cidr: 10.43.0.1/32
+      ports:
+        - protocol: TCP
+          port: 443
+    # To SonarQube (schnappy namespace)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: schnappy
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/component: sonarqube
+      ports:
+        - protocol: TCP
+          port: 9000
+    # To Forgejo registry
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: forgejo
+      ports:
+        - protocol: TCP
+          port: 3000
+    # To apt-cacher-ng (schnappy namespace)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: schnappy
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/component: apt-cache
+      ports:
+        - protocol: TCP
+          port: 3142
+    # To Nexus on Pi (caching proxy for Maven, npm, PyPI, Docker)
+    - to:
+        - ipBlock:
+            cidr: 192.168.11.4/32
+      ports:
+        - protocol: TCP
+          port: 8081
+        - protocol: TCP
+          port: 8082
+    # External HTTPS (Maven Central, npm, Docker Hub for Kaniko)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
+    # Inter-pod (service containers)
+    - to:
+        - podSelector: {}
+    # DNS
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
