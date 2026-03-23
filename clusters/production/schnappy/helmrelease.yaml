@@ -369,6 +369,9 @@ spec:
       mail:
         from: noreply@pmon.dev
       clients:
+        app:
+          enabled: true
+          redirectUri: "https://pmon.dev/auth/callback"
         forgejo:
           enabled: true
           redirectUri: "https://git.pmon.dev/user/oauth2/Keycloak/callback"
