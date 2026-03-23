@@ -59,7 +59,7 @@ spec:
       image:
         pullPolicy: IfNotPresent
         repository: git.pmon.dev/schnappy/site
-        tag: "af25e0f"  # site
+        tag: "24b8fb9"  # site
       resources:
         requests: { cpu: 100m, memory: 64Mi }
         limits: { cpu: 2000m, memory: 256Mi }
