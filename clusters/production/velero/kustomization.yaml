@@ -4,3 +4,4 @@ resources:
   - namespace.yaml
   - helmrelease.yaml
   - minio-deployment.yaml
+  - networkpolicies.yaml
