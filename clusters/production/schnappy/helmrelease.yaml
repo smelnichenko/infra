@@ -34,7 +34,7 @@ spec:
       image:
         pullPolicy: IfNotPresent
         repository: git.pmon.dev/schnappy/monitor
-        tag: "df05da5"  # monitor-backend
+        tag: "5354d11"  # schnappy-monitor
       ingress:
         enabled: true
         className: traefik
