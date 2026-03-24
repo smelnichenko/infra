@@ -28,13 +28,13 @@ spec:
 
     app:
       replicas: 1
-      gitHash: "f6a43be"
-      buildTime: "2026-03-24T13:12:50Z"
+      gitHash: "2920799"
+      buildTime: "2026-03-24T13:35:52Z"
       javaOpts: -Xmx3g -XX:+UseZGC
       image:
         pullPolicy: IfNotPresent
         repository: git.pmon.dev/schnappy/monitor
-        tag: "f6a43be"  # schnappy-monitor
+        tag: "2920799"  # schnappy-monitor
       ingress:
         enabled: true
         className: traefik
