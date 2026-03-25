@@ -3,13 +3,13 @@ vault:
 
 app:
   replicas: 1
-  gitHash: "faabeb1"
-  buildTime: "2026-03-24T13:58:32Z"
+  gitHash: "1a5d5aa"
+  buildTime: "2026-03-25T20:34:09Z"
   javaOpts: -Xmx3g -XX:+UseZGC
   image:
     pullPolicy: IfNotPresent
     repository: git.pmon.dev/schnappy/monitor
-    tag: "faabeb1"  # schnappy-monitor
+    tag: "1a5d5aa"  # schnappy-monitor
   ingress:
     enabled: true
     className: traefik
