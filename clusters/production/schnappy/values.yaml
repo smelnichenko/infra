@@ -151,7 +151,7 @@ gateway:
   image:
     repository: git.pmon.dev/schnappy/api-gateway
     pullPolicy: IfNotPresent
-    tag: "dd970db"  # api-gateway
+    tag: "272aab1"  # api-gateway
   replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC
   cors:
