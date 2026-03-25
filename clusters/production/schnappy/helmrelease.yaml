@@ -56,6 +56,7 @@ spec:
     site:
       enabled: true
       replicas: 1
+      dnsResolver: "10.43.0.10"
       image:
         pullPolicy: IfNotPresent
         repository: git.pmon.dev/schnappy/site
