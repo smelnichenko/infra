@@ -32,10 +32,10 @@ spec:
             groupName: porkbun.talinx.dev
             solverName: porkbun
             config:
-              apiKeySecretRef:
+              apiKey:
                 name: porkbun-secret
                 key: PORKBUN_API_KEY
-              secretApiKeySecretRef:
+              secretApiKey:
                 name: porkbun-secret
                 key: PORKBUN_SECRET_API_KEY
         selector:
