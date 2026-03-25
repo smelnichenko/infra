@@ -1,1 +1,9 @@
-# No custom values — uses chart defaults
+# CRDs as regular templates (not Helm hooks) so Argo CD ServerSideApply works
+installCRDs: false
+crds:
+  createClusterExternalSecret: true
+  createClusterSecretStore: true
+  createSecretStore: true
+  createPushSecret: true
+  createClusterPushSecret: true
+  createClusterGenerator: true
