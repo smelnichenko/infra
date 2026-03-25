@@ -1,0 +1,55 @@
+server:
+  env:
+    WOODPECKER_HOST: "https://ci.pmon.dev"
+    WOODPECKER_FORGEJO: "true"
+    WOODPECKER_FORGEJO_URL: "https://git.pmon.dev"
+    WOODPECKER_ADMIN: "forgejo_admin"
+    WOODPECKER_OPEN: "true"
+    WOODPECKER_LOG_LEVEL: "warn"
+    WOODPECKER_PIPELINE_CANCEL_RUNNING: "false"
+  extraSecretNamesForEnvFrom:
+    - woodpecker-forgejo-secret
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hosts:
+      - host: ci.pmon.dev
+        paths:
+          - path: /
+            backend:
+              serviceName: woodpecker-server
+              servicePort: 80
+    tls:
+      - secretName: woodpecker-tls
+        hosts:
+          - ci.pmon.dev
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-dns
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  persistentVolume:
+    enabled: true
+    size: 1Gi
+    storageClass: local-path
+agent:
+  env:
+    WOODPECKER_SERVER: "woodpecker-server:9000"
+    WOODPECKER_BACKEND: "kubernetes"
+    WOODPECKER_BACKEND_K8S_NAMESPACE: "woodpecker"
+    WOODPECKER_BACKEND_K8S_ALLOW_NATIVE_SECRETS: "true"
+    WOODPECKER_BACKEND_K8S_STORAGE_CLASS: "local-path"
+    WOODPECKER_BACKEND_K8S_VOLUME_SIZE: "2Gi"
+    WOODPECKER_MAX_WORKFLOWS: "4"
+    WOODPECKER_LOG_LEVEL: "warn"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi

@@ -1,0 +1,54 @@
+initContainers:
+  - name: velero-plugin-for-aws
+    image: velero/velero-plugin-for-aws:v1.11.1
+    volumeMounts:
+      - name: plugins
+        mountPath: /target
+credentials:
+  useSecret: true
+  existingSecret: velero-credentials
+configuration:
+  backupStorageLocation:
+    - name: default
+      provider: aws
+      bucket: velero
+      config:
+        region: us-east-1
+        s3ForcePathStyle: "true"
+        s3Url: http://minio-backup.velero.svc:9000
+  volumeSnapshotLocation: []
+  defaultVolumesToFsBackup: true
+  features: ""
+deployNodeAgent: true
+snapshotsEnabled: false
+schedules:
+  schnappy-daily:
+    disabled: false
+    schedule: "0 2 * * *"
+    useOwnerReferencesInBackup: false
+    template:
+      ttl: 168h
+      includedNamespaces:
+        - schnappy
+      defaultVolumesToFsBackup: true
+  full-weekly:
+    disabled: false
+    schedule: "0 3 * * 0"
+    useOwnerReferencesInBackup: false
+    template:
+      ttl: 720h
+      includedNamespaces:
+        - "*"
+      defaultVolumesToFsBackup: true
+upgradeCRDs: false
+kubectl:
+  image:
+    repository: docker.io/bitnami/kubectl
+    tag: latest
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 1000m
+    memory: 512Mi

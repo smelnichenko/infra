@@ -1,0 +1,87 @@
+global:
+  enabled: true
+  tlsDisable: false
+server:
+  image:
+    repository: hashicorp/vault
+    tag: "1.21.3"
+  extraSecretEnvironmentVars:
+    - envName: VAULT_TRANSIT_TOKEN
+      secretName: vault-unseal-token
+      secretKey: token
+  extraVolumes:
+    - type: secret
+      name: vault-unseal-ca
+    - type: secret
+      name: vault-tls
+  ha:
+    enabled: true
+    replicas: 1
+    raft:
+      enabled: true
+      config: |
+        ui = true
+
+        listener "tcp" {
+          address         = "[::]:8200"
+          cluster_address = "[::]:8201"
+          tls_cert_file   = "/vault/userconfig/vault-tls/tls.crt"
+          tls_key_file    = "/vault/userconfig/vault-tls/tls.key"
+        }
+
+        storage "raft" {
+          path = "/vault/data"
+          retry_join {
+            leader_api_addr     = "https://vault-0.vault-internal:8200"
+            leader_ca_cert_file = "/vault/userconfig/vault-tls/ca.crt"
+          }
+        }
+
+        seal "transit" {
+          address     = "https://vault.schnappy.io:8200"
+          token       = "env://VAULT_TRANSIT_TOKEN"
+          key_name    = "vault-autounseal"
+          mount_path  = "transit"
+          tls_ca_cert = "/vault/userconfig/vault-unseal-ca/ca.pem"
+        }
+
+        service_registration "kubernetes" {}
+
+        telemetry {
+          prometheus_retention_time = "24h"
+          disable_hostname = true
+        }
+  readinessProbe:
+    enabled: true
+    exec:
+      command:
+        - /bin/sh
+        - -ec
+        - |
+          VAULT_CACERT=/vault/userconfig/vault-tls/ca.crt vault status
+  affinity: |
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: vault
+                component: server
+            topologyKey: kubernetes.io/hostname
+  dataStorage:
+    enabled: true
+    size: 10Gi
+    storageClass: local-path
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+ui:
+  enabled: true
+  serviceType: ClusterIP
+injector:
+  enabled: false
