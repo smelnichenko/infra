@@ -150,6 +150,11 @@ chessService:
     requests: { cpu: 250m, memory: 2Gi }
     limits: { cpu: 2000m, memory: 4Gi }
 
+smokeTest:
+  enabled: true
+  image: grafana/k6:latest
+  schedule: "0 6 * * *"
+
 # Cross-chart references (secret names for env var mounts, keycloak for admin service)
 postgres:
   database: monitor
