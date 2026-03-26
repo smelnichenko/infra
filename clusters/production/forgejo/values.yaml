@@ -1,4 +1,6 @@
 gitea:
+  admin:
+    existingSecret: forgejo-admin
   config:
     server:
       DOMAIN: git.pmon.dev
