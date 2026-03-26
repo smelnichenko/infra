@@ -152,7 +152,7 @@ chessService:
 
 smokeTest:
   enabled: true
-  image: grafana/k6:latest
+  image: grafana/k6:0.57.0
   schedule: "0 6 * * *"
 
 # Cross-chart references (secret names for env var mounts, keycloak for admin service)
@@ -175,4 +175,3 @@ keycloak:
   clients:
     adminService:
       enabled: true
-# k6 smoke test trigger: 1774562921
