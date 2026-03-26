@@ -10,7 +10,7 @@ spec:
   sources:
     - repoURL: code.forgejo.org/forgejo-helm
       chart: forgejo
-      targetRevision: 16.0.0
+      targetRevision: 16.2.1
       helm:
         valueFiles:
           - $values/clusters/production/forgejo/values.yaml
