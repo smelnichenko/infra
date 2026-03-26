@@ -8,7 +8,8 @@ metadata:
 spec:
   project: default
   sources:
-    - repoURL: oci://ghcr.io/woodpecker-ci/helm/woodpecker
+    - repoURL: oci://ghcr.io/woodpecker-ci/helm
+      chart: woodpecker
       targetRevision: 3.5.1
       helm:
         valueFiles:
