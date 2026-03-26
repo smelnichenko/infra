@@ -9,7 +9,6 @@ spec:
   project: default
   sources:
     - repoURL: code.forgejo.org/forgejo-helm/forgejo
-      chart: forgejo
       targetRevision: 16.2.1
       helm:
         valueFiles:
