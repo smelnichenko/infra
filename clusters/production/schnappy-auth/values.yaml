@@ -1,0 +1,44 @@
+vault:
+  secretsEnabled: true
+
+networkPolicies:
+  enabled: true
+
+keycloak:
+  enabled: true
+  existingSecret: schnappy-keycloak
+  image: git.pmon.dev/schnappy/keycloak-theme:4540886  # keycloak-theme
+  hostname: auth.pmon.dev
+  mail:
+    from: noreply@pmon.dev
+  clients:
+    app:
+      enabled: true
+      redirectUri: "https://pmon.dev/auth/callback"
+    forgejo:
+      enabled: true
+      redirectUri: "https://git.pmon.dev/user/oauth2/Keycloak/callback"
+    grafana:
+      enabled: true
+      redirectUri: "https://grafana.pmon.dev/login/generic_oauth"
+    adminService:
+      enabled: true
+    argocd:
+      enabled: true
+      host: cd.pmon.dev
+  resources:
+    requests: { cpu: 500m, memory: 1Gi }
+    limits: { cpu: 2000m, memory: 2Gi }
+  ingress:
+    enabled: true
+    className: traefik
+    host: auth.pmon.dev
+    tls:
+      enabled: true
+      clusterIssuer: letsencrypt-prod
+      secretName: auth-pmon-dev-tls
+
+# Cross-chart references
+mail:
+  enabled: true
+  existingSecret: schnappy-mail

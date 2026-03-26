@@ -50,12 +50,6 @@ games:
       requests: { cpu: 25m, memory: 32Mi }
       limits: { cpu: 100m, memory: 64Mi }
 
-aptCache:
-  enabled: true
-  storage:
-    size: 10Gi
-    storageClass: local-path
-
 auth:
   existingSecret: schnappy-auth
   registrationEnabled: true
@@ -77,34 +71,6 @@ chat:
 linkerd:
   enabled: false
   authorizationPolicy: false
-
-postgres:
-  enabled: true
-  existingSecret: schnappy-postgres
-  image: postgres:17-alpine
-  sharedBuffers: 4GB
-  effectiveCacheSize: 12GB
-  workMem: 64MB
-  maintenanceWorkMem: 512MB
-  maxParallelWorkersPerGather: 4
-  maxParallelWorkers: 6
-  maxWorkerProcesses: 10
-  effectiveIoConcurrency: 200
-  randomPageCost: "1.1"
-  storage:
-    size: 20Gi
-    storageClass: local-path
-  resources:
-    requests: { cpu: 1000m, memory: 4Gi }
-    limits: { cpu: 4000m, memory: 8Gi }
-
-redis:
-  enabled: true
-  existingSecret: schnappy-redis
-  image: redis:7-alpine
-  resources:
-    requests: { cpu: 100m, memory: 256Mi }
-    limits: { cpu: 1000m, memory: 4Gi }
 
 monitor:
   enabled: true
@@ -133,18 +99,6 @@ mail:
 webhook:
   enabled: true
   existingSecret: schnappy-webhook
-
-minio:
-  enabled: true
-  existingSecret: schnappy-minio
-  bucket: email-attachments
-  image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
-  storage:
-    size: 20Gi
-    storageClass: local-path
-  resources:
-    requests: { cpu: 100m, memory: 256Mi }
-    limits: { cpu: 1000m, memory: 1Gi }
 
 gateway:
   enabled: true
@@ -196,225 +150,23 @@ chessService:
     requests: { cpu: 250m, memory: 2Gi }
     limits: { cpu: 2000m, memory: 4Gi }
 
-kafka:
-  enabled: true
-  existingSecret: schnappy-kafka
-  image: apache/kafka:4.2.0
-  javaOpts: -Xmx3g -Xms3g
-  retention:
-    hours: 168
-    bytes: "10737418240"
-  storage:
-    size: 10Gi
-    storageClass: local-path
-  resources:
-    requests: { cpu: 1000m, memory: 4Gi }
-    limits: { cpu: 4000m, memory: 8Gi }
-  topics:
-    - name: chat.messages
-      partitions: 12
-      replicationFactor: 1
-    - name: chat.events
-      partitions: 6
-      replicationFactor: 1
-    - name: chat.notifications
-      partitions: 3
-      replicationFactor: 1
-    - name: chess.moves
-      partitions: 6
-      replicationFactor: 1
-    - name: user.events
-      partitions: 3
-      replicationFactor: 1
-
-scylla:
-  enabled: true
-  image: scylladb/scylla:6.2
-  args:
-    - --smp=2
-    - --memory=2G
-    - --overprovisioned=1
-  storage:
-    size: 20Gi
-    storageClass: local-path
-  resources:
-    requests: { cpu: 500m, memory: 2Gi }
-    limits: { cpu: 4000m, memory: 4Gi }
-
-elk:
-  enabled: true
-  elasticsearch:
-    existingSecret: schnappy-elasticsearch
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.8
-    javaOpts: -Xms2g -Xmx2g
-    replicas: 1
-    retention:
-      days: 30
-    storage:
-      size: 50Gi
-      storageClass: local-path
-    resources:
-      requests: { cpu: 500m, memory: 4Gi }
-      limits: { cpu: 4000m, memory: 8Gi }
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.19.8
-    replicas: 1
-    ingress:
-      enabled: true
-      className: traefik
-      host: logs.pmon.dev
-      tls:
-        enabled: true
-        clusterIssuer: letsencrypt-dns
-        secretName: logs-pmon-dev-tls
-    resources:
-      requests: { cpu: 100m, memory: 1Gi }
-      limits: { cpu: 1000m, memory: 2Gi }
-  fluentbit:
-    image: cr.fluentbit.io/fluent/fluent-bit:4.2.3
-    resources:
-      requests: { cpu: 50m, memory: 128Mi }
-      limits: { cpu: 200m, memory: 256Mi }
-
-prometheus:
-  enabled: true
-  image: prom/prometheus:v3.10.0
-  retention: 30d
-  scrapeInterval: 15s
-  storage:
-    size: 20Gi
-    storageClass: local-path
-  resources:
-    requests: { cpu: 250m, memory: 512Mi }
-    limits: { cpu: 2000m, memory: 4Gi }
-  vault:
-    enabled: true
-  woodpecker:
-    enabled: true
-
-grafana:
-  enabled: true
-  existingSecret: schnappy-grafana
-  image: grafana/grafana:12.4.0
-  ingress:
-    enabled: true
-    className: traefik
-    host: grafana.pmon.dev
-    tls:
-      enabled: true
-      clusterIssuer: letsencrypt-dns
-      secretName: grafana-pmon-dev-tls
-  oauth:
-    enabled: true
-    name: Keycloak
-    authUrl: https://auth.pmon.dev/realms/schnappy/protocol/openid-connect/auth
-    tokenUrl: http://schnappy-keycloak.schnappy.svc:8080/realms/schnappy/protocol/openid-connect/token
-    apiUrl: http://schnappy-keycloak.schnappy.svc:8080/realms/schnappy/protocol/openid-connect/userinfo
-    scopes: "openid profile email"
-    autoLogin: false
-  storage:
-    size: 5Gi
-    storageClass: local-path
-  resources:
-    requests: { cpu: 100m, memory: 256Mi }
-    limits: { cpu: 1000m, memory: 1Gi }
-
+# Cross-chart references (secret names for env var mounts, keycloak for admin service)
+postgres:
+  database: monitor
+  existingSecret: schnappy-postgres
+redis:
+  existingSecret: schnappy-redis
+minio:
+  existingSecret: schnappy-minio
 alertmanager:
   enabled: true
   existingSecret: schnappy-alertmanager
   alertEmailTo: sergei.melnichenko@gmail.com
   alertEmailFrom: alerts@pmon.dev
-  resources:
-    requests: { cpu: 25m, memory: 128Mi }
-    limits: { cpu: 200m, memory: 256Mi }
-  storage:
-    size: 1Gi
-    storageClass: local-path
-
-kubeStateMetrics:
-  enabled: true
-  resources:
-    requests: { cpu: 25m, memory: 128Mi }
-    limits: { cpu: 200m, memory: 512Mi }
-
 keycloak:
   enabled: true
-  existingSecret: schnappy-keycloak
-  image: git.pmon.dev/schnappy/keycloak-theme:4540886  # keycloak-theme
   hostname: auth.pmon.dev
-  mail:
-    from: noreply@pmon.dev
+  existingSecret: schnappy-keycloak
   clients:
-    app:
-      enabled: true
-      redirectUri: "https://pmon.dev/auth/callback"
-    forgejo:
-      enabled: true
-      redirectUri: "https://git.pmon.dev/user/oauth2/Keycloak/callback"
-    grafana:
-      enabled: true
-      redirectUri: "https://grafana.pmon.dev/login/generic_oauth"
     adminService:
       enabled: true
-    argocd:
-      enabled: true
-      host: cd.pmon.dev
-  resources:
-    requests: { cpu: 500m, memory: 1Gi }
-    limits: { cpu: 2000m, memory: 2Gi }
-  ingress:
-    enabled: true
-    className: traefik
-    host: auth.pmon.dev
-    tls:
-      enabled: true
-      clusterIssuer: letsencrypt-prod
-      secretName: auth-pmon-dev-tls
-
-sonarqube:
-  enabled: true
-  existingSecret: schnappy-sonarqube
-  image: sonarqube:26.3.0.120487-community
-  javaOpts: -Xms1g -Xmx1g
-  ingress:
-    enabled: true
-    className: traefik
-    host: sonar.pmon.dev
-    tls:
-      enabled: true
-      clusterIssuer: letsencrypt-dns
-      secretName: sonar-pmon-dev-tls
-  storage:
-    size: 10Gi
-    storageClass: local-path
-  resources:
-    requests: { cpu: 500m, memory: 6Gi }
-    limits: { cpu: 4000m, memory: 10Gi }
-  postgres:
-    image: postgres:17-alpine
-    storage:
-      size: 5Gi
-      storageClass: local-path
-    resources:
-      requests: { cpu: 100m, memory: 256Mi }
-      limits: { cpu: 1000m, memory: 512Mi }
-  setup:
-    enabled: true
-    projects:
-      - key: schnappy-monitor
-        name: Schnappy Monitor
-      - key: schnappy-admin
-        name: Schnappy Admin
-      - key: schnappy-chat
-        name: Schnappy Chat
-      - key: schnappy-chess
-        name: Schnappy Chess
-      - key: schnappy-gateway
-        name: Schnappy Gateway
-      - key: schnappy-site
-        name: Schnappy Site
-        gate: Frontend
-      - key: schnappy-platform
-        name: Schnappy Platform
-      - key: schnappy-ops
-        name: Schnappy Ops

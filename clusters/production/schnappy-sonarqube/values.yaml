@@ -1,0 +1,53 @@
+vault:
+  secretsEnabled: true
+
+networkPolicies:
+  enabled: true
+
+sonarqube:
+  enabled: true
+  existingSecret: schnappy-sonarqube
+  image: sonarqube:26.3.0.120487-community
+  javaOpts: -Xms1g -Xmx1g
+  ingress:
+    enabled: true
+    className: traefik
+    host: sonar.pmon.dev
+    tls:
+      enabled: true
+      clusterIssuer: letsencrypt-dns
+      secretName: sonar-pmon-dev-tls
+  storage:
+    size: 10Gi
+    storageClass: local-path
+  resources:
+    requests: { cpu: 500m, memory: 6Gi }
+    limits: { cpu: 4000m, memory: 10Gi }
+  postgres:
+    image: postgres:17-alpine
+  postgresStorage:
+    size: 5Gi
+    storageClass: local-path
+  postgresResources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { cpu: 1000m, memory: 512Mi }
+  setup:
+    enabled: true
+    projects:
+      - key: schnappy-monitor
+        name: Schnappy Monitor
+      - key: schnappy-admin
+        name: Schnappy Admin
+      - key: schnappy-chat
+        name: Schnappy Chat
+      - key: schnappy-chess
+        name: Schnappy Chess
+      - key: schnappy-gateway
+        name: Schnappy Gateway
+      - key: schnappy-site
+        name: Schnappy Site
+        gate: Frontend
+      - key: schnappy-platform
+        name: Schnappy Platform
+      - key: schnappy-ops
+        name: Schnappy Ops

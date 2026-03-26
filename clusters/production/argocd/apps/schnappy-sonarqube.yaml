@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: schnappy
+  name: schnappy-sonarqube
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -10,11 +10,11 @@ spec:
   sources:
     - repoURL: https://git.pmon.dev/schnappy/platform.git
       targetRevision: main
-      path: helm/schnappy
+      path: helm/schnappy-sonarqube
       helm:
         releaseName: schnappy
         valueFiles:
-          - $values/clusters/production/schnappy/values.yaml
+          - $values/clusters/production/schnappy-sonarqube/values.yaml
     - repoURL: https://git.pmon.dev/schnappy/infra.git
       targetRevision: main
       ref: values
