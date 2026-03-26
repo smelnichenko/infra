@@ -20,9 +20,16 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: forgejo
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: forgejo-admin
+      jsonPointers:
+        - /data
   syncPolicy:
     automated:
       selfHeal: true
       prune: true
     syncOptions:
       - CreateNamespace=true
+      - RespectIgnoreDifferences=true

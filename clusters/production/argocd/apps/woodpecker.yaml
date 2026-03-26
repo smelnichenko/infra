@@ -20,9 +20,16 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: woodpecker
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: woodpecker-default-agent-secret
+      jsonPointers:
+        - /data
   syncPolicy:
     automated:
       selfHeal: true
       prune: true
     syncOptions:
       - CreateNamespace=true
+      - RespectIgnoreDifferences=true
