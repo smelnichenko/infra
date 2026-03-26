@@ -38,7 +38,11 @@ keycloak:
       clusterIssuer: letsencrypt-prod
       secretName: auth-pmon-dev-tls
 
-# Cross-chart references
+# Cross-chart references (keycloak realm SMTP config)
 mail:
   enabled: true
   existingSecret: schnappy-mail
+  host: smtp.resend.com
+  port: "587"
+  username: resend
+  fromAddress: noreply@pmon.dev
