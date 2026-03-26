@@ -2,6 +2,8 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: schnappy
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
