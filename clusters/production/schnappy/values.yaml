@@ -175,3 +175,4 @@ keycloak:
   clients:
     adminService:
       enabled: true
+# k6 smoke test trigger: 1774562921
