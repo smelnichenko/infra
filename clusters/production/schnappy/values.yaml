@@ -3,8 +3,6 @@ vault:
 
 app:
   replicas: 1
-  gitHash: "04101f3"
-  buildTime: "2026-03-27T09:38:20Z"
   javaOpts: -Xmx3g -XX:+UseZGC
   image:
     pullPolicy: IfNotPresent
