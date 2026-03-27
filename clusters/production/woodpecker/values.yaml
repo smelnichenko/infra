@@ -1,5 +1,5 @@
 server:
-  createAgentSecret: true
+  createAgentSecret: false
   env:
     WOODPECKER_HOST: "https://ci.pmon.dev"
     WOODPECKER_FORGEJO: "true"
@@ -10,6 +10,7 @@ server:
     WOODPECKER_PIPELINE_CANCEL_RUNNING: "false"
   extraSecretNamesForEnvFrom:
     - woodpecker-forgejo-secret
+    - woodpecker-default-agent-secret
   ingress:
     enabled: true
     ingressClassName: traefik
