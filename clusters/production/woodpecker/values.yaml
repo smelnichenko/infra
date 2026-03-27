@@ -1,5 +1,5 @@
 server:
-  createAgentSecret: false
+  createAgentSecret: true
   env:
     WOODPECKER_HOST: "https://ci.pmon.dev"
     WOODPECKER_FORGEJO: "true"
