@@ -23,8 +23,8 @@ app:
     idleTimeout: 300000
     maxLifetime: 1200000
   resources:
-    requests: { cpu: 500m, memory: 4Gi }
-    limits: { cpu: 6000m, memory: 8Gi }
+    requests: { cpu: 500m, memory: 2Gi }
+    limits: { cpu: 4000m, memory: 8Gi }
 
 site:
   enabled: true
