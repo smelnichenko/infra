@@ -154,6 +154,10 @@ smokeTest:
   schedule: "0 6 * * *"
   clientSecretName: schnappy-k6-smoke
 
+loadTest:
+  enabled: true
+  schedule: "0 3 * * *"
+
 # Cross-chart references (secret names for env var mounts, keycloak for admin service)
 postgres:
   database: monitor
