@@ -157,11 +157,8 @@ smokeTest:
   schedule: "0 6 * * *"
   clientSecretName: schnappy-k6-smoke
 
-loadTest:
+hyperfoil:
   enabled: true
-  schedule: "0 3 * * *"
-  stressWorkers: 4
-  stressBaseUrl: "http://schnappy-envoy-proxy:8080"
 
 # Cross-chart references (secret names for env var mounts, keycloak for admin service)
 postgres:
