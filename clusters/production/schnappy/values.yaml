@@ -137,7 +137,7 @@ chatService:
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
     requests: { cpu: 100m, memory: 1Gi }
-    limits: { cpu: 2000m, memory: 2Gi }
+    limits: { cpu: 3000m, memory: 2Gi }
 
 chessService:
   enabled: true
@@ -149,7 +149,7 @@ chessService:
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
     requests: { cpu: 100m, memory: 1Gi }
-    limits: { cpu: 2000m, memory: 2Gi }
+    limits: { cpu: 3000m, memory: 2Gi }
 
 smokeTest:
   enabled: true
