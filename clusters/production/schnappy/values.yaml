@@ -161,7 +161,7 @@ loadTest:
   enabled: true
   schedule: "0 3 * * *"
   stressWorkers: 4
-  stressBaseUrl: "http://envoy-schnappy-schnappy-gw-85aa29de.envoy-gateway-system.svc:8080"
+  stressBaseUrl: "http://schnappy-envoy-proxy:8080"
 
 # Cross-chart references (secret names for env var mounts, keycloak for admin service)
 postgres:
