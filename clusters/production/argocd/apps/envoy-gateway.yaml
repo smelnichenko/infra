@@ -19,11 +19,10 @@ spec:
       ref: values
   destination:
     server: https://kubernetes.default.svc
-    namespace: envoy-gateway-system
+    namespace: schnappy
   syncPolicy:
     automated:
       selfHeal: true
       prune: true
     syncOptions:
-      - CreateNamespace=true
       - ServerSideApply=true
