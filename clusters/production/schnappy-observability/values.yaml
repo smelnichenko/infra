@@ -36,8 +36,8 @@ elk:
   fluentbit:
     image: cr.fluentbit.io/fluent/fluent-bit:4.2.3
     resources:
-      requests: { cpu: 50m, memory: 128Mi }
-      limits: { cpu: 500m, memory: 512Mi }
+      requests: { cpu: 100m, memory: 128Mi }
+      limits: { cpu: 1000m, memory: 512Mi }
 
 prometheus:
   enabled: true
