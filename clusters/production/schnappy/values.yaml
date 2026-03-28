@@ -122,10 +122,10 @@ admin:
     pullPolicy: IfNotPresent
     tag: "8cafd7f"  # admin-service
   replicas: 1
-  javaOpts: -Xmx2g -XX:+UseZGC
+  javaOpts: -Xmx1g -XX:+UseZGC
   resources:
-    requests: { cpu: 250m, memory: 2Gi }
-    limits: { cpu: 2000m, memory: 4Gi }
+    requests: { cpu: 100m, memory: 1Gi }
+    limits: { cpu: 2000m, memory: 2Gi }
 
 chatService:
   enabled: true
@@ -134,10 +134,10 @@ chatService:
     pullPolicy: IfNotPresent
     tag: "6cdd7fa"  # chat-service
   replicas: 1
-  javaOpts: -Xmx2g -XX:+UseZGC
+  javaOpts: -Xmx1g -XX:+UseZGC
   resources:
-    requests: { cpu: 250m, memory: 2Gi }
-    limits: { cpu: 2000m, memory: 4Gi }
+    requests: { cpu: 100m, memory: 1Gi }
+    limits: { cpu: 2000m, memory: 2Gi }
 
 chessService:
   enabled: true
@@ -146,10 +146,10 @@ chessService:
     pullPolicy: IfNotPresent
     tag: "55f6204"  # chess-service
   replicas: 1
-  javaOpts: -Xmx2g -XX:+UseZGC
+  javaOpts: -Xmx1g -XX:+UseZGC
   resources:
-    requests: { cpu: 250m, memory: 2Gi }
-    limits: { cpu: 2000m, memory: 4Gi }
+    requests: { cpu: 100m, memory: 1Gi }
+    limits: { cpu: 2000m, memory: 2Gi }
 
 smokeTest:
   enabled: true

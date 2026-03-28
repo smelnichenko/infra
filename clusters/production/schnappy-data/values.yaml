@@ -13,10 +13,10 @@ postgres:
     - monitor_chat
     - monitor_chess
     - keycloak
-  sharedBuffers: 4GB
-  effectiveCacheSize: 12GB
-  workMem: 64MB
-  maintenanceWorkMem: 512MB
+  sharedBuffers: 512MB
+  effectiveCacheSize: 2GB
+  workMem: 32MB
+  maintenanceWorkMem: 128MB
   maxParallelWorkersPerGather: 4
   maxParallelWorkers: 6
   maxWorkerProcesses: 10
@@ -26,22 +26,22 @@ postgres:
     size: 20Gi
     storageClass: local-path
   resources:
-    requests: { cpu: 1000m, memory: 4Gi }
-    limits: { cpu: 4000m, memory: 8Gi }
+    requests: { cpu: 250m, memory: 1Gi }
+    limits: { cpu: 4000m, memory: 2Gi }
 
 redis:
   enabled: true
   existingSecret: schnappy-redis
   image: redis:7-alpine
   resources:
-    requests: { cpu: 100m, memory: 256Mi }
-    limits: { cpu: 1000m, memory: 4Gi }
+    requests: { cpu: 100m, memory: 64Mi }
+    limits: { cpu: 1000m, memory: 512Mi }
 
 kafka:
   enabled: true
   existingSecret: schnappy-kafka
   image: apache/kafka:4.2.0
-  javaOpts: -Xmx3g -Xms3g
+  javaOpts: -Xmx1g -Xms1g
   retention:
     hours: 168
     bytes: "10737418240"
@@ -49,8 +49,8 @@ kafka:
     size: 10Gi
     storageClass: local-path
   resources:
-    requests: { cpu: 1000m, memory: 4Gi }
-    limits: { cpu: 4000m, memory: 8Gi }
+    requests: { cpu: 250m, memory: 1536Mi }
+    limits: { cpu: 2000m, memory: 2Gi }
   topics:
     - name: chat.messages
       partitions: 12
