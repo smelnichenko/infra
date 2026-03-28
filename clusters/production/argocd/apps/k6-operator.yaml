@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: k6-operator
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://git.pmon.dev/schnappy/infra.git
+    targetRevision: main
+    path: clusters/production/k6-operator
+    directory:
+      recurse: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: k6-operator-system
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+      - CreateNamespace=true
