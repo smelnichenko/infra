@@ -98,6 +98,9 @@ webhook:
   enabled: true
   existingSecret: schnappy-webhook
 
+envoyGateway:
+  enabled: true
+
 gateway:
   enabled: true
   image:
