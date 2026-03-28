@@ -104,7 +104,7 @@ gateway:
     repository: git.pmon.dev/schnappy/api-gateway
     pullPolicy: IfNotPresent
     tag: "48429e2"  # api-gateway
-  replicas: 1
+  replicas: 2
   javaOpts: -Xmx1g -XX:+UseZGC -Dreactor.netty.ioWorkerCount=8
   cors:
     allowedOrigins: "https://pmon.dev"
