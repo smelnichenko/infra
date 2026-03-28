@@ -2,7 +2,7 @@ vault:
   secretsEnabled: true
 
 app:
-  replicas: 1
+  replicas: 2
   javaOpts: -Xmx2g -XX:+UseZGC
   image:
     pullPolicy: IfNotPresent
