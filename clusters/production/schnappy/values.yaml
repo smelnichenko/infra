@@ -105,12 +105,12 @@ gateway:
     pullPolicy: IfNotPresent
     tag: "0526e2c"  # api-gateway
   replicas: 1
-  javaOpts: -Xmx1g -XX:+UseZGC
+  javaOpts: -Xmx1g -XX:+UseZGC -Dreactor.netty.ioWorkerCount=8
   cors:
     allowedOrigins: "https://pmon.dev"
   resources:
     requests: { cpu: 500m, memory: 1Gi }
-    limits: { cpu: 2000m, memory: 2Gi }
+    limits: { cpu: 4000m, memory: 2Gi }
 
 admin:
   enabled: true
