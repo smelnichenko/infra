@@ -102,7 +102,7 @@ envoyGateway:
   enabled: true
 
 gateway:
-  enabled: true
+  enabled: false
   image:
     repository: git.pmon.dev/schnappy/api-gateway
     pullPolicy: IfNotPresent
