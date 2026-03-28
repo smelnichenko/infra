@@ -2,7 +2,7 @@ vault:
   secretsEnabled: true
 
 app:
-  replicas: 2
+  replicas: 1
   javaOpts: -Xmx2g -XX:+UseZGC
   image:
     pullPolicy: IfNotPresent
@@ -104,7 +104,7 @@ gateway:
     repository: git.pmon.dev/schnappy/api-gateway
     pullPolicy: IfNotPresent
     tag: "48429e2"  # api-gateway
-  replicas: 2
+  replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC -Dreactor.netty.ioWorkerCount=8
   cors:
     allowedOrigins: "https://pmon.dev"
