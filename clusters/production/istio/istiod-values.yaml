@@ -1,0 +1,15 @@
+profile: ambient
+
+meshConfig:
+  accessLogFile: /dev/stdout
+  defaultConfig:
+    holdApplicationUntilProxyStarts: false
+
+pilot:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
