@@ -14,7 +14,7 @@ spec:
       helm:
         valueFiles:
           - $values/clusters/production/vault/values.yaml
-    - repoURL: https://git.pmon.dev/schnappy/infra.git
+    - repoURL: http://forgejo-http.forgejo.svc:3000/schnappy/infra.git
       targetRevision: main
       ref: values
   destination:

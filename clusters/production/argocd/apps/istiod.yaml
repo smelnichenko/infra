@@ -17,7 +17,7 @@ spec:
         releaseName: istiod
         valueFiles:
           - $values/clusters/production/istio/istiod-values.yaml
-    - repoURL: https://git.pmon.dev/schnappy/infra.git
+    - repoURL: http://forgejo-http.forgejo.svc:3000/schnappy/infra.git
       targetRevision: main
       ref: values
   destination:

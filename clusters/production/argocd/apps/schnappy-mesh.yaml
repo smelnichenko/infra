@@ -8,14 +8,14 @@ metadata:
 spec:
   project: default
   sources:
-    - repoURL: https://git.pmon.dev/schnappy/platform.git
+    - repoURL: http://forgejo-http.forgejo.svc:3000/schnappy/platform.git
       path: helm/schnappy-mesh
       targetRevision: main
       helm:
         releaseName: schnappy
         valueFiles:
           - $values/clusters/production/schnappy-mesh/values.yaml
-    - repoURL: https://git.pmon.dev/schnappy/infra.git
+    - repoURL: http://forgejo-http.forgejo.svc:3000/schnappy/infra.git
       targetRevision: main
       ref: values
   destination:
