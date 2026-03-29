@@ -100,3 +100,13 @@ kubeStateMetrics:
   resources:
     requests: { cpu: 25m, memory: 128Mi }
     limits: { cpu: 200m, memory: 512Mi }
+
+reports:
+  enabled: true
+  ingress:
+    enabled: true
+    host: reports.pmon.dev
+    tls:
+      enabled: true
+      clusterIssuer: letsencrypt-dns
+      secretName: reports-pmon-dev-tls
