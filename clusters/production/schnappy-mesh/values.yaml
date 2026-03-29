@@ -1,6 +1,9 @@
 peerAuthentication:
   enabled: true
   mode: STRICT
+  # No port-level exceptions needed — MetalLB assigns IP directly to
+  # Istio gateway pod. No Traefik proxy in between. All traffic enters
+  # the mesh via the gateway, which handles its own TLS.
 
 authorizationPolicies:
   enabled: true
