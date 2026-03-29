@@ -45,6 +45,8 @@ victoriametrics:
   retention: 90d
   scrapeInterval: 15s
   graphiteEnabled: true
+  vault:
+    enabled: true
   storage:
     size: 20Gi
     storageClass: local-path
