@@ -1,5 +1,6 @@
 crds:
   enabled: true
+featureGates: ExperimentalGatewayAPISupport=true
 resources:
   requests:
     cpu: 50m
