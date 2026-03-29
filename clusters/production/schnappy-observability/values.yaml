@@ -39,19 +39,18 @@ elk:
       requests: { cpu: 100m, memory: 128Mi }
       limits: { cpu: 1000m, memory: 512Mi }
 
-prometheus:
+victoriametrics:
   enabled: true
-  image: prom/prometheus:v3.10.0
-  retention: 30d
+  image: victoriametrics/victoria-metrics:v1.117.1
+  retention: 90d
   scrapeInterval: 15s
+  graphiteEnabled: true
   storage:
     size: 20Gi
     storageClass: local-path
   resources:
-    requests: { cpu: 100m, memory: 512Mi }
-    limits: { cpu: 2000m, memory: 4Gi }
-  vault:
-    enabled: true
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { cpu: 2000m, memory: 2Gi }
   woodpecker:
     enabled: true
 
