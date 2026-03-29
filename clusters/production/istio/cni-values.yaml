@@ -4,6 +4,8 @@ global:
 cni:
   ambient:
     enabled: true
+  cniConfDir: /mnt/storage/k3s/agent/etc/cni/net.d
+  cniBinDir: /opt/cni/bin
   resources:
     requests:
       cpu: 25m
