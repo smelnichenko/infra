@@ -17,6 +17,9 @@ gateway:
     logs: logs.pmon.dev
     reports: reports.pmon.dev
     sonar: sonar.pmon.dev
+    argocd: cd.pmon.dev
+    forgejo: git.pmon.dev
+    ci: ci.pmon.dev
 
 jwt:
   enabled: true
