@@ -1,0 +1,6 @@
+peerAuthentication:
+  enabled: true
+  mode: STRICT
+
+authorizationPolicies:
+  enabled: true

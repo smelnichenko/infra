@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: schnappy-mesh
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - repoURL: https://git.pmon.dev/schnappy/platform.git
+      path: helm/schnappy-mesh
+      targetRevision: main
+      helm:
+        releaseName: schnappy
+        valueFiles:
+          - $values/clusters/production/schnappy-mesh/values.yaml
+    - repoURL: https://git.pmon.dev/schnappy/infra.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: schnappy
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+      - ServerSideApply=true
