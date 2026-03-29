@@ -6,6 +6,8 @@ meshConfig:
     holdApplicationUntilProxyStarts: false
 
 pilot:
+  env:
+    ZTUNNEL_SA: istio-ztunnel
   resources:
     requests:
       cpu: 100m
