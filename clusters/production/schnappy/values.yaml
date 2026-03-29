@@ -157,8 +157,11 @@ smokeTest:
   schedule: "0 6 * * *"
   clientSecretName: schnappy-k6-smoke
 
-hyperfoil:
+gatling:
   enabled: true
+  image:
+    repository: git.pmon.dev/schnappy/gatling-tests
+    tag: "e7a419f"  # gatling-tests
 
 # Cross-chart references (secret names for env var mounts, keycloak for admin service)
 postgres:
