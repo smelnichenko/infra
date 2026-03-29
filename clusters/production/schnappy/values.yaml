@@ -66,9 +66,6 @@ chess:
 chat:
   e2eEnabled: false
 
-linkerd:
-  enabled: false
-  authorizationPolicy: false
 
 monitor:
   enabled: true
