@@ -8,7 +8,7 @@ server:
     WOODPECKER_OPEN: "true"
     WOODPECKER_LOG_LEVEL: "warn"
     WOODPECKER_PIPELINE_CANCEL_RUNNING: "false"
-    WOODPECKER_PROMETHEUS_AUTH_TOKEN: ""
+    WOODPECKER_PROMETHEUS_AUTH_TOKEN: "metrics"
   extraSecretNamesForEnvFrom:
     - woodpecker-forgejo-secret
     - woodpecker-default-agent-secret
