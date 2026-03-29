@@ -7,7 +7,7 @@ meshConfig:
 
 pilot:
   env:
-    ZTUNNEL_SA: istio-ztunnel
+    ZTUNNEL_SA: istio-system/istio-ztunnel
   resources:
     requests:
       cpu: 100m
