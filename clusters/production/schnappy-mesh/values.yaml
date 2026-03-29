@@ -4,3 +4,21 @@ peerAuthentication:
 
 authorizationPolicies:
   enabled: true
+
+gateway:
+  enabled: true
+  loadBalancerIP: "192.168.11.2"
+  tls:
+    clusterIssuer: letsencrypt-prod
+  hosts:
+    app: pmon.dev
+    auth: auth.pmon.dev
+    grafana: grafana.pmon.dev
+    logs: logs.pmon.dev
+    reports: reports.pmon.dev
+    sonar: sonar.pmon.dev
+
+jwt:
+  enabled: true
+  issuer: https://auth.pmon.dev/realms/schnappy
+  jwksUri: http://schnappy-keycloak:8080/realms/schnappy/protocol/openid-connect/certs
