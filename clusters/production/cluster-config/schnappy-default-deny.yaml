@@ -36,6 +36,20 @@ spec:
       ports:
         - protocol: TCP
           port: 15021
+    # Istio control plane (istiod cert signing, xDS)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: istio-system
+      ports:
+        - protocol: TCP
+          port: 15012
+        - protocol: TCP
+          port: 15010
+        - protocol: TCP
+          port: 15014
+        - protocol: TCP
+          port: 443
     # Cross-namespace egress (Istio gateway → non-mesh services)
     - to:
         - namespaceSelector:
