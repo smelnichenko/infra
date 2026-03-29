@@ -7,7 +7,7 @@ app:
   image:
     pullPolicy: IfNotPresent
     repository: git.pmon.dev/schnappy/monitor
-    tag: "54f96dc"  # schnappy-monitor
+    tag: "d1353b9"  # schnappy-monitor
   ingress:
     enabled: true
     className: traefik
