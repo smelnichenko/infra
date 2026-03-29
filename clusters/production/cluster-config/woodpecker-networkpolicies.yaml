@@ -48,14 +48,14 @@ spec:
       ports:
         - protocol: TCP
           port: 9000
-    # From Prometheus (metrics scraping)
+    # From VictoriaMetrics (metrics scraping)
     - from:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: schnappy
       ports:
         - protocol: TCP
-          port: 8000
+          port: 9001
   egress:
     # To Forgejo (webhooks, API — direct service access)
     - to:

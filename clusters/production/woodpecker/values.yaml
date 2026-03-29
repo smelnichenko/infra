@@ -8,10 +8,11 @@ server:
     WOODPECKER_OPEN: "true"
     WOODPECKER_LOG_LEVEL: "warn"
     WOODPECKER_PIPELINE_CANCEL_RUNNING: "false"
-    WOODPECKER_PROMETHEUS_AUTH_TOKEN: "metrics"
+    WOODPECKER_METRICS_SERVER_ADDR: ":9001"
   extraSecretNamesForEnvFrom:
     - woodpecker-forgejo-secret
     - woodpecker-default-agent-secret
+    - woodpecker-ci-secrets
   ingress:
     enabled: true
     ingressClassName: traefik
