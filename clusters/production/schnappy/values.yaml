@@ -159,6 +159,7 @@ smokeTest:
 
 hyperfoil:
   enabled: true
+  reportsUrl: https://reports.pmon.dev
 
 # Cross-chart references (secret names for env var mounts, keycloak for admin service)
 postgres:
