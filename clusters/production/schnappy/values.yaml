@@ -161,7 +161,7 @@ gatling:
   enabled: true
   image:
     repository: git.pmon.dev/schnappy/gatling-tests
-    tag: "0a6ea6b"  # gatling-tests
+    tag: "74e884d"  # gatling-tests
 
 # Cross-chart references (secret names for env var mounts, keycloak for admin service)
 postgres:
