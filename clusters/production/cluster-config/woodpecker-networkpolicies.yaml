@@ -48,12 +48,14 @@ spec:
       ports:
         - protocol: TCP
           port: 9000
-    # From VictoriaMetrics (metrics scraping)
+    # From schnappy namespace (Istio gateway + VictoriaMetrics scraping)
     - from:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: schnappy
       ports:
+        - protocol: TCP
+          port: 8000
         - protocol: TCP
           port: 9001
   egress:
