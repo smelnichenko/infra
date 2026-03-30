@@ -92,9 +92,4 @@ kubeStateMetrics:
 reports:
   enabled: true
   ingress:
-    enabled: true
-    host: reports.pmon.dev
-    tls:
-      enabled: true
-      clusterIssuer: letsencrypt-dns
-      secretName: reports-pmon-dev-tls
+    enabled: false
