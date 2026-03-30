@@ -16,7 +16,7 @@ gitea:
     actions:
       ENABLED: false
     webhook:
-      ALLOWED_HOST_LIST: private
+      ALLOWED_HOST_LIST: "*"
     repository:
       DEFAULT_BRANCH: main
       DEFAULT_PRIVATE: true
