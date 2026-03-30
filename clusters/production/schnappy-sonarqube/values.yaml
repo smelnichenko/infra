@@ -16,7 +16,7 @@ sonarqube:
     storageClass: local-path
   resources:
     requests: { cpu: 200m, memory: 2Gi }
-    limits: { cpu: 2000m, memory: 4Gi }
+    limits: { cpu: 2000m, memory: 6Gi }
   postgres:
     image: postgres:17-alpine
   postgresStorage:
