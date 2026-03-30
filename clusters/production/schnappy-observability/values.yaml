@@ -72,8 +72,8 @@ grafana:
     enabled: true
     name: Keycloak
     authUrl: https://auth.pmon.dev/realms/schnappy/protocol/openid-connect/auth
-    tokenUrl: http://schnappy-keycloak.schnappy.svc:8080/realms/schnappy/protocol/openid-connect/token
-    apiUrl: http://schnappy-keycloak.schnappy.svc:8080/realms/schnappy/protocol/openid-connect/userinfo
+    tokenUrl: https://auth.pmon.dev/realms/schnappy/protocol/openid-connect/token
+    apiUrl: https://auth.pmon.dev/realms/schnappy/protocol/openid-connect/userinfo
     scopes: "openid profile email"
     autoLogin: false
   storage:
