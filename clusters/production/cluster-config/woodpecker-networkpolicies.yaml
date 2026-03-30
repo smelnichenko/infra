@@ -18,7 +18,7 @@ spec:
         - protocol: TCP
           port: 53
 ---
-# Woodpecker server: ingress from Traefik + agent
+# Woodpecker server: ingress from Istio gateway + agent
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -32,23 +32,7 @@ spec:
     - Ingress
     - Egress
   ingress:
-    # From Traefik ingress controller
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-      ports:
-        - protocol: TCP
-          port: 8000
-    # From agent (gRPC)
-    - from:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: agent
-      ports:
-        - protocol: TCP
-          port: 9000
-    # From schnappy namespace (Istio gateway + VictoriaMetrics scraping)
+    # From Istio gateway (schnappy namespace)
     - from:
         - namespaceSelector:
             matchLabels:
@@ -58,6 +42,14 @@ spec:
           port: 8000
         - protocol: TCP
           port: 9001
+    # From agent (gRPC)
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: agent
+      ports:
+        - protocol: TCP
+          port: 9000
   egress:
     # To Forgejo (webhooks, API — direct service access)
     - to:
@@ -67,13 +59,10 @@ spec:
       ports:
         - protocol: TCP
           port: 3000
-    # HTTPS egress (OAuth via Traefik — git.pmon.dev resolves to Traefik ClusterIP via CoreDNS)
-    # Port 443 for ClusterIP pre-DNAT, port 8443 for post-DNAT (Traefik websecure targetPort)
+    # HTTPS egress (OAuth via Istio gateway — git.pmon.dev resolves to gateway ClusterIP via CoreDNS)
     - ports:
         - protocol: TCP
           port: 443
-        - protocol: TCP
-          port: 8443
     # DNS
     - ports:
         - protocol: UDP
@@ -135,16 +124,12 @@ spec:
     - from:
         - podSelector: {}
   egress:
-    # To Traefik / k8s API (kube-system namespace)
+    # To Kubernetes API (kube-system namespace)
     - to:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: kube-system
       ports:
-        - protocol: TCP
-          port: 8443
-        - protocol: TCP
-          port: 8000
         - protocol: TCP
           port: 443
         - protocol: TCP
