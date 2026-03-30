@@ -20,6 +20,28 @@ spec:
       ports:
         - protocol: TCP
           port: 15021
+    # Istio gateway: allow external traffic (HAProxy) on 80/443
+    - ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
+    # Cross-namespace ingress (forgejo, argocd, woodpecker → schnappy services)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: forgejo
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: argocd
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: woodpecker
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 443
   egress:
     - ports:
         - protocol: UDP
