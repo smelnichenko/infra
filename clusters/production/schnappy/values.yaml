@@ -9,13 +9,7 @@ app:
     repository: git.pmon.dev/schnappy/monitor
     tag: "d1353b9"  # schnappy-monitor
   ingress:
-    enabled: true
-    className: traefik
-    host: pmon.dev
-    tls:
-      enabled: true
-      clusterIssuer: letsencrypt-prod
-      secretName: pmon-dev-tls
+    enabled: false
   hikari:
     maximumPoolSize: 20
     minimumIdle: 5
@@ -38,15 +32,15 @@ site:
     requests: { cpu: 100m, memory: 64Mi }
     limits: { cpu: 2000m, memory: 256Mi }
 
-games:
-  - name: game-scp
-    path: game
-    image:
-      repository: git.pmon.dev/schnappy/game-scp
-      tag: "7744cf4"  # game-scp
-    resources:
-      requests: { cpu: 25m, memory: 32Mi }
-      limits: { cpu: 100m, memory: 64Mi }
+games: []
+#  - name: game-scp
+#    path: game
+#    image:
+#      repository: git.pmon.dev/schnappy/game-scp
+#      tag: "7744cf4"  # game-scp
+#    resources:
+#      requests: { cpu: 25m, memory: 32Mi }
+#      limits: { cpu: 100m, memory: 64Mi }
 
 auth:
   existingSecret: schnappy-auth

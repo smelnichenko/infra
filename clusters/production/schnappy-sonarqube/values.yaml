@@ -10,13 +10,7 @@ sonarqube:
   image: sonarqube:26.3.0.120487-community
   javaOpts: -Xms1g -Xmx1g
   ingress:
-    enabled: true
-    className: traefik
-    host: sonar.pmon.dev
-    tls:
-      enabled: true
-      clusterIssuer: letsencrypt-dns
-      secretName: sonar-pmon-dev-tls
+    enabled: false
   storage:
     size: 10Gi
     storageClass: local-path

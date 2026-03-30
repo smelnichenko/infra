@@ -23,13 +23,7 @@ elk:
     image: docker.elastic.co/kibana/kibana:8.19.8
     replicas: 1
     ingress:
-      enabled: true
-      className: traefik
-      host: logs.pmon.dev
-      tls:
-        enabled: true
-        clusterIssuer: letsencrypt-dns
-        secretName: logs-pmon-dev-tls
+      enabled: false
     resources:
       requests: { cpu: 100m, memory: 1Gi }
       limits: { cpu: 1000m, memory: 2Gi }
@@ -61,13 +55,7 @@ grafana:
   existingSecret: schnappy-grafana
   image: grafana/grafana:12.4.0
   ingress:
-    enabled: true
-    className: traefik
-    host: grafana.pmon.dev
-    tls:
-      enabled: true
-      clusterIssuer: letsencrypt-dns
-      secretName: grafana-pmon-dev-tls
+    enabled: false
   oauth:
     enabled: true
     name: Keycloak
