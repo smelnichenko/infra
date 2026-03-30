@@ -27,4 +27,4 @@ gateway:
 jwt:
   enabled: true
   issuer: https://auth.pmon.dev/realms/schnappy
-  jwksUri: http://schnappy-keycloak:8080/realms/schnappy/protocol/openid-connect/certs
+  jwksUri: https://auth.pmon.dev/realms/schnappy/protocol/openid-connect/certs
