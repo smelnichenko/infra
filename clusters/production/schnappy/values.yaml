@@ -144,6 +144,7 @@ chessService:
 
 smokeTest:
   enabled: true
+  namespace: schnappy-test
   image: grafana/k6:0.57.0
   schedule: "0 6 * * *"
   clientSecretName: schnappy-k6-smoke
