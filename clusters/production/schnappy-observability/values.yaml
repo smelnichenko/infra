@@ -22,6 +22,7 @@ elk:
   kibana:
     image: docker.elastic.co/kibana/kibana:8.19.8
     replicas: 1
+    host: logs.pmon.dev
     ingress:
       enabled: false
     resources:
@@ -54,6 +55,7 @@ grafana:
   enabled: true
   existingSecret: schnappy-grafana
   image: grafana/grafana:12.4.0
+  host: grafana.pmon.dev
   ingress:
     enabled: false
   oauth:

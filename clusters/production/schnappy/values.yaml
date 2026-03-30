@@ -147,6 +147,7 @@ smokeTest:
   image: grafana/k6:0.57.0
   schedule: "0 6 * * *"
   clientSecretName: schnappy-k6-smoke
+  baseUrl: https://pmon.dev
 
 hyperfoil:
   enabled: true
