@@ -26,14 +26,15 @@ spec:
       selfHeal: true
       prune: true
     syncOptions:
-      - ServerSideApply=true
       - RespectIgnoreDifferences=true
   ignoreDifferences:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       jsonPointers:
         - /metadata/annotations
+        - /metadata/resourceVersion
     - group: gateway.networking.k8s.io
       kind: Gateway
       jsonPointers:
         - /metadata/annotations
+        - /metadata/resourceVersion
