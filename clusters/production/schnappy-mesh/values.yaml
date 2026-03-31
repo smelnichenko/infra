@@ -1,9 +1,6 @@
 peerAuthentication:
   enabled: true
-  mode: PERMISSIVE
-  # PERMISSIVE needed because non-mesh namespaces (forgejo, argocd,
-  # woodpecker) connect to the Istio gateway via ClusterIP.
-  # STRICT blocks their plaintext-over-ztunnel connections.
+  mode: STRICT
 
 authorizationPolicies:
   enabled: true
@@ -25,6 +22,6 @@ gateway:
     ci: ci.pmon.dev
 
 jwt:
-  enabled: true
+  enabled: false
   issuer: https://auth.pmon.dev/realms/schnappy
   jwksUri: https://auth.pmon.dev/realms/schnappy/protocol/openid-connect/certs
