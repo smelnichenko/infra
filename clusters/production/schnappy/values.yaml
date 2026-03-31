@@ -17,8 +17,8 @@ app:
     idleTimeout: 300000
     maxLifetime: 1200000
   resources:
-    requests: { cpu: 200m, memory: 2Gi }
-    limits: { cpu: 6000m, memory: 4Gi }
+    requests: { cpu: 200m, memory: 2Gi, ephemeral-storage: 256Mi }
+    limits: { cpu: 6000m, memory: 4Gi, ephemeral-storage: 1Gi }
 
 site:
   enabled: true
