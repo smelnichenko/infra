@@ -25,3 +25,12 @@ jwt:
   enabled: true
   issuer: https://auth.pmon.dev/realms/schnappy
   jwksUri: https://auth.pmon.dev/realms/schnappy/protocol/openid-connect/certs
+  passthroughHosts:
+    - git.pmon.dev
+    - sonar.pmon.dev
+    - ci.pmon.dev
+    - auth.pmon.dev
+    - cd.pmon.dev
+    - grafana.pmon.dev
+    - logs.pmon.dev
+    - reports.pmon.dev
