@@ -9,17 +9,9 @@ spec:
     - Ingress
     - Egress
   ingress:
-    # Istio HBONE tunnel (ztunnel mTLS)
-    - ports:
-        - protocol: TCP
-          port: 15008
-    # Istio health probes
+    # Intra-namespace traffic (sidecars communicate on app ports)
     - from:
-        - ipBlock:
-            cidr: 169.254.7.127/32
-      ports:
-        - protocol: TCP
-          port: 15021
+        - podSelector: {}
     # Istio gateway: allow external traffic (HAProxy) on 80/443
     - ports:
         - protocol: TCP
@@ -42,22 +34,20 @@ spec:
           port: 8080
         - protocol: TCP
           port: 443
+    # Kubelet probes (node → pod)
+    - ports:
+        - protocol: TCP
+          port: 15021
   egress:
+    # DNS
     - ports:
         - protocol: UDP
           port: 53
         - protocol: TCP
           port: 53
-        # Istio HBONE tunnel (ztunnel mTLS)
-        - protocol: TCP
-          port: 15008
-    # Istio ztunnel health probes
+    # Intra-namespace traffic (sidecars communicate on app ports)
     - to:
-        - ipBlock:
-            cidr: 169.254.7.127/32
-      ports:
-        - protocol: TCP
-          port: 15021
+        - podSelector: {}
     # Istio control plane (istiod cert signing, xDS)
     - to:
         - namespaceSelector:
