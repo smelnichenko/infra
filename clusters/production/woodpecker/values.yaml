@@ -37,6 +37,7 @@ agent:
     WOODPECKER_MAX_WORKFLOWS: "1"
     WOODPECKER_CONNECT_RETRY_COUNT: "30"
     WOODPECKER_LOG_LEVEL: "warn"
+    WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES: "forgejo-registry"
   resources:
     requests:
       cpu: 100m
