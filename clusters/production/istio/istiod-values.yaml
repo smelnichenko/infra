@@ -1,4 +1,4 @@
-istio_cni:
+cni:
   enabled: true
 
 meshConfig:
