@@ -19,8 +19,9 @@ spec:
   ignoreDifferences:
     - group: argoproj.io
       kind: Application
-      jsonPointers:
-        - /status
+      jqPathExpressions:
+        - .spec
+        - .metadata
   syncPolicy:
     automated:
       selfHeal: true
