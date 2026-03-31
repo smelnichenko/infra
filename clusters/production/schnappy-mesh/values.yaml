@@ -20,8 +20,3 @@ gateway:
     argocd: cd.pmon.dev
     forgejo: git.pmon.dev
     ci: ci.pmon.dev
-
-jwt:
-  enabled: false
-  issuer: https://auth.pmon.dev/realms/schnappy
-  jwksUri: https://auth.pmon.dev/realms/schnappy/protocol/openid-connect/certs
