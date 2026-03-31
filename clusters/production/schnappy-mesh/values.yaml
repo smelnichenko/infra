@@ -1,6 +1,9 @@
 peerAuthentication:
   enabled: true
-  mode: STRICT
+  mode: PERMISSIVE
+  # PERMISSIVE required: Istio gateway has dataplane-mode: none (set by Istio
+  # itself), cannot participate in HBONE mTLS. Mesh-to-mesh traffic auto-upgrades
+  # to mTLS. AuthorizationPolicies enforce identity-based access on data stores.
 
 authorizationPolicies:
   enabled: true
