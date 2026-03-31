@@ -7,6 +7,7 @@ authorizationPolicies:
 
 gateway:
   enabled: true
+  replicas: 2
   loadBalancerIP: "192.168.11.2"
   tls:
     clusterIssuer: letsencrypt-prod
