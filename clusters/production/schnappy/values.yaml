@@ -32,15 +32,15 @@ site:
     requests: { cpu: 100m, memory: 64Mi }
     limits: { cpu: 2000m, memory: 256Mi }
 
-games: []
-#  - name: game-scp
-#    path: game
-#    image:
-#      repository: git.pmon.dev/schnappy/game-scp
-#      tag: "71ece2f"  # game-scp
-#    resources:
-#      requests: { cpu: 25m, memory: 32Mi }
-#      limits: { cpu: 100m, memory: 64Mi }
+games:
+  - name: game-scp
+    path: game
+    image:
+      repository: git.pmon.dev/schnappy/game-scp
+      tag: "71ece2f"  # game-scp
+    resources:
+      requests: { cpu: 25m, memory: 32Mi }
+      limits: { cpu: 100m, memory: 64Mi }
 
 auth:
   existingSecret: schnappy-auth
