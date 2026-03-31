@@ -29,3 +29,9 @@ spec:
       prune: true
     syncOptions:
       - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+  ignoreDifferences:
+    - group: apps
+      kind: DaemonSet
+      jsonPointers:
+        - /spec/template/metadata/annotations
