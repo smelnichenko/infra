@@ -7,6 +7,8 @@ meshConfig:
     holdApplicationUntilProxyStarts: true
 
 pilot:
+  env:
+    ENABLE_NATIVE_SIDECARS: "true"
   resources:
     requests:
       cpu: 100m
