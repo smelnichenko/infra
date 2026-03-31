@@ -1,10 +1,5 @@
-global:
-  platform: k3s
-
 cni:
-  ambient:
-    enabled: true
-  cniConfDir: /mnt/storage/k3s/agent/etc/cni/net.d
+  cniConfDir: /etc/cni/net.d
   cniBinDir: /opt/cni/bin
   resources:
     requests:
