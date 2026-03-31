@@ -7,7 +7,7 @@ networkPolicies:
 keycloak:
   enabled: true
   existingSecret: schnappy-keycloak
-  image: git.pmon.dev/schnappy/keycloak-theme:bbbb402  # keycloak-theme
+  image: git.pmon.dev/schnappy/keycloak-theme:24a1304  # keycloak-theme
   hostname: auth.pmon.dev
   mail:
     from: noreply@pmon.dev
