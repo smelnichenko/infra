@@ -38,7 +38,7 @@ prometheus:
   enabled: true
   scrapeInterval: 15s
   woodpecker:
-    enabled: true
+    enabled: false
 
 mimir:
   enabled: true
