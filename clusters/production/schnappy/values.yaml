@@ -142,6 +142,11 @@ chessService:
     requests: { cpu: 100m, memory: 1Gi }
     limits: { cpu: 3000m, memory: 2Gi }
 
+tracing:
+  enabled: true
+  tempoEndpoint: "http://schnappy-tempo.schnappy.svc:4317"
+  samplingProbability: "0.1"
+
 smokeTest:
   enabled: true
   namespace: schnappy-test

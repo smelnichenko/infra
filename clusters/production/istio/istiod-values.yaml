@@ -3,8 +3,13 @@ cni:
 
 meshConfig:
   accessLogFile: /dev/stdout
+  enableTracing: true
   defaultConfig:
     holdApplicationUntilProxyStarts: true
+    tracing:
+      zipkin:
+        address: schnappy-tempo.schnappy.svc:9411
+      sampling: 10.0
 
 pilot:
   env:

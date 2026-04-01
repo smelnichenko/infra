@@ -7,6 +7,8 @@ prometheus:
       labels:
         sidecar.istio.io/inject: "false"
     retention: 15d
+    enableFeatures:
+      - exemplar-storage
     # Discover ServiceMonitors/PodMonitors/PrometheusRules from all namespaces
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
