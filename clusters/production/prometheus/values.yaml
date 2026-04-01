@@ -1,6 +1,11 @@
 prometheus:
   prometheusSpec:
+    # No sidecar — scrape merged metrics on port 15020 (plaintext, bypasses mTLS)
+    podMetadata:
+      labels:
+        sidecar.istio.io/inject: "false"
     retention: 15d
+    # Discover ServiceMonitors/PodMonitors/PrometheusRules from all namespaces
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
     ruleSelectorNilUsesHelmValues: false
@@ -19,20 +24,13 @@ prometheus:
       requests: { cpu: 200m, memory: 512Mi }
       limits: { cpu: 4000m, memory: 4Gi }
     remoteWrite:
-      - url: http://schnappy-mimir:9009/api/v1/push
+      - url: http://schnappy-mimir.schnappy.svc:9009/api/v1/push
     alertingEndpoints:
       - name: schnappy-alertmanager
         namespace: schnappy
         port: http
         scheme: http
-    additionalScrapeConfigs:
-      - job_name: schnappy-app
-        metrics_path: /api/actuator/prometheus
-        static_configs:
-          - targets: ['schnappy-monitor:8080']
-      - job_name: schnappy-kube-state-metrics
-        static_configs:
-          - targets: ['schnappy-kube-state-metrics:8080']
+        pathPrefix: /
 
 grafana:
   enabled: false
