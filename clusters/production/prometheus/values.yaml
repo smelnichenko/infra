@@ -54,6 +54,8 @@ prometheusOperator:
   enabled: true
   admissionWebhooks:
     enabled: false
+  tls:
+    enabled: false
   podLabels:
     sidecar.istio.io/inject: "false"
   resources:
