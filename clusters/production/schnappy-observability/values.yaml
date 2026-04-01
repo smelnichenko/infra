@@ -34,22 +34,22 @@ elk:
       requests: { cpu: 100m, memory: 128Mi }
       limits: { cpu: 1000m, memory: 512Mi }
 
-victoriametrics:
+prometheus:
   enabled: true
-  image: victoriametrics/victoria-metrics:v1.117.1
-  retention: 90d
   scrapeInterval: 15s
-  graphiteEnabled: true
-  vault:
-    enabled: true
-  storage:
-    size: 20Gi
-    storageClass: local-path
-  resources:
-    requests: { cpu: 100m, memory: 256Mi }
-    limits: { cpu: 2000m, memory: 2Gi }
   woodpecker:
     enabled: true
+
+mimir:
+  enabled: true
+  image: grafana/mimir:2.16.0
+  retention: 90d
+  minioSecret: schnappy-minio
+  storage: 5Gi
+  storageClassName: local-path
+  resources:
+    requests: { cpu: 200m, memory: 512Mi }
+    limits: { cpu: 2000m, memory: 2Gi }
 
 grafana:
   enabled: true

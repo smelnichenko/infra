@@ -1,0 +1,57 @@
+prometheus:
+  prometheusSpec:
+    retention: 15d
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    serviceMonitorNamespaceSelector: {}
+    podMonitorNamespaceSelector: {}
+    ruleNamespaceSelector: {}
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-path
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 10Gi
+    resources:
+      requests: { cpu: 200m, memory: 512Mi }
+      limits: { cpu: 4000m, memory: 4Gi }
+    remoteWrite:
+      - url: http://schnappy-mimir:9009/api/v1/push
+    alertingEndpoints:
+      - name: schnappy-alertmanager
+        namespace: schnappy
+        port: http
+        scheme: http
+
+grafana:
+  enabled: false
+alertmanager:
+  enabled: false
+kubeStateMetrics:
+  enabled: false
+nodeExporter:
+  enabled: false
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeProxy:
+  enabled: false
+coreDns:
+  enabled: false
+kubelet:
+  enabled: false
+
+prometheusOperator:
+  enabled: true
+  resources:
+    requests: { cpu: 100m, memory: 128Mi }
+    limits: { cpu: 200m, memory: 256Mi }
+
+defaultRules:
+  create: false
