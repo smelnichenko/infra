@@ -31,6 +31,12 @@ prometheus:
         port: http
         scheme: http
         pathPrefix: /
+    # KSM scraped separately — PodMonitor relabeling overwrites its pod labels
+    additionalScrapeConfigs:
+      - job_name: schnappy-kube-state-metrics
+        honor_labels: true
+        static_configs:
+          - targets: ['schnappy-kube-state-metrics.schnappy.svc:8080']
 
 grafana:
   enabled: false
