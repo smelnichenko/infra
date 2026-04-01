@@ -1,5 +1,8 @@
 prometheus:
   prometheusSpec:
+    podMetadata:
+      labels:
+        sidecar.istio.io/inject: "false"
     retention: 15d
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
@@ -49,6 +52,10 @@ kubelet:
 
 prometheusOperator:
   enabled: true
+  admissionWebhooks:
+    enabled: false
+  podLabels:
+    sidecar.istio.io/inject: "false"
   resources:
     requests: { cpu: 100m, memory: 128Mi }
     limits: { cpu: 200m, memory: 256Mi }
