@@ -62,6 +62,12 @@ spec:
           port: 15014
         - protocol: TCP
           port: 443
+    # Kubernetes API (prometheus operator, kube-state-metrics)
+    - ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 6443
     # Cross-namespace egress (Istio gateway → non-mesh services)
     - to:
         - namespaceSelector:
