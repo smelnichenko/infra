@@ -25,6 +25,14 @@ prometheus:
         namespace: schnappy
         port: http
         scheme: http
+    additionalScrapeConfigs:
+      - job_name: schnappy-app
+        metrics_path: /api/actuator/prometheus
+        static_configs:
+          - targets: ['schnappy-monitor:8080']
+      - job_name: schnappy-kube-state-metrics
+        static_configs:
+          - targets: ['schnappy-kube-state-metrics:8080']
 
 grafana:
   enabled: false
