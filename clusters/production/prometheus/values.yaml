@@ -58,6 +58,7 @@ kubelet:
 
 prometheusOperator:
   enabled: true
+  fullnameOverride: schnappy-prometheus-operator
   admissionWebhooks:
     enabled: false
   tls:
