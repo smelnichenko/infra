@@ -1,6 +1,6 @@
 smokeTest:
   enabled: true
-  image: grafana/k6:0.57.0
+  image: grafana/k6:0.55.0
   schedule: "0 6 * * *"
   baseUrl: https://pmon.dev
   keycloakUrl: https://auth.pmon.dev
