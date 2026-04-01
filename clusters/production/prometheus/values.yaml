@@ -1,3 +1,5 @@
+nameOverride: prometheus
+
 prometheus:
   prometheusSpec:
     # No sidecar — scrape merged metrics on port 15020 (plaintext, bypasses mTLS)

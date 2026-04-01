@@ -14,7 +14,7 @@ spec:
       chart: kube-prometheus-stack
       targetRevision: 72.3.0
       helm:
-        releaseName: prometheus
+        releaseName: schnappy
         valueFiles:
           - $values/clusters/production/prometheus/values.yaml
     - repoURL: http://forgejo-http.forgejo.svc:3000/schnappy/infra.git
