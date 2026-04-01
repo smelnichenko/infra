@@ -1,4 +1,4 @@
-nameOverride: prometheus
+fullnameOverride: schnappy-prometheus
 
 prometheus:
   prometheusSpec:
