@@ -8,7 +8,7 @@ elk:
   enabled: true
   elasticsearch:
     existingSecret: schnappy-elasticsearch
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.8
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.13
     javaOpts: -Xms2g -Xmx2g
     replicas: 1
     retention:
@@ -20,7 +20,7 @@ elk:
       requests: { cpu: 250m, memory: 2Gi }
       limits: { cpu: 4000m, memory: 6Gi }
   kibana:
-    image: docker.elastic.co/kibana/kibana:8.19.8
+    image: docker.elastic.co/kibana/kibana:8.19.13
     replicas: 1
     host: logs.pmon.dev
     ingress:
@@ -29,7 +29,7 @@ elk:
       requests: { cpu: 100m, memory: 1Gi }
       limits: { cpu: 1000m, memory: 2Gi }
   fluentbit:
-    image: cr.fluentbit.io/fluent/fluent-bit:4.2.3
+    image: cr.fluentbit.io/fluent/fluent-bit:4.2.3.1
     resources:
       requests: { cpu: 100m, memory: 128Mi }
       limits: { cpu: 1000m, memory: 512Mi }
@@ -42,7 +42,7 @@ prometheus:
 
 mimir:
   enabled: true
-  image: grafana/mimir:2.16.0
+  image: grafana/mimir:2.17.8
   retention: 90d
   minioSecret: schnappy-minio
   storage: 5Gi
@@ -54,7 +54,7 @@ mimir:
 grafana:
   enabled: true
   existingSecret: schnappy-grafana
-  image: grafana/grafana:12.4.0
+  image: grafana/grafana:12.4.2
   host: grafana.pmon.dev
   ingress:
     enabled: false
