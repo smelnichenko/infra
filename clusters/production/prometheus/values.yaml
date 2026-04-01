@@ -1,8 +1,5 @@
 prometheus:
   prometheusSpec:
-    podMetadata:
-      labels:
-        sidecar.istio.io/inject: "false"
     retention: 15d
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
