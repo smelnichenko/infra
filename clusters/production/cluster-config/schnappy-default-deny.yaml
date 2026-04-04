@@ -18,11 +18,8 @@ spec:
           port: 443
         - protocol: TCP
           port: 80
-    # Cross-namespace ingress (forgejo, argocd, woodpecker → schnappy services)
+    # Cross-namespace ingress (argocd, woodpecker → schnappy services)
     - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: forgejo
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: argocd
