@@ -51,18 +51,15 @@ spec:
         - protocol: TCP
           port: 9000
   egress:
-    # To Forgejo (webhooks, API — direct service access)
+    # To Pi Forgejo via VIP (webhooks, API)
     - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: forgejo
+        - ipBlock:
+            cidr: 192.168.11.5/32
       ports:
         - protocol: TCP
-          port: 3000
-    # HTTPS egress (OAuth via Istio gateway — git.pmon.dev resolves to gateway ClusterIP via CoreDNS)
-    - ports:
-        - protocol: TCP
           port: 443
+        - protocol: TCP
+          port: 3000
     # DNS
     - ports:
         - protocol: UDP
@@ -124,6 +121,19 @@ spec:
     - from:
         - podSelector: {}
   egress:
+    # To Pi VIP (Forgejo clone/registry, Nexus, Caddy HTTPS)
+    - to:
+        - ipBlock:
+            cidr: 192.168.11.5/32
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 3000
+        - protocol: TCP
+          port: 8081
+        - protocol: TCP
+          port: 8082
     # To Kubernetes API (kube-system namespace)
     - to:
         - namespaceSelector:
@@ -134,7 +144,7 @@ spec:
           port: 443
         - protocol: TCP
           port: 6443
-    # To Kubernetes API (node IP + ClusterIP, belt-and-suspenders)
+    # To Kubernetes API (node IP + ClusterIP)
     - to:
         - ipBlock:
             cidr: 192.168.11.2/32
@@ -147,7 +157,7 @@ spec:
       ports:
         - protocol: TCP
           port: 443
-    # To Istio gateway (schnappy namespace) — for SonarQube, Keycloak, app via external URLs
+    # To Istio gateway (SonarQube, app via external URLs)
     - to:
         - namespaceSelector:
             matchLabels:
@@ -158,14 +168,6 @@ spec:
       ports:
         - protocol: TCP
           port: 443
-    # To Forgejo registry
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: forgejo
-      ports:
-        - protocol: TCP
-          port: 3000
     # To apt-cacher-ng (schnappy namespace)
     - to:
         - namespaceSelector:
@@ -177,15 +179,17 @@ spec:
       ports:
         - protocol: TCP
           port: 3142
-    # To Nexus on Pi (caching proxy for Maven, npm, PyPI, Docker)
+    # To schnappy Postgres (for integration tests)
     - to:
-        - ipBlock:
-            cidr: 192.168.11.4/32
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: schnappy
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/component: postgres
       ports:
         - protocol: TCP
-          port: 8081
-        - protocol: TCP
-          port: 8082
+          port: 5432
     # External HTTPS (Maven Central, npm, Docker Hub for Kaniko)
     - to:
         - ipBlock:
