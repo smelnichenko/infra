@@ -17,7 +17,7 @@ spec:
         releaseName: schnappy
         valueFiles:
           - $values/clusters/production/prometheus/values.yaml
-    - repoURL: http://forgejo-http.forgejo.svc:3000/schnappy/infra.git
+    - repoURL: http://192.168.11.5:3000/schnappy/infra.git
       targetRevision: main
       ref: values
   destination:

@@ -7,14 +7,14 @@ spec:
   project: default
   sources:
     - path: helm/schnappy-test
-      repoURL: http://forgejo-http.forgejo.svc:3000/schnappy/platform.git
+      repoURL: http://192.168.11.5:3000/schnappy/platform.git
       targetRevision: main
       helm:
         releaseName: schnappy
         valueFiles:
           - $values/clusters/production/schnappy-test/values.yaml
     - ref: values
-      repoURL: http://forgejo-http.forgejo.svc:3000/schnappy/infra.git
+      repoURL: http://192.168.11.5:3000/schnappy/infra.git
       targetRevision: main
   destination:
     server: https://kubernetes.default.svc

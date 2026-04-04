@@ -10,14 +10,14 @@ metadata:
 spec:
   project: default
   sources:
-    - repoURL: http://forgejo-http.forgejo.svc:3000/schnappy/platform.git
+    - repoURL: http://192.168.11.5:3000/schnappy/platform.git
       targetRevision: main
       path: helm/schnappy-sonarqube
       helm:
         releaseName: schnappy
         valueFiles:
           - $values/clusters/production/schnappy-sonarqube/values.yaml
-    - repoURL: http://forgejo-http.forgejo.svc:3000/schnappy/infra.git
+    - repoURL: http://192.168.11.5:3000/schnappy/infra.git
       targetRevision: main
       ref: values
   destination:
