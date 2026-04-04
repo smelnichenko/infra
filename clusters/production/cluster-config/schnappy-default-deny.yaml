@@ -65,14 +65,18 @@ spec:
           port: 443
         - protocol: TCP
           port: 6443
-    # Cross-namespace egress (Istio gateway → non-mesh services)
+    # Pi services via VIP (Forgejo, Keycloak, Vault)
     - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: forgejo
+        - ipBlock:
+            cidr: 192.168.11.5/32
       ports:
         - protocol: TCP
           port: 3000
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 8200
+    # Cross-namespace egress (ArgoCD, Woodpecker)
     - to:
         - namespaceSelector:
             matchLabels:
