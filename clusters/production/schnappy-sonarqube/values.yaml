@@ -36,8 +36,6 @@ sonarqube:
         name: Schnappy Chat
       - key: schnappy-chess
         name: Schnappy Chess
-      - key: schnappy-gateway
-        name: Schnappy Gateway
       - key: schnappy-site
         name: Schnappy Site
         gate: Frontend
