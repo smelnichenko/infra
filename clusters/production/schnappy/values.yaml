@@ -91,19 +91,6 @@ webhook:
 
 
 
-gateway:
-  enabled: false
-  image:
-    repository: git.pmon.dev/schnappy/api-gateway
-    pullPolicy: IfNotPresent
-    tag: "d2a8de9"  # api-gateway
-  replicas: 1
-  javaOpts: -Xmx1g -XX:+UseZGC -Dreactor.netty.ioWorkerCount=8
-  cors:
-    allowedOrigins: "https://pmon.dev"
-  resources:
-    requests: { cpu: 500m, memory: 1Gi }
-    limits: { cpu: 4000m, memory: 2Gi }
 
 admin:
   enabled: true
