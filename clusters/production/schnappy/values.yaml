@@ -89,8 +89,7 @@ webhook:
   enabled: true
   existingSecret: schnappy-webhook
 
-envoyGateway:
-  enabled: false
+
 
 gateway:
   enabled: false
