@@ -13,7 +13,7 @@ meshConfig:
 
 pilot:
   env:
-    ENABLE_NATIVE_SIDECARS: "true"
+    ENABLE_NATIVE_SIDECARS: "false"
   resources:
     requests:
       cpu: 100m
