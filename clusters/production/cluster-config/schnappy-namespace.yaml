@@ -3,4 +3,4 @@ kind: Namespace
 metadata:
   name: schnappy
   labels:
-    istio-injection: enabled
+    istio.io/rev: default

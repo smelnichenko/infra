@@ -86,6 +86,11 @@ minio:
   enabled: true
   existingSecret: schnappy-minio
   bucket: email-attachments
+  buckets:
+    - email-attachments
+    - mimir-blocks
+    - tempo-traces
+    - hyperfoil-reports
   image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
   storage:
     size: 20Gi
