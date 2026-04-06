@@ -11,6 +11,10 @@ spec:
     repoURL: https://talinx.github.io/cert-manager-webhook-porkbun
     chart: cert-manager-webhook-porkbun
     targetRevision: "*"
+    helm:
+      parameters:
+        - name: image.tag
+          value: "1.0.0"
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager
