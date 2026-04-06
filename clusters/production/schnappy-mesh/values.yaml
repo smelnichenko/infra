@@ -1,6 +1,6 @@
 peerAuthentication:
   enabled: true
-  mode: STRICT
+  mode: PERMISSIVE
 
 authorizationPolicies:
   enabled: true
