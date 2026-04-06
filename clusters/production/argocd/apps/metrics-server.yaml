@@ -13,6 +13,8 @@ spec:
     targetRevision: "*"
     helm:
       parameters:
+        - name: args[0]
+          value: "--kubelet-insecure-tls"
         - name: resources.requests.cpu
           value: "50m"
         - name: resources.requests.memory
