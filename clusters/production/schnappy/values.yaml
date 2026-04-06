@@ -135,9 +135,9 @@ tracing:
 
 smokeTest:
   enabled: true
-  namespace: schnappy-test
   image: grafana/k6:1.7.1
   schedule: "0 6 * * *"
+  baseUrl: https://pmon.dev
   clientSecretName: schnappy-k6-smoke
   baseUrl: https://pmon.dev
 
