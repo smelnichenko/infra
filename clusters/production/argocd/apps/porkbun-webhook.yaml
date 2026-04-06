@@ -13,8 +13,10 @@ spec:
     targetRevision: "*"
     helm:
       parameters:
+        - name: image.repository
+          value: "git.pmon.dev/schnappy/cert-manager-webhook-porkbun"
         - name: image.tag
-          value: "1.0.0"
+          value: "1.1.0"
         - name: image.pullPolicy
           value: "Always"
   destination:
