@@ -3,8 +3,6 @@ crds:
 maxConcurrentChallenges: 1
 extraArgs:
   - --feature-gates=ExperimentalGatewayAPISupport=true
-  - --dns01-recursive-nameservers=192.168.11.1:53
-  - --dns01-recursive-nameservers-only
 resources:
   requests:
     cpu: 50m
