@@ -1,5 +1,6 @@
 crds:
   enabled: true
+maxConcurrentChallenges: 1
 extraArgs:
   - --feature-gates=ExperimentalGatewayAPISupport=true
 resources:
