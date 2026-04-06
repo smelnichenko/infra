@@ -20,12 +20,11 @@ spec:
     - group: argoproj.io
       kind: Application
       jqPathExpressions:
-        - .spec
-        - .metadata
+        - .status
+        - .operation
   syncPolicy:
     automated:
       selfHeal: true
       prune: true
     syncOptions:
-      - RespectIgnoreDifferences=true
       - ServerSideApply=true
