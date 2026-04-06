@@ -2,7 +2,7 @@ cni:
   enabled: true
 
 meshConfig:
-  accessLogFile: ""
+  accessLogFile: /dev/stdout
   enableTracing: true
   defaultConfig:
     holdApplicationUntilProxyStarts: true

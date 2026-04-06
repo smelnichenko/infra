@@ -11,7 +11,7 @@ app:
   ingress:
     enabled: false
   hikari:
-    maximumPoolSize: 40
+    maximumPoolSize: 50
     minimumIdle: 5
     connectionTimeout: 20000
     idleTimeout: 300000
