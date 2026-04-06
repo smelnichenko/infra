@@ -121,7 +121,7 @@ chessService:
   image:
     repository: git.pmon.dev/schnappy/chess
     pullPolicy: IfNotPresent
-    tag: "68497ed"  # chess-service
+    tag: "a60c4de"  # chess-service
   replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
