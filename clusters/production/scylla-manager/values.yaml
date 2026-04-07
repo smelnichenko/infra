@@ -1,0 +1,25 @@
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+scylla:
+  developerMode: true
+  datacenter: manager-dc
+  racks:
+    - name: manager-rack
+      members: 1
+      storage:
+        capacity: 5Gi
+        storageClassName: local-path
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+      placement: {}

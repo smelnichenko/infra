@@ -1,0 +1,19 @@
+replicas: 1
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+webhookServerReplicas: 1
+
+webhookServerResources:
+  requests:
+    cpu: 10m
+    memory: 20Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
