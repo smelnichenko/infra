@@ -85,7 +85,7 @@ scylla:
 
 scyllaOperator:
   enabled: true
-  version: "6.2"
+  version: "6.2.3"
   agentVersion: "3.9.0"
   developerMode: true
   backups:
