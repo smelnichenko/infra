@@ -38,7 +38,7 @@ redis:
     limits: { cpu: 1000m, memory: 512Mi, ephemeral-storage: 256Mi }
 
 kafka:
-  enabled: true
+  enabled: false
   existingSecret: schnappy-kafka
   image: apache/kafka:4.2.0
   javaOpts: -Xmx1g -Xms1g
@@ -98,6 +98,9 @@ minio:
   resources:
     requests: { cpu: 100m, memory: 256Mi, ephemeral-storage: 128Mi }
     limits: { cpu: 1000m, memory: 1Gi, ephemeral-storage: 512Mi }
+
+strimzi:
+  enabled: true
 
 aptCache:
   enabled: true

@@ -71,6 +71,9 @@ monitor:
 networkPolicies:
   enabled: true
 
+strimzi:
+  enabled: true
+
 ai:
   enabled: true
   existingSecret: schnappy-ai
