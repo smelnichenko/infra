@@ -27,7 +27,7 @@ spec:
     - group: postgresql.cnpg.io
       kind: Cluster
       managedFieldsManagers:
-        - cnpg-manager
+        - manager
     - group: kafka.strimzi.io
       kind: Kafka
       managedFieldsManagers:
