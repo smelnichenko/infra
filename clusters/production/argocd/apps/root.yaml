@@ -19,6 +19,9 @@ spec:
   ignoreDifferences:
     - group: argoproj.io
       kind: Application
+      jqPathExpressions:
+        - .status
+        - .operation
       managedFieldsManagers:
         - argocd-controller
         - before-first-apply
