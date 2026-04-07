@@ -106,6 +106,8 @@ cnpg:
   enabled: true
   import: false
   backup: true
+  backupEndpoint: http://192.168.11.5:9000
+  backupSecret: schnappy-minio-backup
 
 aptCache:
   enabled: true
