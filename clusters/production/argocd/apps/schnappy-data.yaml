@@ -27,6 +27,7 @@ spec:
     - group: postgresql.cnpg.io
       kind: Cluster
       jsonPointers:
+        - /spec/bootstrap
         - /spec/inheritedMetadata
     - group: kafka.strimzi.io
       kind: Kafka
