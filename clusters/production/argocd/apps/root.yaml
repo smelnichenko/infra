@@ -19,12 +19,13 @@ spec:
   ignoreDifferences:
     - group: argoproj.io
       kind: Application
-      jqPathExpressions:
-        - .status
-        - .operation
+      managedFieldsManagers:
+        - argocd-controller
+        - before-first-apply
   syncPolicy:
     automated:
       selfHeal: true
       prune: true
     syncOptions:
-      - ServerSideApply=true
+      - ServerSideApply=false
+      - RespectIgnoreDifferences=true
