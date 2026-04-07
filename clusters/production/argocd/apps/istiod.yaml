@@ -28,13 +28,4 @@ spec:
       selfHeal: true
       prune: true
     syncOptions:
-      - RespectIgnoreDifferences=true
-  ignoreDifferences:
-    - group: apps
-      kind: Deployment
-      jsonPointers:
-        - /spec/template/metadata/annotations
-    - group: admissionregistration.k8s.io
-      kind: ValidatingWebhookConfiguration
-      jsonPointers:
-        - /webhooks
+      - ServerSideApply=true

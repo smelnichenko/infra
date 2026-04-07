@@ -28,9 +28,4 @@ spec:
       selfHeal: true
       prune: true
     syncOptions:
-      - RespectIgnoreDifferences=true
-  ignoreDifferences:
-    - group: apps
-      kind: DaemonSet
-      jsonPointers:
-        - /spec/template/metadata/annotations
+      - ServerSideApply=true
