@@ -24,6 +24,10 @@ spec:
     server: https://kubernetes.default.svc
     namespace: schnappy
   ignoreDifferences:
+    - group: scylla.scylladb.com
+      kind: ScyllaCluster
+      jqPathExpressions:
+        - .spec.agentRepository
     - group: postgresql.cnpg.io
       kind: Cluster
       jqPathExpressions:
