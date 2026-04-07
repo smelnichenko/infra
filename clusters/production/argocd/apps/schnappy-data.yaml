@@ -26,9 +26,8 @@ spec:
   ignoreDifferences:
     - group: postgresql.cnpg.io
       kind: Cluster
-      jsonPointers:
-        - /spec/bootstrap
-        - /spec/inheritedMetadata
+      managedFieldsManagers:
+        - cnpg-manager
     - group: kafka.strimzi.io
       kind: Kafka
       managedFieldsManagers:
