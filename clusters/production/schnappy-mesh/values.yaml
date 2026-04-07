@@ -1,3 +1,6 @@
+scyllaOperator:
+  enabled: true
+
 peerAuthentication:
   enabled: true
   mode: STRICT
