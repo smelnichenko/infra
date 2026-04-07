@@ -5,7 +5,7 @@ networkPolicies:
   enabled: true
 
 postgres:
-  enabled: true
+  enabled: false
   existingSecret: schnappy-postgres
   image: postgres:17-alpine
   extraDatabases:

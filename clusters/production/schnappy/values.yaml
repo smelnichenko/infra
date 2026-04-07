@@ -74,6 +74,9 @@ networkPolicies:
 strimzi:
   enabled: true
 
+cnpg:
+  enabled: true
+
 ai:
   enabled: true
   existingSecret: schnappy-ai
