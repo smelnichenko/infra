@@ -131,7 +131,7 @@ chessService:
 tracing:
   enabled: true
   tempoEndpoint: "http://schnappy-tempo.schnappy.svc:4318/v1/traces"
-  samplingProbability: "0.1"
+  samplingProbability: "0.01"
 
 smokeTest:
   enabled: true

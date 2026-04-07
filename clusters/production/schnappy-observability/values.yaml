@@ -18,7 +18,7 @@ elk:
       storageClass: local-path
     resources:
       requests: { cpu: 250m, memory: 2Gi }
-      limits: { cpu: 4000m, memory: 6Gi }
+      limits: { cpu: 2000m, memory: 6Gi }
   kibana:
     image: docker.elastic.co/kibana/kibana:8.19.13
     replicas: 1
