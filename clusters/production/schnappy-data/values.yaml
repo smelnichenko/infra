@@ -104,7 +104,7 @@ strimzi:
 
 cnpg:
   enabled: true
-  import: true
+  import: false
   backup: false
 
 aptCache:
