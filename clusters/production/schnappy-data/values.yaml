@@ -90,6 +90,7 @@ minio:
     - mimir-blocks
     - tempo-traces
     - hyperfoil-reports
+    - postgres-backups
   image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
   storage:
     size: 20Gi
@@ -104,7 +105,7 @@ strimzi:
 cnpg:
   enabled: true
   import: false
-  backup: false
+  backup: true
 
 aptCache:
   enabled: true
