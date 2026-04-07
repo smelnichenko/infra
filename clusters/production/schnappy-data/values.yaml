@@ -102,6 +102,11 @@ minio:
 strimzi:
   enabled: true
 
+cnpg:
+  enabled: true
+  import: true
+  backup: false
+
 aptCache:
   enabled: true
   resources:
