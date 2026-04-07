@@ -70,6 +70,8 @@ kafka:
 scylla:
   enabled: true
   image: scylladb/scylla:6.2
+  replicas: 1
+  datacenter: datacenter1
   args:
     - --smp=2
     - --memory=2G
@@ -80,6 +82,18 @@ scylla:
   resources:
     requests: { cpu: 200m, memory: 2Gi, ephemeral-storage: 256Mi }
     limits: { cpu: 4000m, memory: 4Gi, ephemeral-storage: 1Gi }
+
+scyllaOperator:
+  enabled: true
+  version: "6.2"
+  agentVersion: "3.9.0"
+  developerMode: true
+  backups:
+    - name: daily
+      cron: "0 2 * * *"
+      keyspace: ["chat"]
+      location: ["s3:scylla-backups"]
+      retention: 7
 
 minio:
   enabled: true
