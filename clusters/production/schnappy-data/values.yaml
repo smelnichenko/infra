@@ -68,7 +68,7 @@ kafka:
       replicationFactor: 1
 
 scylla:
-  enabled: true
+  enabled: false
   image: scylladb/scylla:6.2
   replicas: 1
   datacenter: datacenter1
