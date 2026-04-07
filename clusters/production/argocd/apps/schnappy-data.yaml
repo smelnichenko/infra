@@ -26,8 +26,8 @@ spec:
   ignoreDifferences:
     - group: postgresql.cnpg.io
       kind: Cluster
-      managedFieldsManagers:
-        - manager
+      jqPathExpressions:
+        - .spec
     - group: kafka.strimzi.io
       kind: Kafka
       managedFieldsManagers:
