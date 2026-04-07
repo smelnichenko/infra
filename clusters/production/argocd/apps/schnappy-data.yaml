@@ -24,25 +24,30 @@ spec:
     server: https://kubernetes.default.svc
     namespace: schnappy
   ignoreDifferences:
-    - group: external-secrets.io
-      kind: ExternalSecret
+    - group: postgresql.cnpg.io
+      kind: Cluster
       jqPathExpressions:
-        - .spec.data[]?.remoteRef.conversionStrategy
-        - .spec.data[]?.remoteRef.decodingStrategy
-        - .spec.data[]?.remoteRef.metadataPolicy
-        - .spec.target.creationPolicy
-        - .spec.target.deletionPolicy
-    - group: apps
-      kind: StatefulSet
-      jqPathExpressions:
-        - .spec.persistentVolumeClaimRetentionPolicy
-        - .spec.template.spec.containers[]?.terminationMessagePath
-        - .spec.template.spec.containers[]?.terminationMessagePolicy
+        - .spec.affinity
+        - .spec.enablePDB
+        - .spec.failoverDelay
+        - .spec.logLevel
+        - .spec.maxSyncReplicas
+        - .spec.minSyncReplicas
+        - .spec.monitoring
+        - .spec.postgresGID
+        - .spec.postgresUID
+        - .spec.primaryUpdateMethod
+        - .spec.primaryUpdateStrategy
+        - .spec.probes
+        - .spec.replicationSlots
+        - .spec.smartShutdownTimeout
+        - .spec.startDelay
+        - .spec.stopDelay
+        - .spec.switchoverDelay
   syncPolicy:
     automated:
       selfHeal: true
       prune: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
       - RespectIgnoreDifferences=true
