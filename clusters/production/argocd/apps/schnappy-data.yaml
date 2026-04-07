@@ -23,9 +23,23 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: schnappy
+  ignoreDifferences:
+    - group: postgresql.cnpg.io
+      kind: Cluster
+      jsonPointers:
+        - /spec/inheritedMetadata
+    - group: kafka.strimzi.io
+      kind: Kafka
+      managedFieldsManagers:
+        - strimzi-cluster-operator
+    - group: kafka.strimzi.io
+      kind: KafkaNodePool
+      managedFieldsManagers:
+        - strimzi-cluster-operator
   syncPolicy:
     automated:
       selfHeal: true
       prune: true
     syncOptions:
       - CreateNamespace=true
+      - RespectIgnoreDifferences=true
