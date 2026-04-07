@@ -28,6 +28,8 @@ spec:
       kind: ScyllaCluster
       jqPathExpressions:
         - .spec.agentRepository
+      managedFieldsManagers:
+        - manager
     - group: postgresql.cnpg.io
       kind: Cluster
       jqPathExpressions:
