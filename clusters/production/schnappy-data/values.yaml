@@ -88,6 +88,7 @@ scyllaOperator:
   version: "6.2.3"
   agentVersion: "3.9.0"
   developerMode: true
+  backupEndpoint: http://192.168.11.5:9000
   backups:
     - name: daily
       cron: "0 2 * * *"
