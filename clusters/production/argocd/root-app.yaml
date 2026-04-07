@@ -22,4 +22,3 @@ spec:
       prune: true
     syncOptions:
       - ServerSideApply=false
-      - Replace=true
