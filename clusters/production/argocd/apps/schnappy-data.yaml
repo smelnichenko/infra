@@ -24,14 +24,6 @@ spec:
     server: https://kubernetes.default.svc
     namespace: schnappy
   ignoreDifferences:
-    - group: apps
-      kind: StatefulSet
-      jqPathExpressions:
-        - .spec.persistentVolumeClaimRetentionPolicy
-        - .spec.volumeClaimTemplates[]?.apiVersion
-        - .spec.volumeClaimTemplates[]?.kind
-        - .spec.volumeClaimTemplates[]?.spec.volumeMode
-        - .spec.volumeClaimTemplates[]?.status
     - group: postgresql.cnpg.io
       kind: Cluster
       jqPathExpressions:
