@@ -12,9 +12,12 @@ spec:
     chart: cert-manager-webhook-porkbun
     targetRevision: "*"
     helm:
+      releaseName: porkbun
       parameters:
         - name: image.tag
           value: "1.0.0"
+        - name: fullnameOverride
+          value: porkbun-webhook
   destination:
     server: https://kubernetes.default.svc
     namespace: cert-manager
