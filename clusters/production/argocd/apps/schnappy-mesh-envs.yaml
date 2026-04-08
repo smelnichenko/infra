@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: schnappy-mesh-envs
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - env: production
+            namespace: schnappy
+            releaseName: schnappy
+            valuesPath: clusters/production/schnappy-mesh/values.yaml
+          - env: test
+            namespace: schnappy-test
+            releaseName: schnappy-test
+            valuesPath: clusters/production/schnappy-test-mesh/values.yaml
+  template:
+    metadata:
+      name: "schnappy-{{env}}-mesh"
+      namespace: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      sources:
+        - repoURL: http://192.168.11.5:3000/schnappy/platform.git
+          targetRevision: main
+          path: helm/schnappy-mesh
+          helm:
+            releaseName: "{{releaseName}}"
+            valueFiles:
+              - "$values/{{valuesPath}}"
+        - repoURL: http://192.168.11.5:3000/schnappy/infra.git
+          targetRevision: main
+          ref: values
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{namespace}}"
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: true
+        syncOptions:
+          - RespectIgnoreDifferences=true
+      ignoreDifferences:
+        - group: gateway.networking.k8s.io
+          kind: HTTPRoute
+          jsonPointers:
+            - /metadata/annotations
+            - /metadata/resourceVersion
+        - group: gateway.networking.k8s.io
+          kind: Gateway
+          jsonPointers:
+            - /metadata/annotations
+            - /metadata/resourceVersion

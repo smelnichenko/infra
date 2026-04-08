@@ -1,0 +1,77 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: schnappy-data-envs
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - env: production
+            namespace: schnappy
+            releaseName: schnappy
+            valuesPath: clusters/production/schnappy-data/values.yaml
+            syncWave: "0"
+          - env: test
+            namespace: schnappy-test
+            releaseName: schnappy-test
+            valuesPath: clusters/production/schnappy-test-data/values.yaml
+            syncWave: "0"
+  template:
+    metadata:
+      name: "schnappy-{{env}}-data"
+      annotations:
+        argocd.argoproj.io/sync-wave: "{{syncWave}}"
+      namespace: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      sources:
+        - repoURL: http://192.168.11.5:3000/schnappy/platform.git
+          targetRevision: main
+          path: helm/schnappy-data
+          helm:
+            releaseName: "{{releaseName}}"
+            valueFiles:
+              - "$values/{{valuesPath}}"
+        - repoURL: http://192.168.11.5:3000/schnappy/infra.git
+          targetRevision: main
+          ref: values
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{namespace}}"
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: false
+        syncOptions:
+          - CreateNamespace=true
+          - RespectIgnoreDifferences=true
+      ignoreDifferences:
+        - group: scylla.scylladb.com
+          kind: ScyllaCluster
+          jqPathExpressions:
+            - .spec.agentRepository
+          managedFieldsManagers:
+            - manager
+        - group: postgresql.cnpg.io
+          kind: Cluster
+          jqPathExpressions:
+            - .spec.affinity
+            - .spec.enablePDB
+            - .spec.failoverDelay
+            - .spec.logLevel
+            - .spec.maxSyncReplicas
+            - .spec.minSyncReplicas
+            - .spec.monitoring
+            - .spec.postgresGID
+            - .spec.postgresUID
+            - .spec.primaryUpdateMethod
+            - .spec.primaryUpdateStrategy
+            - .spec.probes
+            - .spec.replicationSlots
+            - .spec.smartShutdownTimeout
+            - .spec.startDelay
+            - .spec.stopDelay
+            - .spec.switchoverDelay
