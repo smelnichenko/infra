@@ -1,0 +1,15 @@
+scyllaOperator:
+  enabled: true
+
+peerAuthentication:
+  enabled: true
+  mode: STRICT
+
+authorizationPolicies:
+  enabled: true
+
+gateway:
+  enabled: false
+
+jwt:
+  enabled: false
