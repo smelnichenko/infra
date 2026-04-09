@@ -37,9 +37,6 @@ scylla:
   resources:
     requests: { cpu: 50m, memory: 256Mi }
     limits: { cpu: 1000m, memory: 512Mi }
-  storage:
-    size: 5Gi
-    storageClass: local-path
 
 scyllaOperator:
   enabled: true
