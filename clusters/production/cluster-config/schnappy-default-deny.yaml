@@ -76,6 +76,12 @@ spec:
           port: 8080
         - protocol: TCP
           port: 8200
+    # Gateway egress to test/ephemeral environments
+    - to:
+        - namespaceSelector:
+            matchExpressions:
+              - key: environment
+                operator: Exists
     # Cross-namespace egress (ArgoCD, Woodpecker)
     - to:
         - namespaceSelector:
