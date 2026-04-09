@@ -82,6 +82,11 @@ spec:
             matchExpressions:
               - key: environment
                 operator: Exists
+    # Gateway egress to kube-system (Hubble UI)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
     # Cross-namespace egress (ArgoCD, Woodpecker)
     - to:
         - namespaceSelector:
