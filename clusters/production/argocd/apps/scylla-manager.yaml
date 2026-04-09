@@ -29,3 +29,9 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+  ignoreDifferences:
+    - group: scylla.scylladb.com
+      kind: ScyllaCluster
+      jqPathExpressions:
+        - .spec

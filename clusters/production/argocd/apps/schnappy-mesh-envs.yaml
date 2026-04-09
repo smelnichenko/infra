@@ -54,3 +54,11 @@ spec:
           jsonPointers:
             - /metadata/annotations
             - /metadata/resourceVersion
+        - kind: Service
+          name: schnappy-gateway-istio
+          jqPathExpressions:
+            - .spec
+            - .metadata.labels
+        - kind: ServiceAccount
+          jqPathExpressions:
+            - .metadata.labels
