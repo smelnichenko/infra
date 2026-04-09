@@ -32,10 +32,3 @@ hubble:
 
 socketLB:
   enabled: false
-
-# L2 LoadBalancer IP announcement (replaces MetalLB)
-l2announcements:
-  enabled: true
-
-externalIPs:
-  enabled: true
