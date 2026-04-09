@@ -43,7 +43,6 @@ spec:
           prune: true
         syncOptions:
           - RespectIgnoreDifferences=true
-          - ServerSideApply=true
       ignoreDifferences:
         - kind: Service
           name: schnappy-gateway-istio
