@@ -24,6 +24,7 @@ gateway:
     argocd: cd.pmon.dev
     forgejo: git.pmon.dev
     ci: ci.pmon.dev
+    hubble: hubble.pmon.dev
 
 jwt:
   enabled: true
@@ -38,3 +39,4 @@ jwt:
     - grafana.pmon.dev
     - logs.pmon.dev
     - reports.pmon.dev
+    - hubble.pmon.dev

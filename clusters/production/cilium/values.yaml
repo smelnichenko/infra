@@ -28,7 +28,7 @@ hubble:
   relay:
     enabled: true
   ui:
-    enabled: false
+    enabled: true
 
 socketLB:
   enabled: false
