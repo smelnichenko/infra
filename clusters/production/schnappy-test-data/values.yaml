@@ -23,6 +23,15 @@ kafka:
 scylla:
   enabled: false
 
+scylla:
+  enabled: false
+  resources:
+    requests: { cpu: 50m, memory: 256Mi }
+    limits: { cpu: 1000m, memory: 512Mi }
+  storage:
+    size: 5Gi
+    storageClass: local-path
+
 scyllaOperator:
   enabled: true
   version: "6.2.3"
