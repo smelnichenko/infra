@@ -53,6 +53,7 @@ spec:
           kind: ScyllaCluster
           jqPathExpressions:
             - .spec.agentRepository
+            - .spec.datacenter.racks[].storage
           managedFieldsManagers:
             - manager
         - group: postgresql.cnpg.io
