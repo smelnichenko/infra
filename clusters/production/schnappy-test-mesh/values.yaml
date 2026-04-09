@@ -10,6 +10,11 @@ authorizationPolicies:
 
 gateway:
   enabled: false
+  external:
+    enabled: true
+    gatewayName: schnappy-gateway
+    gatewayNamespace: schnappy
+    hostname: test.pmon.dev
 
 jwt:
   enabled: false
