@@ -2,7 +2,7 @@ watchAnyNamespace: true
 resources:
   requests:
     cpu: 100m
-    memory: 256Mi
-  limits:
-    cpu: 500m
     memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
