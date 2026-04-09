@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: schnappy-ephemeral
-  labels:
-    istio.io/rev: default
-    environment: ephemeral
