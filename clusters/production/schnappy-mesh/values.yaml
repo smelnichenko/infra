@@ -13,6 +13,7 @@ gateway:
   replicas: 2
   loadBalancerIP: "192.168.11.2"
   allowedNamespaces:
+    - schnappy-ephemeral
     - schnappy-test
   tls:
     clusterIssuer: letsencrypt-prod

@@ -1,0 +1,70 @@
+vault:
+  secretsEnabled: true
+  secretPathPrefix: "secret/data/schnappy-ephemeral"
+
+networkPolicies:
+  enabled: true
+
+postgres:
+  enabled: false
+
+redis:
+  enabled: true
+  existingSecret: schnappy-ephemeral-redis
+  image: redis:7-alpine
+  resources:
+    requests: { cpu: 10m, memory: 32Mi }
+    limits: { cpu: 100m, memory: 128Mi }
+
+kafka:
+  enabled: false
+  existingSecret: schnappy-ephemeral-kafka
+  resources:
+    requests: { cpu: 50m, memory: 512Mi }
+    limits: { cpu: 1000m, memory: 1536Mi }
+  retention:
+    hours: 24
+    bytes: "2147483648"
+  storage:
+    size: 2Gi
+    storageClass: local-path
+
+scylla:
+  enabled: false
+
+scylla:
+  enabled: false
+  resources:
+    requests: { cpu: 50m, memory: 256Mi }
+    limits: { cpu: 1000m, memory: 512Mi }
+
+scyllaOperator:
+  enabled: true
+  version: "6.2.3"
+  agentVersion: "3.9.0"
+  developerMode: true
+
+minio:
+  enabled: true
+  existingSecret: schnappy-ephemeral-minio
+  bucket: email-attachments
+  buckets:
+    - email-attachments
+  image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
+  storage:
+    size: 5Gi
+    storageClass: local-path
+  resources:
+    requests: { cpu: 25m, memory: 128Mi }
+    limits: { cpu: 500m, memory: 512Mi }
+
+strimzi:
+  enabled: true
+
+cnpg:
+  enabled: true
+  import: false
+  backup: false
+
+aptCache:
+  enabled: false

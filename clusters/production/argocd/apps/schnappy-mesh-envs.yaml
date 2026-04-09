@@ -5,50 +5,55 @@ metadata:
   namespace: argocd
 spec:
   generators:
-    - list:
-        elements:
-          - env: production
-            namespace: schnappy
-            releaseName: schnappy
-            valuesPath: clusters/production/schnappy-mesh/values.yaml
-          - env: test
-            namespace: schnappy-test
-            releaseName: schnappy-test
-            valuesPath: clusters/production/schnappy-test-mesh/values.yaml
+  - list:
+      elements:
+      - env: production
+        namespace: schnappy
+        releaseName: schnappy
+        valuesPath: clusters/production/schnappy-mesh/values.yaml
+      - env: test
+        namespace: schnappy-test
+        releaseName: schnappy-test
+        valuesPath: clusters/production/schnappy-test-mesh/values.yaml
+      - env: ephemeral
+        namespace: schnappy-ephemeral
+        releaseName: schnappy-ephemeral
+        valuesPath: clusters/production/schnappy-ephemeral-mesh/values.yaml
+        syncWave: '0'
   template:
     metadata:
-      name: "schnappy-{{env}}-mesh"
+      name: schnappy-{{env}}-mesh
       namespace: argocd
       finalizers:
-        - resources-finalizer.argocd.argoproj.io
+      - resources-finalizer.argocd.argoproj.io
     spec:
       project: default
       sources:
-        - repoURL: http://192.168.11.5:3000/schnappy/platform.git
-          targetRevision: main
-          path: helm/schnappy-mesh
-          helm:
-            releaseName: "{{releaseName}}"
-            valueFiles:
-              - "$values/{{valuesPath}}"
-        - repoURL: http://192.168.11.5:3000/schnappy/infra.git
-          targetRevision: main
-          ref: values
+      - repoURL: http://192.168.11.5:3000/schnappy/platform.git
+        targetRevision: main
+        path: helm/schnappy-mesh
+        helm:
+          releaseName: '{{releaseName}}'
+          valueFiles:
+          - $values/{{valuesPath}}
+      - repoURL: http://192.168.11.5:3000/schnappy/infra.git
+        targetRevision: main
+        ref: values
       destination:
         server: https://kubernetes.default.svc
-        namespace: "{{namespace}}"
+        namespace: '{{namespace}}'
       syncPolicy:
         automated:
           selfHeal: true
           prune: true
         syncOptions:
-          - RespectIgnoreDifferences=true
+        - RespectIgnoreDifferences=true
       ignoreDifferences:
-        - kind: Service
-          name: schnappy-gateway-istio
-          jqPathExpressions:
-            - .spec
-            - .metadata.labels
-        - kind: ServiceAccount
-          jqPathExpressions:
-            - .metadata.labels
+      - kind: Service
+        name: schnappy-gateway-istio
+        jqPathExpressions:
+        - .spec
+        - .metadata.labels
+      - kind: ServiceAccount
+        jqPathExpressions:
+        - .metadata.labels

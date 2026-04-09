@@ -1,0 +1,145 @@
+vault:
+  secretsEnabled: true
+  secretPathPrefix: "secret/data/schnappy-ephemeral"
+
+app:
+  replicas: 1
+  javaOpts: -Xmx1g -XX:+UseZGC
+  image:
+    pullPolicy: IfNotPresent
+    repository: git.pmon.dev/schnappy/monitor
+    tag: "138eefe"  # schnappy-monitor
+  ingress:
+    enabled: false
+  resources:
+    requests: { cpu: 50m, memory: 512Mi }
+    limits: { cpu: 2000m, memory: 2Gi }
+
+site:
+  enabled: true
+  replicas: 1
+  dnsResolver: "10.43.0.10"
+  image:
+    pullPolicy: IfNotPresent
+    repository: git.pmon.dev/schnappy/site
+    tag: "ad14723"  # site
+  resources:
+    requests: { cpu: 10m, memory: 32Mi }
+    limits: { cpu: 500m, memory: 128Mi }
+
+games:
+  - name: game-scp
+    path: game
+    image:
+      repository: git.pmon.dev/schnappy/game-scp
+      tag: "62b6b55"  # game-scp
+    resources:
+      requests: { cpu: 10m, memory: 32Mi }
+      limits: { cpu: 100m, memory: 128Mi }
+
+auth:
+  existingSecret: schnappy-ephemeral-auth
+  registrationEnabled: true
+  secureCookies: true
+  tokenExpiration: 1h
+  registrationApproval:
+    mode: ai
+    defaultGroup: Users
+
+captcha:
+  enabled: false
+
+chess:
+  enabled: true
+
+chat:
+  e2eEnabled: false
+
+monitor:
+  enabled: true
+  http:
+    connectTimeout: 10s
+    readTimeout: 30s
+    userAgent: MonitorBot/1.0
+
+networkPolicies:
+  enabled: true
+
+strimzi:
+  enabled: true
+
+cnpg:
+  enabled: true
+
+scyllaOperator:
+  enabled: true
+
+ai:
+  enabled: true
+  existingSecret: schnappy-ephemeral-ai
+  model: claude-haiku-4-5-20251001
+
+mail:
+  enabled: false
+
+webhook:
+  enabled: false
+
+admin:
+  enabled: true
+  image:
+    repository: git.pmon.dev/schnappy/admin
+    pullPolicy: IfNotPresent
+    tag: "2b912e4"  # admin-service
+  replicas: 1
+  javaOpts: -Xmx512m -XX:+UseZGC
+  resources:
+    requests: { cpu: 50m, memory: 256Mi }
+    limits: { cpu: 1000m, memory: 1Gi }
+
+chatService:
+  enabled: true
+  image:
+    repository: git.pmon.dev/schnappy/chat
+    pullPolicy: IfNotPresent
+    tag: "f35d730"  # chat-service
+  replicas: 1
+  javaOpts: -Xmx512m -XX:+UseZGC
+  resources:
+    requests: { cpu: 50m, memory: 256Mi }
+    limits: { cpu: 1000m, memory: 1Gi }
+
+chessService:
+  enabled: true
+  image:
+    repository: git.pmon.dev/schnappy/chess
+    pullPolicy: IfNotPresent
+    tag: "a60c4de"  # chess-service
+  replicas: 1
+  javaOpts: -Xmx512m -XX:+UseZGC
+  resources:
+    requests: { cpu: 50m, memory: 256Mi }
+    limits: { cpu: 1000m, memory: 1Gi }
+
+tracing:
+  enabled: true
+  tempoEndpoint: "http://schnappy-tempo.schnappy.svc:4318/v1/traces"
+  samplingProbability: "1.0"
+
+smokeTest:
+  enabled: false
+
+hyperfoil:
+  enabled: false
+
+postgres:
+  database: monitor
+  existingSecret: schnappy-ephemeral-postgres
+redis:
+  existingSecret: schnappy-ephemeral-redis
+minio:
+  existingSecret: schnappy-ephemeral-minio
+alertmanager:
+  enabled: false
+keycloak:
+  enabled: false

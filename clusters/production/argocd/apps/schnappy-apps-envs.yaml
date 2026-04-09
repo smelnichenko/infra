@@ -5,45 +5,50 @@ metadata:
   namespace: argocd
 spec:
   generators:
-    - list:
-        elements:
-          - env: production
-            namespace: schnappy
-            releaseName: schnappy
-            valuesPath: clusters/production/schnappy/values.yaml
-            syncWave: "2"
-          - env: test
-            namespace: schnappy-test
-            releaseName: schnappy-test
-            valuesPath: clusters/production/schnappy-test-apps/values.yaml
-            syncWave: "2"
+  - list:
+      elements:
+      - env: production
+        namespace: schnappy
+        releaseName: schnappy
+        valuesPath: clusters/production/schnappy/values.yaml
+        syncWave: '2'
+      - env: test
+        namespace: schnappy-test
+        releaseName: schnappy-test
+        valuesPath: clusters/production/schnappy-test-apps/values.yaml
+        syncWave: '2'
+      - env: ephemeral
+        namespace: schnappy-ephemeral
+        releaseName: schnappy-ephemeral
+        valuesPath: clusters/production/schnappy-ephemeral-apps/values.yaml
+        syncWave: '0'
   template:
     metadata:
-      name: "schnappy-{{env}}-apps"
+      name: schnappy-{{env}}-apps
       annotations:
-        argocd.argoproj.io/sync-wave: "{{syncWave}}"
+        argocd.argoproj.io/sync-wave: '{{syncWave}}'
       namespace: argocd
       finalizers:
-        - resources-finalizer.argocd.argoproj.io
+      - resources-finalizer.argocd.argoproj.io
     spec:
       project: default
       sources:
-        - repoURL: http://192.168.11.5:3000/schnappy/platform.git
-          targetRevision: main
-          path: helm/schnappy
-          helm:
-            releaseName: "{{releaseName}}"
-            valueFiles:
-              - "$values/{{valuesPath}}"
-        - repoURL: http://192.168.11.5:3000/schnappy/infra.git
-          targetRevision: main
-          ref: values
+      - repoURL: http://192.168.11.5:3000/schnappy/platform.git
+        targetRevision: main
+        path: helm/schnappy
+        helm:
+          releaseName: '{{releaseName}}'
+          valueFiles:
+          - $values/{{valuesPath}}
+      - repoURL: http://192.168.11.5:3000/schnappy/infra.git
+        targetRevision: main
+        ref: values
       destination:
         server: https://kubernetes.default.svc
-        namespace: "{{namespace}}"
+        namespace: '{{namespace}}'
       syncPolicy:
         automated:
           selfHeal: true
           prune: true
         syncOptions:
-          - CreateNamespace=true
+        - CreateNamespace=true

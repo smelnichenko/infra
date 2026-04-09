@@ -1,0 +1,20 @@
+scyllaOperator:
+  enabled: true
+
+peerAuthentication:
+  enabled: true
+  mode: STRICT
+
+authorizationPolicies:
+  enabled: true
+
+gateway:
+  enabled: false
+  external:
+    enabled: true
+    gatewayName: schnappy-gateway
+    gatewayNamespace: schnappy
+    hostname: ephemeral.pmon.dev
+
+jwt:
+  enabled: false
