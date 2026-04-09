@@ -19,6 +19,15 @@ redis:
 kafka:
   enabled: false
   existingSecret: schnappy-test-kafka
+  resources:
+    requests: { cpu: 50m, memory: 512Mi }
+    limits: { cpu: 1000m, memory: 1536Mi }
+  retention:
+    hours: 24
+    bytes: "2147483648"
+  storage:
+    size: 2Gi
+    storageClass: local-path
 
 scylla:
   enabled: false
