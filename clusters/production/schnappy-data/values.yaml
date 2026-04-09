@@ -39,6 +39,7 @@ redis:
 kafka:
   enabled: false
   existingSecret: schnappy-kafka
+  clusterId: ""
   image: apache/kafka:4.2.0
   javaOpts: -Xmx1g -Xms1g
   retention:

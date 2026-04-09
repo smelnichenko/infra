@@ -18,6 +18,7 @@ redis:
 
 kafka:
   enabled: false
+  existingSecret: schnappy-test-kafka
 
 scylla:
   enabled: false
