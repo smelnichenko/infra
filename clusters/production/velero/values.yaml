@@ -15,7 +15,7 @@ configuration:
       config:
         region: us-east-1
         s3ForcePathStyle: "true"
-        s3Url: http://minio-backup.velero.svc:9000
+        s3Url: http://192.168.11.5:9000
   volumeSnapshotLocation: []
   defaultVolumesToFsBackup: true
   features: ""
