@@ -51,7 +51,18 @@ spec:
         - protocol: TCP
           port: 9000
   egress:
-    # To Pi Forgejo via VIP (webhooks, API)
+    # To Istio gateway (git.pmon.dev, auth.pmon.dev via wildcard DNS)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: schnappy
+          podSelector:
+            matchLabels:
+              gateway.networking.k8s.io/gateway-name: schnappy-gateway
+      ports:
+        - protocol: TCP
+          port: 443
+    # To Pi Forgejo via VIP (webhooks, API — direct)
     - to:
         - ipBlock:
             cidr: 192.168.11.5/32
