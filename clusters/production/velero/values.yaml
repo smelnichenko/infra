@@ -29,7 +29,7 @@ schedules:
     template:
       ttl: 168h
       includedNamespaces:
-        - schnappy
+        - schnappy-production
       defaultVolumesToFsBackup: true
   full-weekly:
     disabled: false

@@ -6,7 +6,7 @@ networkPolicies:
 
 postgres:
   enabled: false
-  existingSecret: schnappy-postgres
+  existingSecret: schnappy-production-postgres
   image: postgres:17-alpine
   extraDatabases:
     - monitor_admin
@@ -30,7 +30,7 @@ postgres:
 
 redis:
   enabled: true
-  existingSecret: schnappy-redis
+  existingSecret: schnappy-production-redis
   image: redis:7-alpine
   resources:
     requests: { cpu: 100m, memory: 64Mi, ephemeral-storage: 64Mi }
@@ -38,7 +38,7 @@ redis:
 
 kafka:
   enabled: false
-  existingSecret: schnappy-kafka
+  existingSecret: schnappy-production-kafka
   clusterId: ""
   image: apache/kafka:4.2.0
   javaOpts: -Xmx1g -Xms1g
@@ -99,12 +99,10 @@ scyllaOperator:
 
 minio:
   enabled: true
-  existingSecret: schnappy-minio
+  existingSecret: schnappy-production-minio
   bucket: email-attachments
   buckets:
     - email-attachments
-    - mimir-blocks
-    - tempo-traces
     - hyperfoil-reports
     - postgres-backups
   image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
@@ -122,9 +120,10 @@ cnpg:
   enabled: true
   import: false
   recovery: true
+  recoveryServerName: schnappy-postgres
   backup: true
   backupEndpoint: http://192.168.11.5:9000
-  backupSecret: schnappy-minio-backup
+  backupSecret: schnappy-production-minio-backup
 
 aptCache:
   enabled: true

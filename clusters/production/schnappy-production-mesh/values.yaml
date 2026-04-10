@@ -14,7 +14,7 @@ gateway:
     enabled: true
     gatewayName: schnappy-infra-gateway
     gatewayNamespace: schnappy-infra
-    hostname: test.pmon.dev
+    hostname: pmon.dev
 
 jwt:
   enabled: false

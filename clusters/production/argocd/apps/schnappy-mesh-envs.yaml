@@ -4,20 +4,17 @@ metadata:
   name: schnappy-mesh-envs
   namespace: argocd
 spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
   generators:
-    - list:
-        elements:
-          - env: production
-            namespace: schnappy
-            releaseName: schnappy
-            valuesPath: clusters/production/schnappy-mesh/values.yaml
-          - env: test
-            namespace: schnappy-test
-            releaseName: schnappy-test
-            valuesPath: clusters/production/schnappy-test-mesh/values.yaml
+    - git:
+        repoURL: http://192.168.11.5:3000/schnappy/infra.git
+        revision: main
+        directories:
+          - path: "clusters/production/schnappy-*-mesh"
   template:
     metadata:
-      name: "schnappy-{{env}}-mesh"
+      name: '{{ .path.basenameNormalized }}'
       namespace: argocd
       finalizers:
         - resources-finalizer.argocd.argoproj.io
@@ -28,15 +25,15 @@ spec:
           targetRevision: main
           path: helm/schnappy-mesh
           helm:
-            releaseName: "{{releaseName}}"
+            releaseName: '{{ index .path.segments 2 | trimSuffix "-mesh" }}'
             valueFiles:
-              - "$values/{{valuesPath}}"
+              - "$values/{{ .path }}/values.yaml"
         - repoURL: http://192.168.11.5:3000/schnappy/infra.git
           targetRevision: main
           ref: values
       destination:
         server: https://kubernetes.default.svc
-        namespace: "{{namespace}}"
+        namespace: '{{ index .path.segments 2 | trimSuffix "-mesh" }}'
       syncPolicy:
         automated:
           selfHeal: true

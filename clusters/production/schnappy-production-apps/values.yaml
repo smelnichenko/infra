@@ -43,7 +43,7 @@ games:
       limits: { cpu: 100m, memory: 64Mi }
 
 auth:
-  existingSecret: schnappy-auth
+  existingSecret: schnappy-production-auth
   registrationEnabled: true
   secureCookies: true
   tokenExpiration: 1h
@@ -82,12 +82,12 @@ scyllaOperator:
 
 ai:
   enabled: true
-  existingSecret: schnappy-ai
+  existingSecret: schnappy-production-ai
   model: claude-haiku-4-5-20251001
 
 mail:
   enabled: true
-  existingSecret: schnappy-mail
+  existingSecret: schnappy-production-mail
   host: smtp.resend.com
   port: "587"
   username: resend
@@ -96,7 +96,7 @@ mail:
 
 webhook:
   enabled: true
-  existingSecret: schnappy-webhook
+  existingSecret: schnappy-production-webhook
 
 
 
@@ -139,7 +139,7 @@ chessService:
 
 tracing:
   enabled: true
-  tempoEndpoint: "http://schnappy-tempo.schnappy.svc:4318/v1/traces"
+  tempoEndpoint: "http://schnappy-tempo.schnappy-infra.svc:4318/v1/traces"
   samplingProbability: "0.01"
 
 smokeTest:
@@ -158,14 +158,11 @@ hyperfoil:
 # Cross-chart references (secret names for env var mounts, keycloak for admin service)
 postgres:
   database: monitor
-  existingSecret: schnappy-postgres
+  existingSecret: schnappy-production-postgres
 redis:
-  existingSecret: schnappy-redis
+  existingSecret: schnappy-production-redis
 minio:
-  existingSecret: schnappy-minio
-alertmanager:
-  enabled: true
-  existingSecret: schnappy-alertmanager
+  existingSecret: schnappy-production-minio
   alertEmailTo: sergei.melnichenko@gmail.com
   alertEmailFrom: alerts@pmon.dev
 keycloak:

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: schnappy-production
+  name: schnappy-infra
   labels:
     istio.io/rev: default
-    environment: production
+    gateway: "true"

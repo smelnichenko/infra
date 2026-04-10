@@ -22,7 +22,7 @@ spec:
     - from:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: schnappy
+              gateway: "true"
           podSelector:
             matchLabels:
               gateway.networking.k8s.io/gateway-name: schnappy-gateway
@@ -71,7 +71,7 @@ spec:
     - to:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: schnappy
+              gateway: "true"
       ports:
         - protocol: TCP
           port: 4318

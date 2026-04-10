@@ -8,7 +8,7 @@ meshConfig:
     holdApplicationUntilProxyStarts: true
     tracing:
       zipkin:
-        address: schnappy-tempo.schnappy.svc:9411
+        address: schnappy-tempo.schnappy-infra.svc:9411
       sampling: 1.0
 
 pilot:

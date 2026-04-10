@@ -1,0 +1,45 @@
+vault:
+  secretsEnabled: true
+  secretPathPrefix: "secret/data/schnappy"
+
+networkPolicies:
+  enabled: true
+
+postgres:
+  enabled: false
+
+redis:
+  enabled: false
+
+kafka:
+  enabled: false
+
+scylla:
+  enabled: false
+
+scyllaOperator:
+  enabled: false
+
+minio:
+  enabled: true
+  existingSecret: schnappy-infra-minio
+  bucket: mimir-blocks
+  buckets:
+    - mimir-blocks
+    - tempo-traces
+  image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
+  storage:
+    size: 10Gi
+    storageClass: local-path
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits: { cpu: 500m, memory: 512Mi }
+
+strimzi:
+  enabled: false
+
+cnpg:
+  enabled: false
+
+aptCache:
+  enabled: false

@@ -1,0 +1,61 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: schnappy-infra-default-deny
+  namespace: schnappy-infra
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Intra-namespace
+    - from:
+        - podSelector: {}
+    # Kubelet probes
+    - ports:
+        - protocol: TCP
+          port: 15021
+  egress:
+    # DNS
+    - ports:
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
+    # Intra-namespace
+    - to:
+        - podSelector: {}
+    # Istio control plane
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: istio-system
+      ports:
+        - { protocol: TCP, port: 15012 }
+        - { protocol: TCP, port: 15010 }
+        - { protocol: TCP, port: 15014 }
+        - { protocol: TCP, port: 443 }
+    # Kubernetes API
+    - ports:
+        - { protocol: TCP, port: 443 }
+        - { protocol: TCP, port: 6443 }
+    # Pi services (Vault for ESO)
+    - to:
+        - ipBlock:
+            cidr: 192.168.11.5/32
+      ports:
+        - { protocol: TCP, port: 8200 }
+    # Gateway egress to all environment namespaces
+    - to:
+        - namespaceSelector:
+            matchExpressions:
+              - key: environment
+                operator: Exists
+    # Gateway egress to kube-system (Hubble UI)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+    # Gateway egress to Pi (Forgejo, Keycloak proxy)
+    - ports:
+        - { protocol: TCP, port: 3000 }
+        - { protocol: TCP, port: 8080 }

@@ -4,24 +4,17 @@ metadata:
   name: schnappy-apps-envs
   namespace: argocd
 spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
   generators:
-    - list:
-        elements:
-          - env: production
-            namespace: schnappy
-            releaseName: schnappy
-            valuesPath: clusters/production/schnappy/values.yaml
-            syncWave: "2"
-          - env: test
-            namespace: schnappy-test
-            releaseName: schnappy-test
-            valuesPath: clusters/production/schnappy-test-apps/values.yaml
-            syncWave: "2"
+    - git:
+        repoURL: http://192.168.11.5:3000/schnappy/infra.git
+        revision: main
+        directories:
+          - path: "clusters/production/schnappy-*-apps"
   template:
     metadata:
-      name: "schnappy-{{env}}-apps"
-      annotations:
-        argocd.argoproj.io/sync-wave: "{{syncWave}}"
+      name: '{{ .path.basenameNormalized }}'
       namespace: argocd
       finalizers:
         - resources-finalizer.argocd.argoproj.io
@@ -32,15 +25,15 @@ spec:
           targetRevision: main
           path: helm/schnappy
           helm:
-            releaseName: "{{releaseName}}"
+            releaseName: '{{ index .path.segments 2 | trimSuffix "-apps" }}'
             valueFiles:
-              - "$values/{{valuesPath}}"
+              - "$values/{{ .path }}/values.yaml"
         - repoURL: http://192.168.11.5:3000/schnappy/infra.git
           targetRevision: main
           ref: values
       destination:
         server: https://kubernetes.default.svc
-        namespace: "{{namespace}}"
+        namespace: '{{ index .path.segments 2 | trimSuffix "-apps" }}'
       syncPolicy:
         automated:
           selfHeal: true

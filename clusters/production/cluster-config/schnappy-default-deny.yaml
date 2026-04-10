@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: schnappy-default-deny
-  namespace: schnappy
+  namespace: schnappy-production
 spec:
   podSelector: {}
   policyTypes:
@@ -12,12 +12,11 @@ spec:
     # Intra-namespace traffic (sidecars communicate on app ports)
     - from:
         - podSelector: {}
-    # Istio gateway: allow external traffic (HAProxy) on 80/443
-    - ports:
-        - protocol: TCP
-          port: 443
-        - protocol: TCP
-          port: 80
+    # Gateway ingress (from schnappy-infra)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              gateway: "true"
     # Cross-namespace ingress (argocd, woodpecker → schnappy services)
     - from:
         - namespaceSelector:
@@ -76,17 +75,6 @@ spec:
           port: 8080
         - protocol: TCP
           port: 8200
-    # Gateway egress to test/ephemeral environments
-    - to:
-        - namespaceSelector:
-            matchExpressions:
-              - key: environment
-                operator: Exists
-    # Gateway egress to kube-system (Hubble UI)
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
     # Cross-namespace egress (ArgoCD, Woodpecker)
     - to:
         - namespaceSelector:
