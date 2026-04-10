@@ -55,7 +55,8 @@ spec:
         - namespaceSelector:
             matchExpressions:
               - key: environment
-                operator: Exists
+                operator: In
+                values: ["production", "test"]
     # Gateway egress to kube-system (Hubble UI)
     - to:
         - namespaceSelector:
