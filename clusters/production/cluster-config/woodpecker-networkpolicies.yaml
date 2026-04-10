@@ -51,22 +51,16 @@ spec:
         - protocol: TCP
           port: 9000
   egress:
-    # To gateway (git.pmon.dev, auth.pmon.dev via wildcard DNS → externalIP)
-    - to:
-        - ipBlock:
-            cidr: 192.168.11.2/32
-        - ipBlock:
-            cidr: 10.43.0.0/16
-      ports:
+    # HTTPS (gateway externalIP + Pi VIP + gateway pod IPs)
+    # Cilium eBPF DNAT makes ipBlock unreliable for externalIP traffic,
+    # so we allow 443 broadly but restrict 3000 to Pi VIP only.
+    - ports:
         - protocol: TCP
           port: 443
-    # To Pi Forgejo via VIP (webhooks, API — direct)
     - to:
         - ipBlock:
             cidr: 192.168.11.5/32
       ports:
-        - protocol: TCP
-          port: 443
         - protocol: TCP
           port: 3000
     # DNS
