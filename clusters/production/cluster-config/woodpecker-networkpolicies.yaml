@@ -167,7 +167,7 @@ spec:
               gateway: "true"
           podSelector:
             matchLabels:
-              gateway.networking.k8s.io/gateway-name: schnappy-gateway
+              gateway.istio.io/managed: istio.io-gateway-controller
       ports:
         - protocol: TCP
           port: 443
