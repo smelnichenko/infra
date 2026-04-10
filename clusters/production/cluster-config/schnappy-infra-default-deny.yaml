@@ -12,6 +12,12 @@ spec:
     # Intra-namespace
     - from:
         - podSelector: {}
+    # External traffic to gateway (80/443)
+    - ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
     # Kubelet probes
     - ports:
         - protocol: TCP
