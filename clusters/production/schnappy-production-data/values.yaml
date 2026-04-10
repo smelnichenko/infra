@@ -119,8 +119,7 @@ strimzi:
 cnpg:
   enabled: true
   import: false
-  recovery: true
-  recoveryServerName: schnappy-postgres
+  recovery: false
   backup: true
   backupEndpoint: http://192.168.11.5:9000
   backupSecret: schnappy-production-minio-backup
