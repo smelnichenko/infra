@@ -27,7 +27,7 @@ spec:
           helm:
             releaseName: '{{ index .path.segments 2 | trimSuffix "-apps" }}'
             valueFiles:
-              - "$values/{{ .path }}/values.yaml"
+              - "$values/{{ .path.path }}/values.yaml"
         - repoURL: http://192.168.11.5:3000/schnappy/infra.git
           targetRevision: main
           ref: values
