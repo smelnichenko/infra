@@ -7,6 +7,11 @@ networkPolicies:
 
 postgres:
   enabled: false
+  databases:
+    - name: monitor
+    - name: admin
+    - name: chat
+    - name: chess
 
 redis:
   enabled: true

@@ -8,10 +8,11 @@ postgres:
   enabled: false
   existingSecret: schnappy-production-postgres
   image: postgres:17-alpine
-  extraDatabases:
-    - monitor_admin
-    - monitor_chat
-    - monitor_chess
+  databases:
+    - name: monitor
+    - name: admin
+    - name: chat
+    - name: chess
   sharedBuffers: 512MB
   effectiveCacheSize: 2GB
   workMem: 32MB
