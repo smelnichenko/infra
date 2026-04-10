@@ -16,6 +16,8 @@ gateway:
     gatewayNamespace: schnappy-infra
     sectionName: https-apex
     hostname: pmon.dev
+    hosts:
+      reports: reports.pmon.dev
 
 jwt:
   enabled: false
