@@ -71,7 +71,17 @@ spec:
             - .spec.switchoverDelay
         - group: kafka.strimzi.io
           kind: KafkaTopic
+          managedFieldsManagers:
+            - strimzi-topic-operator
           jqPathExpressions:
             - .metadata
             - .spec
             - .status
+        - group: kafka.strimzi.io
+          kind: Kafka
+          managedFieldsManagers:
+            - strimzi-kafka-operator
+        - group: kafka.strimzi.io
+          kind: KafkaNodePool
+          managedFieldsManagers:
+            - strimzi-kafka-operator
