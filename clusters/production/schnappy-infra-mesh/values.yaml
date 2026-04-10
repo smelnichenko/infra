@@ -10,6 +10,7 @@ authorizationPolicies:
 
 gateway:
   enabled: true
+  infraOnly: true
   replicas: 2
   loadBalancerIP: "192.168.11.2"
   allowedNamespaces:
@@ -19,13 +20,7 @@ gateway:
     clusterIssuer: letsencrypt-prod
   hosts:
     app: pmon.dev
-    auth: auth.pmon.dev
-    grafana: grafana.pmon.dev
-    logs: logs.pmon.dev
-    reports: reports.pmon.dev
-    sonar: sonar.pmon.dev
     argocd: cd.pmon.dev
-    forgejo: git.pmon.dev
     ci: ci.pmon.dev
     hubble: hubble.pmon.dev
 

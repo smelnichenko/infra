@@ -40,6 +40,15 @@ prometheus:
   woodpecker:
     enabled: false
 
+gateway:
+  enabled: true
+  name: schnappy-infra-gateway
+  namespace: schnappy-infra
+  hosts:
+    grafana: grafana.pmon.dev
+    logs: logs.pmon.dev
+    reports: reports.pmon.dev
+
 mimir:
   enabled: true
   image: grafana/mimir:2.17.8

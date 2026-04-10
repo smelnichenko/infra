@@ -4,6 +4,13 @@ vault:
 networkPolicies:
   enabled: true
 
+gateway:
+  enabled: true
+  name: schnappy-infra-gateway
+  namespace: schnappy-infra
+  hosts:
+    sonar: sonar.pmon.dev
+
 sonarqube:
   enabled: true
   existingSecret: schnappy-sonarqube
