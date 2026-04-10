@@ -125,10 +125,4 @@ cnpg:
   backupSecret: schnappy-production-minio-backup
 
 aptCache:
-  enabled: true
-  resources:
-    requests: { cpu: 25m, memory: 32Mi, ephemeral-storage: 64Mi }
-    limits: { cpu: 200m, memory: 128Mi, ephemeral-storage: 256Mi }
-  storage:
-    size: 10Gi
-    storageClass: local-path
+  enabled: false
