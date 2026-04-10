@@ -41,7 +41,6 @@ spec:
         syncOptions:
           - CreateNamespace=true
           - RespectIgnoreDifferences=true
-          - ServerSideApply=true
       ignoreDifferences:
         - group: scylla.scylladb.com
           kind: ScyllaCluster
