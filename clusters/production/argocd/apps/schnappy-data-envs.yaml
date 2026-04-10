@@ -72,5 +72,6 @@ spec:
         - group: kafka.strimzi.io
           kind: KafkaTopic
           jqPathExpressions:
-            - .metadata.annotations
-            - .metadata.labels
+            - .metadata
+            - .spec
+            - .status
