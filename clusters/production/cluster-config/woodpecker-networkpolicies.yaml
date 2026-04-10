@@ -51,14 +51,10 @@ spec:
         - protocol: TCP
           port: 9000
   egress:
-    # To Istio gateway (git.pmon.dev, auth.pmon.dev via wildcard DNS)
+    # To Istio gateway (git.pmon.dev, auth.pmon.dev via wildcard DNS → 192.168.11.2)
     - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: schnappy
-          podSelector:
-            matchLabels:
-              gateway.networking.k8s.io/gateway-name: schnappy-gateway
+        - ipBlock:
+            cidr: 192.168.11.2/32
       ports:
         - protocol: TCP
           port: 443
