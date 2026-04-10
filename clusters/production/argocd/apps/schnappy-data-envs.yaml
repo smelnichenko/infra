@@ -69,3 +69,8 @@ spec:
             - .spec.startDelay
             - .spec.stopDelay
             - .spec.switchoverDelay
+        - group: kafka.strimzi.io
+          kind: KafkaTopic
+          jqPathExpressions:
+            - .metadata.annotations
+            - .metadata.labels
