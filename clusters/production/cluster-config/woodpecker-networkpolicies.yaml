@@ -51,8 +51,20 @@ spec:
         - protocol: TCP
           port: 9000
   egress:
-    # HTTPS egress (gateway at 192.168.11.2 for git/auth.pmon.dev, Pi VIP for direct)
-    - ports:
+    # To gateway (git.pmon.dev, auth.pmon.dev via wildcard DNS → externalIP)
+    - to:
+        - ipBlock:
+            cidr: 192.168.11.2/32
+        - ipBlock:
+            cidr: 10.43.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+    # To Pi Forgejo via VIP (webhooks, API — direct)
+    - to:
+        - ipBlock:
+            cidr: 192.168.11.5/32
+      ports:
         - protocol: TCP
           port: 443
         - protocol: TCP
