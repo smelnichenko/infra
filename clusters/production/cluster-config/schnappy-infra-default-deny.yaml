@@ -55,7 +55,13 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: kube-system
-    # Gateway egress to Pi (Forgejo, Keycloak proxy)
-    - ports:
-        - { protocol: TCP, port: 3000 }
-        - { protocol: TCP, port: 8080 }
+    # Gateway egress to ArgoCD
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: argocd
+    # Gateway egress to Woodpecker
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: woodpecker
