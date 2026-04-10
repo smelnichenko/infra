@@ -53,7 +53,7 @@ mimir:
   enabled: true
   image: grafana/mimir:2.17.8
   retention: 90d
-  minioSecret: schnappy-minio
+  minioSecret: schnappy-infra-minio
   minioEndpoint: schnappy-infra-minio.schnappy-infra.svc:9000
   storage: 5Gi
   storageClassName: local-path
@@ -65,7 +65,7 @@ tempo:
   enabled: true
   image: grafana/tempo:2.7.2
   retention: 336h
-  minioSecret: schnappy-minio
+  minioSecret: schnappy-infra-minio
   minioEndpoint: schnappy-infra-minio.schnappy-infra.svc:9000
   storage: 2Gi
   storageClassName: local-path
