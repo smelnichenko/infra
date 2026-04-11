@@ -85,3 +85,8 @@ spec:
           kind: KafkaNodePool
           managedFieldsManagers:
             - strimzi-kafka-operator
+        - group: batch
+          kind: Job
+          jqPathExpressions:
+            - .spec.selector
+            - .spec.template.metadata.labels
