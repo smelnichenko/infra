@@ -48,6 +48,7 @@ gateway:
     grafana: grafana.pmon.dev
     logs: logs.pmon.dev
     reports: reports.pmon.dev
+    alerts: alerts.pmon.dev
 
 mimir:
   enabled: true
