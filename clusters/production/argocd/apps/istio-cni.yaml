@@ -17,7 +17,7 @@ spec:
         releaseName: istio-cni
         valueFiles:
           - $values/clusters/production/istio/cni-values.yaml
-    - repoURL: http://192.168.11.5:3000/schnappy/infra.git
+    - repoURL: https://git.pmon.dev/schnappy/infra.git
       targetRevision: main
       ref: values
   destination:

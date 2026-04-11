@@ -8,7 +8,7 @@ spec:
   goTemplateOptions: ["missingkey=error"]
   generators:
     - git:
-        repoURL: http://192.168.11.5:3000/schnappy/infra.git
+        repoURL: https://git.pmon.dev/schnappy/infra.git
         revision: main
         directories:
           - path: "clusters/production/schnappy-*-data"
@@ -21,14 +21,14 @@ spec:
     spec:
       project: default
       sources:
-        - repoURL: http://192.168.11.5:3000/schnappy/platform.git
+        - repoURL: https://git.pmon.dev/schnappy/platform.git
           targetRevision: main
           path: helm/schnappy-data
           helm:
             releaseName: '{{ index .path.segments 2 | trimSuffix "-data" }}'
             valueFiles:
               - "$values/{{ .path.path }}/values.yaml"
-        - repoURL: http://192.168.11.5:3000/schnappy/infra.git
+        - repoURL: https://git.pmon.dev/schnappy/infra.git
           targetRevision: main
           ref: values
       destination:
