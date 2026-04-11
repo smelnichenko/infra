@@ -154,6 +154,7 @@ hyperfoil:
   enabled: true
   reportsUrl: https://reports.pmon.dev
   clientSecretName: schnappy-hyperfoil
+  minioEndpoint: schnappy-infra-minio.schnappy-infra.svc:9000
 
 # Cross-chart references (secret names for env var mounts, keycloak for admin service)
 postgres:

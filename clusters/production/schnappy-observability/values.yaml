@@ -116,4 +116,4 @@ kubeStateMetrics:
 reports:
   enabled: true
   image: nginx:1.27-alpine
-  minioEndpoint: schnappy-production-minio.schnappy-production.svc:9000
+  minioEndpoint: schnappy-infra-minio.schnappy-infra.svc:9000
