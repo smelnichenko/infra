@@ -37,6 +37,9 @@ elk:
 prometheus:
   enabled: true
   scrapeInterval: 15s
+  scrapeNamespaces:
+    - schnappy-production
+    - schnappy-test
   woodpecker:
     enabled: false
 
