@@ -17,7 +17,7 @@ app:
     idleTimeout: 300000
     maxLifetime: 1200000
   resources:
-    requests: { cpu: 200m, memory: 2Gi, ephemeral-storage: 256Mi }
+    requests: { cpu: 3000m, memory: 3Gi, ephemeral-storage: 256Mi }
     limits: { cpu: 6000m, memory: 4Gi, ephemeral-storage: 1Gi }
 
 site:
@@ -110,7 +110,7 @@ admin:
   replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
-    requests: { cpu: 100m, memory: 1Gi }
+    requests: { cpu: 100m, memory: 512Mi }
     limits: { cpu: 2000m, memory: 2Gi }
 
 chatService:
@@ -122,7 +122,7 @@ chatService:
   replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
-    requests: { cpu: 100m, memory: 1Gi }
+    requests: { cpu: 1000m, memory: 1536Mi }
     limits: { cpu: 3000m, memory: 2Gi }
 
 chessService:
@@ -134,7 +134,7 @@ chessService:
   replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
-    requests: { cpu: 100m, memory: 1Gi }
+    requests: { cpu: 1000m, memory: 1536Mi }
     limits: { cpu: 3000m, memory: 2Gi }
 
 tracing:

@@ -26,7 +26,7 @@ postgres:
     size: 20Gi
     storageClass: local-path
   resources:
-    requests: { cpu: 250m, memory: 1Gi, ephemeral-storage: 256Mi }
+    requests: { cpu: 1500m, memory: 1Gi, ephemeral-storage: 256Mi }
     limits: { cpu: 4000m, memory: 2Gi, ephemeral-storage: 1Gi }
 
 redis:
