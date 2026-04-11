@@ -1,6 +1,9 @@
 vault:
   secretsEnabled: true
 
+alerts:
+  enabled: true
+
 networkPolicies:
   enabled: true
 

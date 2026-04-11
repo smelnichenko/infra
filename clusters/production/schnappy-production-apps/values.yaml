@@ -1,6 +1,9 @@
 vault:
   secretsEnabled: true
 
+alerts:
+  enabled: true
+
 app:
   replicas: 1
   javaOpts: -Xmx2g -XX:+UseZGC -XX:+UseStringDeduplication
