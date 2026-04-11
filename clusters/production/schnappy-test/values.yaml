@@ -1,10 +1,5 @@
 smokeTest:
-  enabled: true
-  image: grafana/k6:1.7.1
-  schedule: "0 6 * * *"
-  baseUrl: https://pmon.dev
-  keycloakUrl: https://auth.pmon.dev
-  clientSecretName: schnappy-k6-smoke
+  enabled: false
 
 vault:
   secretsEnabled: true
