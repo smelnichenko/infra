@@ -127,7 +127,10 @@ tracing:
   samplingProbability: "1.0"
 
 smokeTest:
-  enabled: false
+  enabled: true
+  image: grafana/k6:1.7.1
+  baseUrl: https://test.pmon.dev
+  clientSecretName: schnappy-k6-smoke
 
 hyperfoil:
   enabled: false
@@ -143,3 +146,4 @@ alertmanager:
   enabled: false
 keycloak:
   enabled: false
+  hostname: auth.pmon.dev
