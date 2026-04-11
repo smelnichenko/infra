@@ -1,3 +1,5 @@
+global:
+  priorityClassName: infra-critical
 crds:
   enabled: true
 maxConcurrentChallenges: 1

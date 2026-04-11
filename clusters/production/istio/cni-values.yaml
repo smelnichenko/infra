@@ -1,6 +1,7 @@
 cni:
   cniConfDir: /etc/cni/net.d
   cniBinDir: /opt/cni/bin
+  priorityClassName: system-node-critical
   resources:
     requests:
       cpu: 25m

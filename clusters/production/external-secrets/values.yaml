@@ -1,3 +1,4 @@
+priorityClassName: infra-critical
 # CRDs as regular templates (not Helm hooks) so Argo CD ServerSideApply works
 installCRDs: false
 crds:

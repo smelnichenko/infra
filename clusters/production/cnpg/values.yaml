@@ -1,3 +1,4 @@
+priorityClassName: infra-critical
 resources:
   requests:
     cpu: 100m

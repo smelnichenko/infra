@@ -12,6 +12,7 @@ meshConfig:
       sampling: 1.0
 
 pilot:
+  priorityClassName: system-cluster-critical
   env:
     ENABLE_NATIVE_SIDECARS: "false"
   resources:

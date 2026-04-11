@@ -1,3 +1,4 @@
+priorityClassName: infra-critical
 replicas: 1
 
 resources:
