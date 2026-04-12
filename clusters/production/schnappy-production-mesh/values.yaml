@@ -14,7 +14,6 @@ gateway:
     enabled: true
     gatewayName: schnappy-infra-gateway
     gatewayNamespace: schnappy-infra
-    sectionName: https-apex
     hostname: pmon.dev
 
 jwt:
