@@ -10,7 +10,7 @@ app:
   image:
     pullPolicy: IfNotPresent
     repository: git.pmon.dev/schnappy/monitor
-    tag: "0dff31c"  # monitor
+    tag: "abe746c"  # monitor
   ingress:
     enabled: false
   hikari:
@@ -109,7 +109,7 @@ admin:
   image:
     repository: git.pmon.dev/schnappy/admin
     pullPolicy: IfNotPresent
-    tag: "5921c77"  # admin
+    tag: "d3aaf0e"  # admin
   replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
@@ -121,7 +121,7 @@ chatService:
   image:
     repository: git.pmon.dev/schnappy/chat
     pullPolicy: IfNotPresent
-    tag: "722c18a"  # chat
+    tag: "4740fe4"  # chat
   replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
@@ -133,7 +133,7 @@ chessService:
   image:
     repository: git.pmon.dev/schnappy/chess
     pullPolicy: IfNotPresent
-    tag: "b6e9b1e"  # chess
+    tag: "596f015"  # chess
   replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
