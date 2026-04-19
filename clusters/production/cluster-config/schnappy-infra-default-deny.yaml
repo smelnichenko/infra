@@ -44,10 +44,15 @@ spec:
     - ports:
         - { protocol: TCP, port: 443 }
         - { protocol: TCP, port: 6443 }
-    # Pi services (Vault for ESO)
+    # Pi services — Vault HA on all 3 Pi addresses (pi1, VIP, pi2) for
+    # ESO + prometheus blackbox probe
     - to:
         - ipBlock:
+            cidr: 192.168.11.4/32
+        - ipBlock:
             cidr: 192.168.11.5/32
+        - ipBlock:
+            cidr: 192.168.11.6/32
       ports:
         - { protocol: TCP, port: 8200 }
     # Gateway egress to all environment namespaces
@@ -72,3 +77,11 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: woodpecker
+    # Prometheus scrape egress to external-secrets, velero
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: external-secrets
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: velero
