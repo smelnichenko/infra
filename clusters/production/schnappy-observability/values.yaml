@@ -101,6 +101,7 @@ grafana:
 
 alertmanager:
   enabled: true
+  logLevel: debug
   existingSecret: schnappy-alertmanager
   alertEmailTo: sergei.melnichenko@gmail.com
   alertEmailFrom: alerts@pmon.dev
