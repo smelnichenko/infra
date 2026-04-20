@@ -109,7 +109,7 @@ admin:
   image:
     repository: git.pmon.dev/schnappy/admin
     pullPolicy: IfNotPresent
-    tag: "d3aaf0e"  # admin
+    tag: "b49d1bc"  # admin
   replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
@@ -121,7 +121,7 @@ chatService:
   image:
     repository: git.pmon.dev/schnappy/chat
     pullPolicy: IfNotPresent
-    tag: "4740fe4"  # chat
+    tag: "7e50b3b"  # chat
   replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
@@ -133,7 +133,7 @@ chessService:
   image:
     repository: git.pmon.dev/schnappy/chess
     pullPolicy: IfNotPresent
-    tag: "596f015"  # chess
+    tag: "6dfd1ad"  # chess
   replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
