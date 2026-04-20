@@ -18,14 +18,12 @@ spec:
       ports:
         - protocol: TCP
           port: 8080
-    # Gateway ingress (cross-namespace routing from prod gateway)
+    # Anything from the infra namespace: gateway (data path), prometheus
+    # (scrape merged Istio metrics on :15020), blackbox-exporter, etc.
     - from:
         - namespaceSelector:
             matchLabels:
               gateway: "true"
-          podSelector:
-            matchLabels:
-              gateway.istio.io/managed: istio.io-gateway-controller
     # Kubelet probes
     - ports:
         - protocol: TCP
