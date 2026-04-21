@@ -8,19 +8,21 @@ Argo CD Application manifests and production values files. This repo is the sing
 clusters/production/
 ├── argocd/apps/              # Argo CD Application manifests (app-of-apps)
 │   ├── root.yaml             # Root Application (manages all others)
-│   ├── schnappy.yaml         # Core app chart
-│   ├── schnappy-data.yaml    # Data stores chart
-│   ├── schnappy-auth.yaml    # Keycloak chart
-│   ├── schnappy-mesh.yaml    # Istio mesh config chart
-│   └── ...                   # cert-manager, vault, velero, forgejo, woodpecker, istio, metallb, etc.
-├── cluster-config/           # Raw manifests (ClusterIssuers, default-deny NPs, velero MinIO)
-├── schnappy/values.yaml      # Core app production values (image tags updated by CD pipeline)
-├── schnappy-data/values.yaml
-├── schnappy-auth/values.yaml
+│   ├── schnappy-production-apps.yaml  # Core app chart (prod env)
+│   ├── schnappy-production-data.yaml  # Data stores (prod)
+│   ├── schnappy-production-mesh.yaml  # Istio mesh (prod)
+│   ├── schnappy-test-apps.yaml        # Core app chart (test env)
+│   ├── schnappy-test-data.yaml        # Data stores (test)
+│   ├── schnappy-test-mesh.yaml        # Istio mesh (test)
+│   └── ...                   # cert-manager, vault, velero, istio-*, strimzi, etc.
+├── cluster-config/           # Raw manifests (ClusterIssuers, default-deny NPs, PriorityClasses, ESOs)
+├── schnappy-production-apps/values.yaml
+├── schnappy-production-data/values.yaml
+├── schnappy-production-mesh/values.yaml
+├── schnappy-test-apps/values.yaml
 ├── schnappy-observability/values.yaml
 ├── schnappy-sonarqube/values.yaml
-├── schnappy-mesh/values.yaml
-└── istio/                    # Istio Helm values (istiod, cni, ztunnel)
+└── istio/                    # Istio Helm values (istiod, cni)
 ```
 
 ## Deploy Flow
