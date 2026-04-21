@@ -39,3 +39,4 @@ jwt:
     - reports.pmon.dev
     - hubble.pmon.dev
     - alerts.pmon.dev
+    - runbooks.pmon.dev

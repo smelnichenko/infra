@@ -52,6 +52,7 @@ gateway:
     logs: logs.pmon.dev
     reports: reports.pmon.dev
     alerts: alerts.pmon.dev
+    runbooks: runbooks.pmon.dev
 
 mimir:
   enabled: true
@@ -122,3 +123,7 @@ reports:
   enabled: true
   image: nginx:1.27-alpine
   minioEndpoint: schnappy-infra-minio.schnappy-infra.svc:9000
+
+runbooks:
+  enabled: true
+  image: nginx:1.27-alpine
