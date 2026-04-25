@@ -98,8 +98,10 @@ spec:
                     secretKeyRef:
                       name: forgejo-readonly-token
                       key: token
+                # Use the same address ESO uses (Pi VIP, port 8200);
+                # vault.pmon.dev isn't fronted by Caddy.
                 - name: VAULT_ADDR
-                  value: https://vault.pmon.dev
+                  value: https://192.168.11.5:8200
                 - name: VAULT_TOKEN
                   valueFrom:
                     secretKeyRef:
@@ -166,12 +168,12 @@ spec:
                       continue   # still in use; skip
                     fi
                     # Live App is gone — purge every key under the prefix.
-                    keys=$(curl -sf -X LIST -H "X-Vault-Token: $VAULT_TOKEN" \
+                    keys=$(curl -sfk -X LIST -H "X-Vault-Token: $VAULT_TOKEN" \
                       "$VAULT_ADDR/v1/secret/metadata/${prefix%/}" \
                       | jq -r '.data.keys[]?' || true)
                     for k in $keys; do
                       echo "[vault-gc] purge secret/${prefix}${k}"
-                      curl -sf -X DELETE -H "X-Vault-Token: $VAULT_TOKEN" \
+                      curl -sfk -X DELETE -H "X-Vault-Token: $VAULT_TOKEN" \
                         "$VAULT_ADDR/v1/secret/metadata/${prefix}${k}" >/dev/null
                     done
                   done
