@@ -38,7 +38,12 @@ spec:
                   secretName: forgejo-readonly-token
                   key: token
               requeueAfterSeconds: 60
-              labels: ["preview"]
+              # Forgejo/Gitea PR generator has no `labels` filter
+              # (that's GitHub-only). Use a branch-name regex to opt
+              # PRs in instead: only branches matching `^preview/…`
+              # spawn an env.
+              filters:
+                - branchMatch: '^preview/'
   template:
     metadata:
       name: 'pr-{{ .number }}-{{ .repo }}'
