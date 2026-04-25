@@ -13,10 +13,10 @@ postgres:
     - name: chat
     - name: chess
 
-redis:
+valkey:
   enabled: true
-  existingSecret: schnappy-test-redis
-  image: redis:7-alpine
+  existingSecret: schnappy-test-valkey
+  image: valkey/valkey:8.1-alpine
   resources:
     requests: { cpu: 10m, memory: 32Mi }
     limits: { cpu: 100m, memory: 128Mi }

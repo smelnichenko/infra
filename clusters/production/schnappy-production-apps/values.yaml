@@ -163,8 +163,8 @@ hyperfoil:
 postgres:
   database: monitor
   existingSecret: schnappy-production-postgres
-redis:
-  existingSecret: schnappy-production-redis
+valkey:
+  existingSecret: schnappy-production-valkey
 minio:
   existingSecret: schnappy-production-minio
   alertEmailTo: sergei.melnichenko@gmail.com

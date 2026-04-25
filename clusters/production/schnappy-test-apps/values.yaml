@@ -138,8 +138,8 @@ hyperfoil:
 postgres:
   database: monitor
   existingSecret: schnappy-test-postgres
-redis:
-  existingSecret: schnappy-test-redis
+valkey:
+  existingSecret: schnappy-test-valkey
 minio:
   existingSecret: schnappy-test-minio
 alertmanager:

@@ -8,7 +8,7 @@ networkPolicies:
 postgres:
   enabled: false
 
-redis:
+valkey:
   enabled: false
 
 kafka:
