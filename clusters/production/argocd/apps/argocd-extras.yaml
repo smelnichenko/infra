@@ -1,0 +1,25 @@
+# Wraps the loose Argo CD manifests in extras/ — projects.yaml,
+# forgejo-readonly-token ExternalSecret, preview-shared-secrets
+# ClusterExternalSecrets, stale-pr-envs CronJob — into a single
+# Application so root's watch on apps/ picks them up.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd-extras
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://git.pmon.dev/schnappy/infra.git
+    targetRevision: main
+    path: clusters/production/argocd/extras
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
