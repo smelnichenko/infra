@@ -75,7 +75,8 @@ spec:
               dnsResolver: "10.96.0.10"
             ingress:
               host: 'pr-{{ .number }}.preview.pmon.dev'
-            postgres:
+            cnpg:
+              enabled: true
               ephemeral: true
             valkey:
               ephemeral: true
