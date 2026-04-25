@@ -4,35 +4,25 @@ vault:
 networkPolicies:
   enabled: true
 
-elk:
+clickhouse:
   enabled: true
-  elasticsearch:
-    existingSecret: schnappy-elasticsearch
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.13
-    javaOpts: -Xms2g -Xmx2g
-    replicas: 1
-    retention:
-      days: 30
-    storage:
-      size: 50Gi
-      storageClass: local-path
-    resources:
-      requests: { cpu: 250m, memory: 2Gi }
-      limits: { cpu: 3000m, memory: 6Gi }
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.19.13
-    replicas: 1
-    host: logs.pmon.dev
-    ingress:
-      enabled: false
-    resources:
-      requests: { cpu: 100m, memory: 1Gi }
-      limits: { cpu: 1000m, memory: 2Gi }
-  fluentbit:
-    image: cr.fluentbit.io/fluent/fluent-bit:4.2.3.1
-    resources:
-      requests: { cpu: 100m, memory: 128Mi }
-      limits: { cpu: 1000m, memory: 512Mi }
+  existingSecret: schnappy-clickhouse
+  image: clickhouse/clickhouse-server:24.8-alpine
+  resources:
+    requests: { cpu: "100m", memory: "512Mi" }
+    limits:   { cpu: "2",    memory: "2Gi" }
+  storage:
+    size: 20Gi
+    storageClass: local-path
+  retention:
+    days: 30
+
+fluentbit:
+  enabled: true
+  image: cr.fluentbit.io/fluent/fluent-bit:4.2.3.1
+  resources:
+    requests: { cpu: "100m", memory: "128Mi" }
+    limits:   { cpu: "1000m", memory: "512Mi" }
 
 prometheus:
   enabled: true
