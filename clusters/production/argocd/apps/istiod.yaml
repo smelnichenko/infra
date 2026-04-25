@@ -29,10 +29,17 @@ spec:
       prune: true
     syncOptions:
       - ServerSideApply=true
-      - ServerSideDiff=true   # respect apiserver-defaulted fields
       - RespectIgnoreDifferences=true
   ignoreDifferences:
     - group: admissionregistration.k8s.io
       kind: ValidatingWebhookConfiguration
       jsonPointers:
         - /webhooks
+    - group: apps
+      kind: Deployment
+      name: istiod
+      jsonPointers:
+        - /spec/revisionHistoryLimit
+        - /spec/progressDeadlineSeconds
+        - /spec/strategy/rollingUpdate/maxSurge
+        - /spec/strategy/rollingUpdate/maxUnavailable
