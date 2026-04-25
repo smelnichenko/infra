@@ -1,13 +1,13 @@
 # Infra
 
-Flux CD cluster state repository for pmon.dev. GitOps single source of truth for what is deployed.
+Argo CD cluster state repository for pmon.dev. GitOps single source of truth for what is deployed.
 
 ## Architecture
 
-Flux CD controllers in the `flux-system` namespace continuously reconcile this repository against the live cluster state. Woodpecker CD pipelines commit updated image tags here after successful builds. Flux detects the changes (polling every 1 minute) and triggers Helm upgrades.
+Argo CD in the `argocd` namespace continuously reconciles this repository against the live cluster state. Woodpecker CD pipelines commit updated image tags here after successful builds. Argo CD detects the changes and triggers Helm upgrades.
 
 ```
-Code push --> Woodpecker CI/CD --> Kaniko image build --> commit tag here --> Flux reconciles
+Code push --> Woodpecker CI/CD --> Kaniko image build --> commit tag here --> Argo CD syncs
 ```
 
 ## Structure
@@ -16,7 +16,8 @@ Code push --> Woodpecker CI/CD --> Kaniko image build --> commit tag here --> Fl
 infra/
   clusters/
     production/
-      monitor/           # HelmRelease + values for the main application
+      argocd/apps/       # Argo CD Applications (one per workload)
+      monitor/           # values for the schnappy app chart
       forgejo/           # Forgejo git forge
       woodpecker/        # Woodpecker CI
       vault/             # HashiCorp Vault
@@ -25,10 +26,7 @@ infra/
       external-secrets/  # External Secrets Operator
 ```
 
-Each subdirectory contains:
-
-- **Kustomization** -- tells Flux what to apply
-- **HelmRelease** -- Helm chart reference with values (including image tags)
+Each Application points at a Helm chart + a values file in this repo.
 
 ## How Deploys Work
 
@@ -36,23 +34,22 @@ Each subdirectory contains:
 2. Woodpecker CD builds and tests the code
 3. Kaniko builds a container image, pushes to Forgejo registry
 4. Woodpecker's `update-infra` step commits the new image tag to this repo
-5. Flux source-controller detects the commit (1-minute poll)
-6. Flux helm-controller upgrades the HelmRelease with the new image tag
-7. Kubernetes performs a rolling update
+5. Argo CD detects the commit (poll/webhook) and syncs the Application
+6. Helm renders the chart with the new image tag, Kubernetes performs a rolling update
 
 ## Operations
 
 ```bash
-# Check Flux reconciliation status
-ssh ten 'sudo k3s kubectl get kustomizations,helmreleases -A'
+# Check Argo CD application status
+ssh ten 'sudo kubectl get applications -n argocd'
 
-# Force immediate reconciliation
-ssh ten 'sudo k3s kubectl annotate gitrepository/infra -n flux-system reconcile.fluxcd.io/requestedAt=$(date +%s) --overwrite'
+# Force immediate sync of an Application
+ssh ten 'sudo kubectl -n argocd patch application schnappy --type merge -p "{\"operation\":{\"sync\":{}}}"'
 
-# Check a specific HelmRelease
-ssh ten 'sudo k3s kubectl describe helmrelease monitor -n monitor'
+# Check a specific Application
+ssh ten 'sudo kubectl describe application schnappy -n argocd'
 ```
 
 ## Important
 
-Do not edit image tags manually. They are managed by Woodpecker CD pipelines. Configuration values (resource limits, feature flags, etc.) can be edited directly and Flux will apply them.
+Do not edit image tags manually. They are managed by Woodpecker CD pipelines. Configuration values (resource limits, feature flags, etc.) can be edited directly and Argo CD will apply them.
