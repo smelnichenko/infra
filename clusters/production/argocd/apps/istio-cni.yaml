@@ -29,3 +29,7 @@ spec:
       prune: true
     syncOptions:
       - ServerSideApply=true
+      # ServerSideDiff makes Argo compute the diff via API-server
+      # dry-run, so fields the apiserver defaults (maxSurge,
+      # revisionHistoryLimit, ...) don't show as perpetual drift.
+      - ServerSideDiff=true
