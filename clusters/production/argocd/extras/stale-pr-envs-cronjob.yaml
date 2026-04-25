@@ -1,10 +1,21 @@
-# Plan 067 §"Cleanup policy 2" — daily sweep of stale per-PR envs.
+# Plan 067 §"Cleanup policy" + Vault GC.
 #
-# - For every Application matching `^pr-\d+-`:
-#     - If the source PR has been closed > 24h: force-prune.
-#     - If the head SHA hasn't changed in > 7d: force-prune.
-# - Logs to stdout; alerts via the existing Mimir Argo CD pipeline if
-#   a force-prune fails.
+# Daily sweep that:
+#   1. For every Argo CD Application labelled preview-env=true (i.e.
+#      schnappy-pr-<N>): if the source PR has been closed > 24h, OR
+#      head SHA hasn't changed in > 7d, force-prune.
+#   2. For every Vault prefix matching `secret/schnappy-pr-*/`: if no
+#      live Argo CD Application matches, purge the entire prefix
+#      (calls the Vault metadata DELETE API for full purge — same as
+#      `task deploy:delete-environment`).
+#
+# Vault token requirements: a scoped token (NOT the root token) at
+# secret/argocd/vault-cleanup-token { token: <hvs.…> }, issued once
+# under a policy with `list` on `secret/metadata/` and `delete` on
+# `secret/metadata/schnappy-pr-*` only. ESO syncs into Secret
+# `vault-cleanup-token` in argocd ns. If the Secret is absent, the
+# Vault GC step logs a warning and skips — the Argo CD prune step
+# still runs.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -35,13 +46,32 @@ roleRef:
   kind: Role
   name: stale-pr-envs-sweeper
 ---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: vault-cleanup-token
+  namespace: argocd
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: vault-backend
+    kind: ClusterSecretStore
+  target:
+    name: vault-cleanup-token
+    creationPolicy: Owner
+  data:
+    - secretKey: token
+      remoteRef:
+        key: argocd/vault-cleanup-token
+        property: token
+---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: stale-pr-envs-sweeper
   namespace: argocd
 spec:
-  schedule: "0 6 * * *"   # daily 06:00 UTC
+  schedule: "0 6 * * *"
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 5
   concurrencyPolicy: Forbid
@@ -68,6 +98,14 @@ spec:
                     secretKeyRef:
                       name: forgejo-readonly-token
                       key: token
+                - name: VAULT_ADDR
+                  value: https://vault.pmon.dev
+                - name: VAULT_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: vault-cleanup-token
+                      key: token
+                      optional: true
                 - name: STALE_DAYS
                   value: "7"
                 - name: CLOSED_GRACE_HOURS
@@ -81,6 +119,7 @@ spec:
                   closed_grace=$(( CLOSED_GRACE_HOURS * 3600 ))
                   stale_secs=$(( STALE_DAYS * 86400 ))
 
+                  # ── 1. Argo CD Application prune ─────────────────────
                   kubectl get application -n argocd -l preview-env=true \
                     -o json | jq -r '.items[] | [.metadata.name, .metadata.labels."pr-number", .metadata.labels."source-repo", .status.history[-1].deployedAt] | @tsv' | \
                   while IFS=$'\t' read -r app pr repo deployed; do
@@ -95,15 +134,46 @@ spec:
                     if [ "$pr_state" = "closed" ] && [ -n "$pr_closed_at" ]; then
                       closed_epoch=$(date -u -d "$pr_closed_at" +%s)
                       if [ $((now_epoch - closed_epoch)) -gt $closed_grace ]; then
-                        echo "[prune] $app — PR closed > ${CLOSED_GRACE_HOURS}h ago"
+                        echo "[prune-app] $app — PR closed > ${CLOSED_GRACE_HOURS}h ago"
                         kubectl delete application -n argocd "$app"
                         continue
                       fi
                     fi
                     if [ $((now_epoch - deployed_epoch)) -gt $stale_secs ]; then
-                      echo "[prune] $app — head SHA stale > ${STALE_DAYS}d"
+                      echo "[prune-app] $app — head SHA stale > ${STALE_DAYS}d"
                       kubectl delete application -n argocd "$app"
                     fi
+                  done
+
+                  # ── 2. Vault prefix GC ───────────────────────────────
+                  if [ -z "${VAULT_TOKEN:-}" ]; then
+                    echo "[vault-gc] VAULT_TOKEN not set — skipping (provision secret/argocd/vault-cleanup-token to enable)"
+                    exit 0
+                  fi
+
+                  # Snapshot live PR-env apps so we know what to keep.
+                  live_apps=$(kubectl get application -n argocd -l preview-env=true \
+                    -o jsonpath='{.items[*].metadata.labels.pr-number}' || echo "")
+
+                  prefixes=$(curl -sf -X LIST -H "X-Vault-Token: $VAULT_TOKEN" \
+                    "$VAULT_ADDR/v1/secret/metadata/" \
+                    | jq -r '.data.keys[]?' \
+                    | grep -E '^schnappy-pr-[0-9]+/$' || true)
+
+                  for prefix in $prefixes; do
+                    pr_num=$(echo "$prefix" | sed -E 's|^schnappy-pr-([0-9]+)/$|\1|')
+                    if echo " $live_apps " | grep -q " $pr_num "; then
+                      continue   # still in use; skip
+                    fi
+                    # Live App is gone — purge every key under the prefix.
+                    keys=$(curl -sf -X LIST -H "X-Vault-Token: $VAULT_TOKEN" \
+                      "$VAULT_ADDR/v1/secret/metadata/${prefix%/}" \
+                      | jq -r '.data.keys[]?' || true)
+                    for k in $keys; do
+                      echo "[vault-gc] purge secret/${prefix}${k}"
+                      curl -sf -X DELETE -H "X-Vault-Token: $VAULT_TOKEN" \
+                        "$VAULT_ADDR/v1/secret/metadata/${prefix}${k}" >/dev/null
+                    done
                   done
               securityContext:
                 allowPrivilegeEscalation: false
