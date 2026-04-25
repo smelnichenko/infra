@@ -100,6 +100,20 @@ scyllaOperator:
       keyspace: ["chat"]
       location: ["s3:scylla-backups"]
       retention: 7
+  # Plan 069 — operator-managed backup + repair via ScyllaDB Manager.
+  scyllaManager:
+    enabled: true
+    backup:
+      enabled: true
+      cron: "0 3 * * *"
+      retention: 7
+      location: "s3:schnappy-backups/scylla"
+    repair:
+      enabled: true
+      cron: "0 4 * * 0"
+      intensity: 1.0
+      parallel: 1
+      smallTableThreshold: "1GiB"
 
 minio:
   enabled: true

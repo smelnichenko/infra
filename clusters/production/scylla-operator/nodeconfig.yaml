@@ -1,0 +1,28 @@
+# Plan 069 — host-level Scylla tuning on `ten` (CPU pinning + hugepages
+# + IRQ tuning). Cluster-scoped CR; the operator's privileged host Job
+# applies cpuset / vm.nr_hugepages / IRQ-balancer settings.
+#
+# Prereqs:
+#   - kubelet `cpuManagerPolicy: static` (set in setup-kubeadm.yml)
+#   - `ten` reboot to land hugepages cleanly (sysctl works hot too,
+#     but a clean boot is the safer rollout)
+#
+# Effect:
+#   - Scylla shards pinned to dedicated cores via cpuset
+#   - 1024 × 2MiB hugepages reserved for shard memory
+#   - irqbalance disabled so NIC/timer IRQs don't disrupt shards
+apiVersion: scylla.scylladb.com/v1alpha1
+kind: NodeConfig
+metadata:
+  name: ten-tuning
+spec:
+  placement:
+    nodeSelector:
+      kubernetes.io/hostname: ten
+  localDiskSetup:
+    raids: []          # single disk, no RAID
+    filesystems: []    # already mounted
+    mounts: []
+  # CPU pinning requires kubelet cpuManagerPolicy=static (handled in
+  # setup-kubeadm.yml).
+  disableOptimizations: false
