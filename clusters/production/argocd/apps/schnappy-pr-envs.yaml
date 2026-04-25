@@ -1,0 +1,98 @@
+# Plan 067 — ephemeral per-PR preview environments.
+#
+# One ApplicationSet generator per repo (monitor / chat / admin / chess /
+# site). For each open PR labelled `preview` in any of those repos,
+# Argo CD spins up a self-contained namespace `schnappy-pr-<N>` running
+# the schnappy chart with image tag pr-<N>-<sha> from Forgejo.
+#
+# - Forgejo readonly token at secret `forgejo-readonly-token` in argocd ns
+#   (delivered by ESO, see schnappy-pr-envs-secret.yaml).
+# - Argo project: `pr-envs` (sandboxed; can only touch schnappy-pr-* ns).
+# - Cert: covered by the wildcard cert in cert-manager/preview-wildcard.yaml.
+# - Per-PR data: ephemeral CNPG postgres, Valkey CR (operator), shared
+#   Kafka/Scylla/Keycloak/MinIO with per-PR topic/keyspace/client/bucket
+#   prefixes. Cleanup hook deletes the prefixed resources on PR close.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: schnappy-pr-envs
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+    - matrix:
+        generators:
+          - list:
+              elements:
+                - { repo: monitor }
+                - { repo: chat }
+                - { repo: admin }
+                - { repo: chess }
+                - { repo: site }
+          - pullRequest:
+              gitea:
+                owner: schnappy
+                repo: '{{ .repo }}'
+                api: https://git.pmon.dev
+                tokenRef:
+                  secretName: forgejo-readonly-token
+                  key: token
+              requeueAfterSeconds: 60
+              labels: ["preview"]
+  template:
+    metadata:
+      name: 'pr-{{ .number }}-{{ .repo }}'
+      labels:
+        preview-env: "true"
+        pr-number: "{{ .number }}"
+        source-repo: "{{ .repo }}"
+    spec:
+      project: pr-envs
+      source:
+        repoURL: https://git.pmon.dev/schnappy/platform.git
+        targetRevision: main
+        path: helm/schnappy
+        helm:
+          releaseName: 'pr-{{ .number }}'
+          values: |
+            namespace: schnappy-pr-{{ .number }}
+            previewMode: true
+            previewNumber: "{{ .number }}"
+            previewSourceRepo: "{{ .repo }}"
+            app:
+              image:
+                repository: git.pmon.dev/schnappy/{{ .repo }}
+                tag: 'pr-{{ .number }}-{{ .head_short_sha }}'
+            site:
+              image:
+                repository: git.pmon.dev/schnappy/site
+                tag: 'pr-{{ .number }}-{{ .head_short_sha }}'
+              dnsResolver: "10.96.0.10"
+            ingress:
+              host: 'pr-{{ .number }}.preview.pmon.dev'
+            postgres:
+              ephemeral: true
+            valkey:
+              ephemeral: true
+            kafka:
+              shared: true
+              topicPrefix: 'pr-{{ .number }}-'
+            scylla:
+              shared: true
+              keyspacePrefix: 'pr_{{ .number }}_'
+            minio:
+              shared: true
+              bucketName: 'pr-{{ .number }}'
+            keycloak:
+              realm: dev
+              clientId: 'preview-pr-{{ .number }}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: 'schnappy-pr-{{ .number }}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ApplyOutOfSyncOnly=true

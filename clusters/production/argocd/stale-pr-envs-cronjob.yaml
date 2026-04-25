@@ -1,0 +1,116 @@
+# Plan 067 §"Cleanup policy 2" — daily sweep of stale per-PR envs.
+#
+# - For every Application matching `^pr-\d+-`:
+#     - If the source PR has been closed > 24h: force-prune.
+#     - If the head SHA hasn't changed in > 7d: force-prune.
+# - Logs to stdout; alerts via the existing Mimir Argo CD pipeline if
+#   a force-prune fails.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: stale-pr-envs-sweeper
+  namespace: argocd
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: stale-pr-envs-sweeper
+  namespace: argocd
+rules:
+  - apiGroups: ["argoproj.io"]
+    resources: ["applications"]
+    verbs: ["get", "list", "delete", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: stale-pr-envs-sweeper
+  namespace: argocd
+subjects:
+  - kind: ServiceAccount
+    name: stale-pr-envs-sweeper
+    namespace: argocd
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: stale-pr-envs-sweeper
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: stale-pr-envs-sweeper
+  namespace: argocd
+spec:
+  schedule: "0 6 * * *"   # daily 06:00 UTC
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          restartPolicy: Never
+          serviceAccountName: stale-pr-envs-sweeper
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            seccompProfile: { type: RuntimeDefault }
+          containers:
+            - name: sweeper
+              image: alpine/k8s:1.34.0
+              env:
+                - name: FORGEJO_API
+                  value: https://git.pmon.dev/api/v1
+                - name: FORGEJO_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: forgejo-readonly-token
+                      key: token
+                - name: STALE_DAYS
+                  value: "7"
+                - name: CLOSED_GRACE_HOURS
+                  value: "24"
+              command:
+                - sh
+                - -c
+                - |
+                  set -eu
+                  now_epoch=$(date -u +%s)
+                  closed_grace=$(( CLOSED_GRACE_HOURS * 3600 ))
+                  stale_secs=$(( STALE_DAYS * 86400 ))
+
+                  kubectl get application -n argocd -l preview-env=true \
+                    -o json | jq -r '.items[] | [.metadata.name, .metadata.labels."pr-number", .metadata.labels."source-repo", .status.history[-1].deployedAt] | @tsv' | \
+                  while IFS=$'\t' read -r app pr repo deployed; do
+                    [ -z "$pr" ] && continue
+                    deployed_epoch=$(date -u -d "$deployed" +%s 2>/dev/null || echo 0)
+                    pr_state=$(curl -fsS -H "Authorization: token $FORGEJO_TOKEN" \
+                      "$FORGEJO_API/repos/schnappy/$repo/issues/$pr" \
+                      | jq -r '.state // "unknown"')
+                    pr_closed_at=$(curl -fsS -H "Authorization: token $FORGEJO_TOKEN" \
+                      "$FORGEJO_API/repos/schnappy/$repo/issues/$pr" \
+                      | jq -r '.closed_at // ""')
+                    if [ "$pr_state" = "closed" ] && [ -n "$pr_closed_at" ]; then
+                      closed_epoch=$(date -u -d "$pr_closed_at" +%s)
+                      if [ $((now_epoch - closed_epoch)) -gt $closed_grace ]; then
+                        echo "[prune] $app — PR closed > ${CLOSED_GRACE_HOURS}h ago"
+                        kubectl delete application -n argocd "$app"
+                        continue
+                      fi
+                    fi
+                    if [ $((now_epoch - deployed_epoch)) -gt $stale_secs ]; then
+                      echo "[prune] $app — head SHA stale > ${STALE_DAYS}d"
+                      kubectl delete application -n argocd "$app"
+                    fi
+                  done
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: [ALL]
+                readOnlyRootFilesystem: true
+              volumeMounts:
+                - { name: tmp, mountPath: /tmp }
+          volumes:
+            - { name: tmp, emptyDir: {} }

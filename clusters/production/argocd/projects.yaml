@@ -1,0 +1,94 @@
+# AppProject split (Plan 067 §3) — sandbox preview PR envs from prod.
+#
+# Three projects:
+#   - prod      : everything currently in clusters/production/argocd/apps
+#   - pr-envs   : per-PR Applications spawned by the schnappy-pr-envs
+#                 ApplicationSet. Restricted to the `schnappy-pr-*`
+#                 namespace pattern; can't touch `schnappy-production` /
+#                 `schnappy-test` / cluster-scoped resources.
+#   - infra     : low-level cluster infra (ESO, cert-manager, CNPG,
+#                 operator installs) that legitimately needs cluster
+#                 scope.
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: prod
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: Production workloads (schnappy-production / schnappy-test)
+  sourceRepos:
+    - https://git.pmon.dev/schnappy/*
+  destinations:
+    - namespace: "schnappy-production"
+      server: https://kubernetes.default.svc
+    - namespace: "schnappy-test"
+      server: https://kubernetes.default.svc
+    - namespace: "schnappy"
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - { group: "", kind: Namespace }
+  namespaceResourceWhitelist:
+    - { group: "*", kind: "*" }
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: pr-envs
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: Ephemeral per-PR preview environments — restricted scope
+  sourceRepos:
+    - https://git.pmon.dev/schnappy/platform.git
+    - https://git.pmon.dev/schnappy/infra.git
+  destinations:
+    - namespace: "schnappy-pr-*"
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - { group: "", kind: Namespace }
+  namespaceResourceWhitelist:
+    - { group: "", kind: "*" }
+    - { group: "apps", kind: "*" }
+    - { group: "batch", kind: "*" }
+    - { group: "networking.k8s.io", kind: "*" }
+    - { group: "gateway.networking.k8s.io", kind: "*" }
+    - { group: "policy", kind: "*" }
+    - { group: "external-secrets.io", kind: "*" }
+    - { group: "cert-manager.io", kind: "*" }
+    - { group: "postgresql.cnpg.io", kind: "*" }
+    - { group: "hyperspike.io", kind: "*" }            # Valkey CR
+    - { group: "kafka.strimzi.io", kind: "KafkaTopic" } # topic-only, no clusters
+  # Block creating AppProjects / cluster-wide RBAC from a PR env.
+  roles: []
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: infra
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: Cluster infra (operators, cert-manager, ESO, prometheus, scylla)
+  sourceRepos:
+    - https://git.pmon.dev/schnappy/infra.git
+    - https://git.pmon.dev/schnappy/platform.git
+    - https://*.github.io/*           # operator helm chart repos
+    - https://strimzi.io/charts/
+    - https://hyperspike.github.io/*
+    - https://charts.jetstack.io
+    - https://charts.external-secrets.io
+    - https://cloudnative-pg.github.io/charts
+    - https://scylla-operator-charts.storage.googleapis.com/stable
+    - https://prometheus-community.github.io/helm-charts
+  destinations:
+    - namespace: "*"
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - { group: "*", kind: "*" }
+  namespaceResourceWhitelist:
+    - { group: "*", kind: "*" }
