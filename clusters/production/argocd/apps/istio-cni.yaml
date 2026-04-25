@@ -33,3 +33,13 @@ spec:
       # dry-run, so fields the apiserver defaults (maxSurge,
       # revisionHistoryLimit, ...) don't show as perpetual drift.
       - ServerSideDiff=true
+      - RespectIgnoreDifferences=true
+  ignoreDifferences:
+    # Fields the apiserver defaults that the chart doesn't declare;
+    # ServerSideDiff alone wasn't clearing the status flag.
+    - group: apps
+      kind: DaemonSet
+      name: istio-cni-node
+      jsonPointers:
+        - /spec/revisionHistoryLimit
+        - /spec/updateStrategy/rollingUpdate/maxSurge
