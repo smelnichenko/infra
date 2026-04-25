@@ -24,6 +24,22 @@ fluentbit:
     requests: { cpu: "100m", memory: "128Mi" }
     limits:   { cpu: "1000m", memory: "512Mi" }
 
+openobserve:
+  enabled: true
+  image: public.ecr.aws/zinclabs/openobserve:v0.14.7
+  existingSecret: schnappy-openobserve
+  resources:
+    requests: { cpu: "100m", memory: "256Mi" }
+    limits:   { cpu: "1",    memory: "1Gi" }
+  storage:
+    size: 10Gi
+    storageClass: local-path
+  retention:
+    days: 14
+  externalSecret:
+    enabled: true
+    refreshInterval: 15m
+
 prometheus:
   enabled: true
   scrapeInterval: 15s
