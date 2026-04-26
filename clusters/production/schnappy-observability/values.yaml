@@ -10,7 +10,7 @@ clickhouse:
   image: clickhouse/clickhouse-server:24.8-alpine
   resources:
     requests: { cpu: "100m", memory: "512Mi" }
-    limits:   { cpu: "2",    memory: "2Gi" }
+    limits:   { cpu: "2",    memory: "4Gi" }
   storage:
     size: 20Gi
     storageClass: local-path
