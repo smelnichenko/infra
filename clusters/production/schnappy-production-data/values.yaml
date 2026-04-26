@@ -94,13 +94,10 @@ scyllaOperator:
   agentVersion: "3.9.0"
   developerMode: true
   backupEndpoint: http://192.168.11.5:9000
-  backups:
-    - name: daily
-      cron: "0 2 * * *"
-      keyspace: ["chat"]
-      location: ["s3:scylla-backups"]
-      retention: 7
-  # Plan 069 — operator-managed backup + repair via ScyllaDB Manager.
+  # Legacy `backups[]` removed — superseded by scyllaManager.backup
+  # (which uses the ScyllaDBManagerTask CRD). Both blocks were active
+  # at once and emitted duplicate daily-backup tasks pointing at
+  # different buckets, both nonexistent in MinIO.
   scyllaManager:
     enabled: true
     backup:
@@ -122,6 +119,7 @@ minio:
   buckets:
     - email-attachments
     - postgres-backups
+    - schnappy-backups
   image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
   storage:
     size: 20Gi
