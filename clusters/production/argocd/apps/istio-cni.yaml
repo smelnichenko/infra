@@ -29,6 +29,7 @@ spec:
       prune: true
     syncOptions:
       - ServerSideApply=true
+      - ServerSideDiff=true
       - RespectIgnoreDifferences=true
   ignoreDifferences:
     # Fields the apiserver defaults that the chart doesn't declare —
