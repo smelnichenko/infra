@@ -43,6 +43,12 @@ spec:
         - /spec/progressDeadlineSeconds
         - /spec/strategy/rollingUpdate/maxSurge
         - /spec/strategy/rollingUpdate/maxUnavailable
-        # HPA owns spec.replicas; Argo's compare flags it as drift
-        # without this entry, sending the app into a selfHeal loop.
         - /spec/replicas
+      # HPA writes via kube-controller-manager; ignoring its
+      # field-management drops replicas + a few other auto-set
+      # fields from the compare cleanly. Without this, Argo's
+      # compare-state flags the Deployment OutOfSync forever even
+      # though `argocd app diff` shows no actual diff (v3.3.x
+      # compare-vs-diff divergence).
+      managedFieldsManagers:
+        - kube-controller-manager
