@@ -142,7 +142,9 @@ chessService:
 
 tracing:
   enabled: true
-  tempoEndpoint: "http://schnappy-tempo.schnappy-infra.svc:4318/v1/traces"
+  # gRPC OTLP (port 4317) — chart default. Removing the explicit
+  # endpoint override here so chart-default `tempoEndpoint` +
+  # `tempoTransport: grpc` apply.
   samplingProbability: "0.01"
 
 smokeTest:
