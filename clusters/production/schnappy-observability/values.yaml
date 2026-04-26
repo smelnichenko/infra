@@ -29,8 +29,11 @@ openobserve:
   image: public.ecr.aws/zinclabs/openobserve:v0.14.7
   existingSecret: schnappy-openobserve
   resources:
-    requests: { cpu: "100m", memory: "256Mi" }
-    limits:   { cpu: "1",    memory: "1Gi" }
+    # 1Gi was OOMKilled under burst ingest from a Hyperfoil stress run
+    # (cluster-wide log volume + per-request log lines from the test).
+    # 4Gi gives headroom for batching/compaction without throttling.
+    requests: { cpu: "200m", memory: "512Mi" }
+    limits:   { cpu: "2",    memory: "4Gi" }
   storage:
     size: 10Gi
     storageClass: local-path
