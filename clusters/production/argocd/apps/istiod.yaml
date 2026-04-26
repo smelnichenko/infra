@@ -43,3 +43,6 @@ spec:
         - /spec/progressDeadlineSeconds
         - /spec/strategy/rollingUpdate/maxSurge
         - /spec/strategy/rollingUpdate/maxUnavailable
+        # HPA owns spec.replicas; Argo's compare flags it as drift
+        # without this entry, sending the app into a selfHeal loop.
+        - /spec/replicas
