@@ -10,14 +10,13 @@ metadata:
   name: woodpecker-server-metrics
   namespace: woodpecker
   labels:
-    app.kubernetes.io/name: woodpecker
-    app.kubernetes.io/component: server
-    app.kubernetes.io/part-of: woodpecker
+    app.kubernetes.io/name: server
+    app.kubernetes.io/instance: woodpecker
 spec:
   type: ClusterIP
   selector:
-    app.kubernetes.io/name: woodpecker
-    app.kubernetes.io/component: server
+    app.kubernetes.io/name: server
+    app.kubernetes.io/instance: woodpecker
   ports:
     - name: metrics
       port: 9001
@@ -34,16 +33,18 @@ metadata:
   name: woodpecker-server-metrics
   namespace: woodpecker
   labels:
-    app.kubernetes.io/name: woodpecker
-    app.kubernetes.io/component: server
+    app.kubernetes.io/name: server
+    app.kubernetes.io/instance: woodpecker
 spec:
   namespaceSelector:
     matchNames:
       - woodpecker
+  # Match the dedicated metrics Service (above), not the chart's
+  # main woodpecker-server (which exposes 80 + 9000 only).
   selector:
     matchLabels:
-      app.kubernetes.io/name: woodpecker
-      app.kubernetes.io/component: server
+      app.kubernetes.io/name: server
+      app.kubernetes.io/instance: woodpecker
   endpoints:
     - port: metrics
       path: /metrics
