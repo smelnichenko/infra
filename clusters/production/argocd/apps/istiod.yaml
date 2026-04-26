@@ -28,8 +28,13 @@ spec:
       selfHeal: true
       prune: true
     syncOptions:
-      - ServerSideApply=true
-      - ServerSideDiff=true
+      # CSA (default, no ServerSideApply) — Argo's compare uses the
+      # kubectl last-applied-configuration annotation as desired state,
+      # which contains exactly the chart-rendered fields. Apiserver
+      # defaults (probe defaults, dnsPolicy, strategy.type, etc.) are
+      # not in that annotation, so they're not compared and don't show
+      # as drift. SSA was tried but caused perpetual OutOfSync because
+      # it claims fieldsV1 ownership broadly.
       - RespectIgnoreDifferences=true
   ignoreDifferences:
     - group: admissionregistration.k8s.io
