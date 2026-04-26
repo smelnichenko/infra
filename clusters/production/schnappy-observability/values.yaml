@@ -77,8 +77,8 @@ tempo:
   storage: 2Gi
   storageClassName: local-path
   resources:
-    requests: { cpu: 100m, memory: 512Mi }
-    limits: { cpu: 1000m, memory: 2Gi }
+    requests: { cpu: 200m, memory: 512Mi }
+    limits: { cpu: 4000m, memory: 2Gi }
 
 grafana:
   enabled: true
