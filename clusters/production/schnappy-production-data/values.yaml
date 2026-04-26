@@ -104,7 +104,10 @@ scyllaOperator:
       enabled: true
       cron: "0 3 * * *"
       retention: 7
-      location: "s3:schnappy-backups"
+      # Pi MinIO (192.168.11.5) hosts the canonical scylla-backups
+      # bucket (preexisting). Don't invent a new bucket name —
+      # just point at what's already there.
+      location: "s3:scylla-backups"
     repair:
       enabled: true
       cron: "0 4 * * 0"
