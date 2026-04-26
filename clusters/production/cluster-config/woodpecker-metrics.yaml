@@ -1,0 +1,56 @@
+---
+# Separate Service exposing the woodpecker-server metrics port (9001).
+# The chart's main Service only exposes 80 (HTTP UI) + 9000 (gRPC for
+# agents). Prometheus scrapes via this Service using bearer auth from
+# the WOODPECKER_PROMETHEUS_AUTH_TOKEN env var (mounted from the
+# woodpecker-ci-secrets k8s Secret via extraSecretNamesForEnvFrom).
+apiVersion: v1
+kind: Service
+metadata:
+  name: woodpecker-server-metrics
+  namespace: woodpecker
+  labels:
+    app.kubernetes.io/name: woodpecker
+    app.kubernetes.io/component: server
+    app.kubernetes.io/part-of: woodpecker
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: woodpecker
+    app.kubernetes.io/component: server
+  ports:
+    - name: metrics
+      port: 9001
+      targetPort: 9001
+      protocol: TCP
+---
+# ServiceMonitor lives in `woodpecker` ns so the authorization secret
+# reference resolves to the existing woodpecker-ci-secrets Secret in
+# the same namespace. Prometheus's serviceMonitorNamespaceSelector is
+# empty (selects all namespaces), so it picks this up.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: woodpecker-server-metrics
+  namespace: woodpecker
+  labels:
+    app.kubernetes.io/name: woodpecker
+    app.kubernetes.io/component: server
+spec:
+  namespaceSelector:
+    matchNames:
+      - woodpecker
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: woodpecker
+      app.kubernetes.io/component: server
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+      scheme: http
+      authorization:
+        type: Bearer
+        credentials:
+          name: woodpecker-ci-secrets
+          key: WOODPECKER_PROMETHEUS_AUTH_TOKEN
