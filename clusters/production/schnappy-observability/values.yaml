@@ -25,13 +25,18 @@ fluentbit:
     limits:   { cpu: "1000m", memory: "512Mi" }
 
 openobserve:
-  enabled: true
+  # Retired. Logs live in ClickHouse and are queried via Grafana's
+  # ClickHouse-Logs datasource (Explore + tracesToLogsV2 from Tempo).
+  # OO was a duplicate store with extra UI; the operational cost
+  # (4Gi pod, periodic compaction stalls needing Istio retry masks,
+  # tuning every workload bump) outweighed the Discover-style UI value.
+  # Set enabled=false to drop the StatefulSet, NetworkPolicy,
+  # DestinationRule/VirtualService, fluent-bit OO output block, and
+  # let logs.pmon.dev fall back to its redirect to grafana/explore.
+  enabled: false
   image: public.ecr.aws/zinclabs/openobserve:v0.14.7
   existingSecret: schnappy-openobserve
   resources:
-    # 1Gi was OOMKilled under burst ingest from a Hyperfoil stress run
-    # (cluster-wide log volume + per-request log lines from the test).
-    # 4Gi gives headroom for batching/compaction without throttling.
     requests: { cpu: "200m", memory: "512Mi" }
     limits:   { cpu: "2",    memory: "4Gi" }
   storage:
