@@ -123,7 +123,6 @@ chessService:
 
 tracing:
   enabled: true
-  tempoEndpoint: "http://schnappy-tempo.schnappy-infra.svc:4318/v1/traces"
   samplingProbability: "1.0"
 
 smokeTest:
