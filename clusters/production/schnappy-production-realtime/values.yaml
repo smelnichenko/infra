@@ -5,11 +5,18 @@ vault:
 networkPolicies:
   enabled: true
 
-# No public ingress yet. Centrifugo runs internally — Kafka async-consumer
-# registers its group, sub-token verification is wired — clients can't
-# reach it until rt.pmon.dev is added (DNS + cert) at frontend cutover.
+# Attach Centrifugo to the existing Istio gateway via path prefix on
+# pmon.dev — same wildcard cert + DNS as the SPA. The /realtime prefix
+# is stripped before reaching the upstream so Centrifugo sees its
+# canonical paths (e.g. /connection/websocket).
 gateway:
-  enabled: false
+  enabled: true
+  name: schnappy-infra-gateway
+  namespace: schnappy-infra
+  pathPrefix: /realtime
+  hosts:
+    realtime: ""    # leave blank → path-prefix mode below
+    app: pmon.dev
 
 centrifugo:
   enabled: true
