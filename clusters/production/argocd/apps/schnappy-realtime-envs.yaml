@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: schnappy-realtime-envs
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://git.pmon.dev/schnappy/infra.git
+        revision: main
+        directories:
+          - path: "clusters/production/schnappy-*-realtime"
+  template:
+    metadata:
+      name: '{{ .path.basenameNormalized }}'
+      namespace: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      sources:
+        - repoURL: https://git.pmon.dev/schnappy/platform.git
+          targetRevision: main
+          path: helm/schnappy-realtime
+          helm:
+            releaseName: '{{ index .path.segments 2 | trimSuffix "-realtime" }}'
+            valueFiles:
+              - "$values/{{ .path.path }}/values.yaml"
+        - repoURL: https://git.pmon.dev/schnappy/infra.git
+          targetRevision: main
+          ref: values
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ index .path.segments 2 | trimSuffix "-realtime" }}'
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: true
+        syncOptions:
+          - CreateNamespace=true
+          - RespectIgnoreDifferences=true

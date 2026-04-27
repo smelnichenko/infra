@@ -71,6 +71,17 @@ kafka:
     - name: user.events
       partitions: 3
       replicationFactor: 1
+    # Plan 066 envelope topics — apps publish here, Centrifugo (Kafka
+    # async-consumer) and ClickHouse Kafka engine both consume.
+    - name: events.chat.messages
+      partitions: 12
+      replicationFactor: 1
+    - name: events.chess.moves
+      partitions: 6
+      replicationFactor: 1
+    - name: events.notifications
+      partitions: 3
+      replicationFactor: 1
 
 scylla:
   enabled: false

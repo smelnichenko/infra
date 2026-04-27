@@ -1,0 +1,94 @@
+vault:
+  secretsEnabled: true
+
+networkPolicies:
+  enabled: true
+
+# No public ingress for Centrifugo yet — Phase 1 of Plan 066 deploys
+# the broker, Kafka async-consumer registers its consumer group, and
+# we validate health before opening rt.pmon.dev. Re-enable + add
+# DNS/cert when frontend cutover begins.
+gateway:
+  enabled: false
+
+centrifugo:
+  enabled: true
+  image: centrifugo/centrifugo:v6
+  replicas: 2
+  resources:
+    requests: { cpu: "100m", memory: "128Mi" }
+    limits:   { cpu: "1",    memory: "512Mi" }
+
+  jwks:
+    publicEndpoint: "https://auth.pmon.dev/realms/schnappy/protocol/openid-connect/certs"
+    audience: "centrifugo"
+
+  externalSecret:
+    enabled: true
+    refreshInterval: 15m
+
+  # Subscription tokens (Plan 066 Option C). Centrifugo ESO already
+  # projects sub_token_secret → CENTRIFUGO_SUB_TOKEN_SECRET.
+  subscriptionToken:
+    enabled: true
+    envVar: CENTRIFUGO_SUB_TOKEN_SECRET
+
+  # Same-namespace addressing — production runs everything in
+  # `schnappy-production` (apps + data + mesh + realtime are all the
+  # same namespace; the directory split is organizational only).
+  valkey:
+    address: "schnappy-production-valkey:6379"
+    secretName: schnappy-production-valkey
+    secretKey: VALKEY_PASSWORD
+
+  kafka:
+    enabled: true
+    brokers:
+      - "schnappy-production-kafka-bootstrap:9092"
+    consumerGroup: centrifugo
+    topics:
+      - events.chat.messages
+      - events.chess.moves
+      - events.notifications
+
+  # Topics are owned by the data chart (schnappy-data); don't double-create.
+  topics:
+    create: false
+
+  namespaces:
+    - name: chess
+      protected: true
+      presence: true
+      historySize: 200
+      historyTtl: "168h"
+      recover: true
+      forceRecovery: true
+    - name: chat
+      protected: true
+      presence: true
+      historySize: 100
+      historyTtl: "720h"
+      recover: true
+      forceRecovery: false
+    - name: notifications
+      allowedUserChannels: "$"
+      presence: false
+      historySize: 50
+      historyTtl: "168h"
+      recover: true
+      forceRecovery: false
+    - name: presence
+      allowedUserChannels: "$"
+      presence: false
+      historySize: 0
+      historyTtl: "0s"
+      recover: false
+      forceRecovery: false
+
+# Strimzi IS the operator for Kafka in this cluster — flag tells the
+# NetworkPolicy to use Strimzi pod selectors. Topic creation is gated
+# separately by `centrifugo.topics.create=false` above (data chart owns
+# the topic list).
+strimzi:
+  enabled: true
+  clusterName: schnappy-production
