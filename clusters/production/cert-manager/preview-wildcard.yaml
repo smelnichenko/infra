@@ -1,4 +1,4 @@
-# Plan 067 — wildcard TLS for ephemeral PR preview envs.
+# Wildcard TLS for ephemeral PR preview envs.
 # DNS-01 via the existing Porkbun webhook ClusterIssuer.
 apiVersion: cert-manager.io/v1
 kind: Certificate

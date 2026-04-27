@@ -5,10 +5,9 @@ vault:
 networkPolicies:
   enabled: true
 
-# No public ingress for Centrifugo yet — Phase 1 of Plan 066 deploys
-# the broker, Kafka async-consumer registers its consumer group, and
-# we validate health before opening rt.pmon.dev. Re-enable + add
-# DNS/cert when frontend cutover begins.
+# No public ingress yet. Centrifugo runs internally — Kafka async-consumer
+# registers its group, sub-token verification is wired — clients can't
+# reach it until rt.pmon.dev is added (DNS + cert) at frontend cutover.
 gateway:
   enabled: false
 
@@ -28,9 +27,9 @@ centrifugo:
     enabled: true
     refreshInterval: 15m
 
-  # Subscription tokens (Plan 066 Option C). Centrifugo reads the
-  # secret from CENTRIFUGO_CLIENT_SUBSCRIPTION_TOKEN_HMAC_SECRET_KEY
-  # (canonical env name). ESO populates from secret/schnappy/centrifugo/sub_token_secret.
+  # Per-channel subscription tokens (HS256). Centrifugo reads the secret
+  # from CENTRIFUGO_CLIENT_SUBSCRIPTION_TOKEN_HMAC_SECRET_KEY (canonical
+  # env name). ESO populates from secret/schnappy/centrifugo/sub_token_secret.
   subscriptionToken:
     enabled: true
 

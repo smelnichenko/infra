@@ -1,4 +1,4 @@
-# AppProject split (Plan 067 §3) — sandbox preview PR envs from prod.
+# AppProject split — sandbox preview PR envs from prod.
 #
 # Three projects:
 #   - prod      : everything currently in clusters/production/argocd/apps

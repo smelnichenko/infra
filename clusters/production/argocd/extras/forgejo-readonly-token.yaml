@@ -1,5 +1,5 @@
-# Plan 067 — Forgejo readonly token consumed by the schnappy-pr-envs
-# ApplicationSet (PullRequest generator). Vault path:
+# Forgejo readonly token consumed by the schnappy-pr-envs ApplicationSet
+# (PullRequest generator). Vault path:
 #   secret/argocd/forgejo-readonly { token: <forgejo PAT, public PR scope only> }
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret

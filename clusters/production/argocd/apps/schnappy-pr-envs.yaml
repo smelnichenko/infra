@@ -1,4 +1,4 @@
-# Plan 067 — ephemeral per-PR preview environments.
+# Ephemeral per-PR preview environments.
 #
 # One ApplicationSet generator per repo (monitor / chat / admin / chess /
 # site). For each open PR labelled `preview` in any of those repos,

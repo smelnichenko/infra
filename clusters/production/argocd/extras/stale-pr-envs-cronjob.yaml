@@ -1,4 +1,4 @@
-# Plan 067 §"Cleanup policy" + Vault GC.
+# PR-env cleanup policy + Vault GC.
 #
 # Daily sweep that:
 #   1. For every Argo CD Application labelled preview-env=true (i.e.

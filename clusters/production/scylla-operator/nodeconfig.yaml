@@ -1,6 +1,6 @@
-# Plan 069 — host-level Scylla tuning on `ten` (CPU pinning + hugepages
-# + IRQ tuning). Cluster-scoped CR; the operator's privileged host Job
-# applies cpuset / vm.nr_hugepages / IRQ-balancer settings.
+# Host-level Scylla tuning on `ten` — CPU pinning, hugepages, IRQ
+# tuning. Cluster-scoped CR; the operator's privileged host Job applies
+# cpuset / vm.nr_hugepages / IRQ-balancer settings.
 #
 # Prereqs:
 #   - kubelet `cpuManagerPolicy: static` (set in setup-kubeadm.yml)
