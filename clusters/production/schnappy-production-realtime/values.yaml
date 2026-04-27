@@ -1,3 +1,4 @@
+# (cache-bust: force fresh manifest render on Argo's repo-server)
 vault:
   secretsEnabled: true
 
