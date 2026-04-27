@@ -27,11 +27,11 @@ centrifugo:
     enabled: true
     refreshInterval: 15m
 
-  # Subscription tokens (Plan 066 Option C). Centrifugo ESO already
-  # projects sub_token_secret → CENTRIFUGO_SUB_TOKEN_SECRET.
+  # Subscription tokens (Plan 066 Option C). Centrifugo reads the
+  # secret from CENTRIFUGO_CLIENT_SUBSCRIPTION_TOKEN_HMAC_SECRET_KEY
+  # (canonical env name). ESO populates from secret/schnappy/centrifugo/sub_token_secret.
   subscriptionToken:
     enabled: true
-    envVar: CENTRIFUGO_SUB_TOKEN_SECRET
 
   # Same-namespace addressing — production runs everything in
   # `schnappy-production` (apps + data + mesh + realtime are all the
