@@ -13,7 +13,7 @@ gateway:
 
 centrifugo:
   enabled: true
-  image: centrifugo/centrifugo:v6
+  image: centrifugo/centrifugo:v6.7.1
   replicas: 2
   resources:
     requests: { cpu: "100m", memory: "128Mi" }
