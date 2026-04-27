@@ -145,7 +145,7 @@ tracing:
   # gRPC OTLP (port 4317) — chart default. Removing the explicit
   # endpoint override here so chart-default `tempoEndpoint` +
   # `tempoTransport: grpc` apply.
-  samplingProbability: "0.005"
+  samplingProbability: "0.01"
 
 smokeTest:
   enabled: true
