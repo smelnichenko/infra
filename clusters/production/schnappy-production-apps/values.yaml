@@ -178,3 +178,8 @@ keycloak:
   clients:
     adminService:
       enabled: true
+
+# Admin mints Centrifugo channel subscription tokens for chat + chess.
+# Requires schnappy-realtime chart deployed in the same namespace.
+realtime:
+  enabled: true
