@@ -129,3 +129,8 @@ reports:
 runbooks:
   enabled: true
   image: nginx:1.27-alpine
+
+smartctl:
+  enabled: true
+  host: "192.168.11.2"
+  port: 9633
