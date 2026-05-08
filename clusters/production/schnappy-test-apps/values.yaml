@@ -32,7 +32,7 @@ games:
     path: game
     image:
       repository: git.pmon.dev/schnappy/game-scp
-      tag: "e804131"  # game-scp
+      tag: "dc47352"  # game-scp
     resources:
       requests: { cpu: 10m, memory: 32Mi }
       limits: { cpu: 100m, memory: 128Mi }
