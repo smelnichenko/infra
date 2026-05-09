@@ -1,5 +1,10 @@
 server:
   createAgentSecret: false
+  # Bumped past chart's bundled appVersion. Chart 3.5.1 ships v3.13.0;
+  # Woodpecker UI prompts to update to v3.14.0 (released 2026-05-01).
+  # Drop these overrides once chart 3.6.x ships v3.14.0+.
+  image:
+    tag: "v3.14.0"
   env:
     WOODPECKER_HOST: "https://ci.pmon.dev"
     WOODPECKER_FORGEJO: "true"
@@ -27,6 +32,8 @@ server:
     size: 1Gi
     storageClass: local-path
 agent:
+  image:
+    tag: "v3.14.0"
   env:
     WOODPECKER_SERVER: "woodpecker-server:9000"
     WOODPECKER_BACKEND: "kubernetes"
