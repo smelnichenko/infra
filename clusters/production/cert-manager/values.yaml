@@ -3,6 +3,12 @@ global:
 crds:
   enabled: true
 maxConcurrentChallenges: 1
+# DNS-01 must resolve via public resolvers: the LAN resolver is authoritative
+# for pmon.dev (hairpin override to the node IP) and returns empty SOA answers,
+# which makes cert-manager's zone discovery walk up to the TLD and ask Porkbun
+# for the wrong zone.
+dns01RecursiveNameservers: "1.1.1.1:53,8.8.8.8:53"
+dns01RecursiveNameserversOnly: true
 extraArgs:
   - --feature-gates=ExperimentalGatewayAPISupport=true
 resources:
