@@ -142,6 +142,7 @@ strimzi:
 
 cnpg:
   enabled: true
+  instances: 2   # primary + 1 streaming replica — pod-level HA; CNPG manages PDB/failover
   import: false
   recovery: false
   backup: true
