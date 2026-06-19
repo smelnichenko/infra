@@ -26,7 +26,10 @@ spec:
   syncPolicy:
     automated:
       selfHeal: true
-      prune: true
+      # prune stays OFF on the root app-of-apps: a bad ApplicationSet render or a
+      # force-sync must never cascade-delete every child Application. Leaf stateless
+      # apps keep their own prune; removing a child here is a deliberate manual delete.
+      prune: false
     syncOptions:
       - ServerSideApply=false
       - RespectIgnoreDifferences=true
