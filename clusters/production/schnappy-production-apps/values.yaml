@@ -20,7 +20,10 @@ app:
     idleTimeout: 300000
     maxLifetime: 1200000
   resources:
-    requests: { cpu: 3000m, memory: 3Gi, ephemeral-storage: 256Mi }
+    # CPU request right-sized from 3000m: it reserves whole cores the app never
+    # uses at rest (node-wide actual CPU is ~5%), which blocked rolling-update
+    # surge on the single node. The 6000m limit keeps burst headroom for load.
+    requests: { cpu: 750m, memory: 3Gi, ephemeral-storage: 256Mi }
     limits: { cpu: 6000m, memory: 4Gi, ephemeral-storage: 1Gi }
 
 site:
