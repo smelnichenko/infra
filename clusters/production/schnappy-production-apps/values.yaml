@@ -20,10 +20,11 @@ app:
     idleTimeout: 300000
     maxLifetime: 1200000
   resources:
-    # CPU request right-sized from 3000m: it reserves whole cores the app never
-    # uses at rest (node-wide actual CPU is ~5%), which blocked rolling-update
-    # surge on the single node. The 6000m limit keeps burst headroom for load.
-    requests: { cpu: 750m, memory: 3Gi, ephemeral-storage: 256Mi }
+    # CPU request sized from the load test: monitor peaks ~4.4 cores under a
+    # 1000 req/s stress run, so 1500m is a sane guaranteed floor while the 6000m
+    # limit absorbs the burst. The single-node rolling-update wedge is handled
+    # by maxSurge:0 on the Deployment, not by starving this request.
+    requests: { cpu: 1500m, memory: 3Gi, ephemeral-storage: 256Mi }
     limits: { cpu: 6000m, memory: 4Gi, ephemeral-storage: 1Gi }
 
 site:
