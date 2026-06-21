@@ -121,6 +121,10 @@ kubeStateMetrics:
     requests: { cpu: 25m, memory: 128Mi }
     limits: { cpu: 200m, memory: 512Mi }
 
+# Persistent metric sink for the manually-triggered DR drill (task dr:drill).
+pushgateway:
+  enabled: true
+
 reports:
   enabled: true
   image: nginx:1.27-alpine
