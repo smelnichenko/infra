@@ -90,7 +90,7 @@ admin:
   image:
     repository: git.pmon.dev/schnappy/admin
     pullPolicy: IfNotPresent
-    tag: "f826585"  # admin
+    tag: "6a2418d"  # admin
   replicas: 1
   javaOpts: -Xmx512m -XX:+UseZGC
   resources:
