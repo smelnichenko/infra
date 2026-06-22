@@ -125,10 +125,9 @@ minio:
   buckets:
     - email-attachments
     - postgres-backups
-    # schnappy-backups (scylla manager) — created out-of-band via mc
-    # exec inside the minio pod; the bootstrap Job here can't reach
-    # minio:9000 from outside the mesh (AuthZ requires SPIFFE identity)
-    # and re-running it as a sidecar-injected Job is fragile.
+    # Scylla Manager backs up to Pi MinIO's scylla-backups bucket
+    # (see scyllaManager.backup.location above), not to a bucket on
+    # this in-cluster MinIO.
   image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
   storage:
     size: 20Gi
