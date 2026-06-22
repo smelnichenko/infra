@@ -125,7 +125,7 @@ chatService:
   image:
     repository: git.pmon.dev/schnappy/chat
     pullPolicy: IfNotPresent
-    tag: "9216320"  # chat
+    tag: "d8dc29d"  # chat
   replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
@@ -137,7 +137,7 @@ chessService:
   image:
     repository: git.pmon.dev/schnappy/chess
     pullPolicy: IfNotPresent
-    tag: "d58722c"  # chess
+    tag: "58923b2"  # chess
   replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
