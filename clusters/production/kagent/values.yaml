@@ -277,15 +277,26 @@ cilium-debug-agent:
 
 # ---------------------------------------------------------------------------
 # Footprint trimming on the single node — disable optional MCP add-ons we don't
-# need in Phase 1. grafana-mcp needs a Grafana SA token we haven't provisioned;
-# querydoc is a docs-RAG sidecar (and would need an OpenAI key); kmcp manages
+# need. querydoc is a docs-RAG sidecar (and would need an OpenAI key); kmcp manages
 # user-authored MCPServer CRDs we don't ship yet.
-grafana-mcp:
-  enabled: false
 querydoc:
   enabled: false
 kmcp:
   enabled: false
+
+# Grafana MCP server (mcp-grafana) — backs the observability-agent's Grafana tools.
+# Targets the cluster Grafana in schnappy-infra (not the chart-default in-namespace
+# grafana) with a read-only Viewer service-account token synced from Vault by ESO
+# (secret kagent-grafana / GRAFANA_SERVICE_ACCOUNT_TOKEN). The grafana NP in the
+# schnappy-observability chart allows kagent->grafana:3000; kagent egress already does.
+grafana-mcp:
+  enabled: true
+  grafana:
+    url: "schnappy-grafana.schnappy-infra:3000/api"
+    secretRef: kagent-grafana
+  resources:
+    requests: { cpu: 25m, memory: 64Mi }
+    limits: { memory: 256Mi }
 
 # ---------------------------------------------------------------------------
 # SSO via the bundled oauth2-proxy in trusted-proxy mode, fronting the UI.
