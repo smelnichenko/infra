@@ -19,6 +19,14 @@ providers:
     apiKeySecretRef: kagent-anthropic
     apiKeySecretKey: ANTHROPIC_API_KEY
 
+# Scope the controller to the kagent namespace — all our Agents/ModelConfigs live
+# here. Watching every namespace caches cluster-wide objects on first sync, which
+# overran the controller's startup window (exit 137, even at 1Gi); namespaced is
+# far lighter and starts fast. The tools' read-only ClusterRole is separate (below).
+rbac:
+  namespaces:
+    - kagent
+
 # ---------------------------------------------------------------------------
 # Database.
 #
