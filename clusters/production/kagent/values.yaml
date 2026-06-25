@@ -1,0 +1,317 @@
+# kagent Helm values — Phase 1 (read-only / advisory), single-node prod.
+#
+# Driven by the kagent Argo Application (clusters/production/argocd/apps/kagent.yaml).
+# Like cert-manager/kube-prometheus-stack it's an upstream OCI Helm chart fed by this
+# file via the `$values` ref — but kagent EXTENDS that with a third `path:` source for
+# its own raw CRs (namespace, mesh/network policy, route, ModelConfigs, ExternalSecrets,
+# monitoring), making it a self-contained app rather than the 2-source chart-only
+# layout those apps use. No kustomize-with-helm, no repo-server --enable-helm.
+
+# Anthropic is the only provider; we own the ModelConfig CRs (claude-sonnet /
+# claude-haiku in resources/modelconfigs.yaml), so the chart-generated default
+# ModelConfig also points at Anthropic and reads the key from our ESO-synced
+# Secret rather than an inline apiKey.
+providers:
+  default: anthropic
+  anthropic:
+    provider: Anthropic
+    model: "claude-sonnet-4-6"
+    apiKeySecretRef: kagent-anthropic
+    apiKeySecretKey: ANTHROPIC_API_KEY
+
+# ---------------------------------------------------------------------------
+# Database.
+#
+# The controller has NO SQLite fallback: its Deployment template hard-fails the
+# render unless one of database.postgres.{url,urlFile,bundled.enabled} is set,
+# and it always exports a POSTGRES_DATABASE_URL. Phase 1 runs memory/vector OFF
+# (vectorEnabled:false), but a Postgres connection is still mandatory, so we keep
+# the chart's bundled instance.
+#
+# SECURITY NOTE: the bundled instance uses hardcoded kagent/kagent credentials
+# (the chart names them dev/eval-only). That is acceptable here ONLY because the
+# database pod is network-isolated — the kagent-default NetworkPolicy denies all
+# ingress to it except from inside the namespace, and STRICT mTLS guards
+# east-west — and it holds no Vault-fed secrets. Migrating to a CNPG cluster with
+# ESO-delivered credentials is the tracked follow-up; until then do not expose
+# this Postgres beyond the namespace.
+#
+# The bundled instance renders as a plain Deployment plus a standalone RWO PVC
+# (not a StatefulSet). With memory/vector OFF the data is ephemeral session
+# state; the PVC is still swept up by Velero's all-namespaces fs-backup, so it is
+# non-critical-but-covered, not a data-loss gap pending the CNPG migration.
+database:
+  postgres:
+    vectorEnabled: false
+    bundled:
+      enabled: true
+      storage: 500Mi
+      resources:
+        requests:
+          cpu: 25m
+          memory: 128Mi
+        limits:
+          cpu: 250m
+          memory: 256Mi
+
+# ---------------------------------------------------------------------------
+# Controller — operator + REST/A2A API. SSO is enforced by the oauth2-proxy in
+# front of the UI; the controller trusts the proxy-set JWT (trusted-proxy mode).
+# ---------------------------------------------------------------------------
+controller:
+  replicas: 1
+  auth:
+    mode: trusted-proxy
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+  # Plain-HTTP /metrics so the ServiceMonitor (resources/servicemonitor.yaml) can
+  # scrape without client TLS/bearer plumbing. The dedicated metrics Service is
+  # only reachable in-namespace + from Prometheus (NetworkPolicy).
+  metrics:
+    enabled: true
+    secureServing: false
+    bindAddress: ":8443"
+    service:
+      port: 8443
+  # Stamp a stable label on every dynamically-spawned agent pod so the
+  # NetworkPolicy can scope external (Anthropic) egress to ONLY the agent
+  # runtime — the controller/ui/tools/postgres get no internet egress.
+  agentDeployment:
+    podLabels:
+      kagent.pmon.dev/egress: anthropic
+
+# UI — Next.js console. Reached only via oauth2-proxy (the HTTPRoute targets the
+# proxy, not the UI directly), so it is never exposed unauthenticated.
+ui:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 25m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
+
+# ---------------------------------------------------------------------------
+# Built-in MCP tool executor. The tool server runs the actual kubectl/k8s calls
+# under its own ServiceAccount on behalf of every agent, so its RBAC is the real
+# blast radius.
+#
+# Phase 1 is read-only/advisory FOR THE AGENT/LLM TOOL SURFACE, enforced 3 ways:
+#   - rbac.readOnly:true   → the subchart renders a get/list/watch ClusterRole
+#                            named kagent-tools-read-role (NOT the default
+#                            apiGroups/resources/verbs:["*"] cluster-admin role).
+#   - rbac.allowSecrets:false → Secrets are excluded from that role, so an agent
+#                            cannot exfiltrate Vault-fed credentials via the LLM.
+#   - tools.args: --read-only → also disables write operations at the app layer.
+#
+# SCOPE NOTE: "read-only" here means the tools SA (the SA every agent's kubectl
+# calls run under). The chart ALSO binds the separate kagent-controller SA to a
+# chart-mandated operator role with core/apps/batch/gateway write — that is the
+# operator reconciling its own Agent/ModelConfig CRs and the agent Deployments it
+# spawns, NOT an LLM-reachable surface. So the residual write blast radius in
+# Phase 1 is the controller operator, not the agents.
+#
+# The base read-only role only covers core/apps/batch/networking/autoscaling.
+# additionalRules adds get/list/watch for exactly the CRD groups the Phase-1
+# agents reason over, plus the read-only cluster-topology groups the base role
+# omits (nodes, RBAC objects, CRDs, API services, admission webhooks). Every rule
+# is get/list/watch only — no create/update/patch/delete, no `secrets`, no `*`
+# verb.
+# ---------------------------------------------------------------------------
+kagent-tools:
+  enabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+  tools:
+    # App-layer guard rail, paired with the read-only RBAC below.
+    args:
+      - "--read-only"
+    # Publish the native tools ServiceMonitor (Prometheus selects all
+    # ServiceMonitors cluster-wide; the release label is harmless convention).
+    metrics:
+      servicemonitor:
+        enabled: true
+        labels:
+          release: schnappy
+  rbac:
+    create: true
+    readOnly: true
+    allowSecrets: false
+    additionalRules:
+      # ---- cluster topology the base read-only role omits ----
+      # Nodes / componentstatuses — scheduling and node-health reasoning.
+      - apiGroups: [""]
+        resources: ["nodes", "nodes/status", "componentstatuses"]
+        verbs: ["get", "list", "watch"]
+      # Endpoints/EndpointSlices — service-to-pod resolution for debugging.
+      - apiGroups: [""]
+        resources: ["endpoints"]
+        verbs: ["get", "list", "watch"]
+      - apiGroups: ["discovery.k8s.io"]
+        resources: ["endpointslices"]
+        verbs: ["get", "list", "watch"]
+      # PVCs / PVs — storage topology.
+      - apiGroups: [""]
+        resources: ["persistentvolumeclaims", "persistentvolumes"]
+        verbs: ["get", "list", "watch"]
+      # RBAC objects — read-only, so agents can explain who-can-do-what.
+      # (Reading RoleBindings/Roles never exposes Secret contents.)
+      - apiGroups: ["rbac.authorization.k8s.io"]
+        resources: ["clusterroles", "clusterrolebindings", "roles", "rolebindings"]
+        verbs: ["get", "list", "watch"]
+      # CRD inventory + aggregated API discovery (helm/k8s agents).
+      - apiGroups: ["apiextensions.k8s.io"]
+        resources: ["customresourcedefinitions"]
+        verbs: ["get", "list", "watch"]
+      - apiGroups: ["apiregistration.k8s.io"]
+        resources: ["apiservices"]
+        verbs: ["get", "list", "watch"]
+      # Admission webhooks — diagnosing rejected applies.
+      - apiGroups: ["admissionregistration.k8s.io"]
+        resources: ["validatingwebhookconfigurations", "mutatingwebhookconfigurations"]
+        verbs: ["get", "list", "watch"]
+      # Metrics API — `kubectl top` style resource reads.
+      - apiGroups: ["metrics.k8s.io"]
+        resources: ["pods", "nodes"]
+        verbs: ["get", "list", "watch"]
+      # ---- stack CRDs the Phase-1 agents reason over: read-only get/list/watch
+      # on all CRs in these groups (one rule — resources/verbs are identical, so
+      # apiGroups just lists the groups). Istio mesh (istio-agent), Cilium
+      # (cilium-policy/debug), Gateway API, Argo CD (status/health/drift, no sync),
+      # Prometheus Operator (promql/observability), CNPG, Strimzi, Velero,
+      # External Secrets (CR status only — allowSecrets:false still denies the
+      # Secret payloads), cert-manager. ----
+      - apiGroups:
+          - networking.istio.io
+          - security.istio.io
+          - telemetry.istio.io
+          - extensions.istio.io
+          - install.istio.io
+          - cilium.io
+          - gateway.networking.k8s.io
+          - argoproj.io
+          - monitoring.coreos.com
+          - postgresql.cnpg.io
+          - kafka.strimzi.io
+          - velero.io
+          - external-secrets.io
+          - cert-manager.io
+        resources: ["*"]
+        verbs: ["get", "list", "watch"]
+
+# ---------------------------------------------------------------------------
+# Agents — Phase-1 read-only/advisory set. The three mutating agents are
+# disabled; the read-leaning ones stay (each runs its own pod).
+# ---------------------------------------------------------------------------
+argo-rollouts-agent:
+  enabled: false
+cilium-manager-agent:
+  enabled: false
+kgateway-agent:
+  enabled: false
+
+k8s-agent:
+  enabled: true
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits: { memory: 256Mi }
+istio-agent:
+  enabled: true
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits: { memory: 256Mi }
+promql-agent:
+  enabled: true
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits: { memory: 256Mi }
+observability-agent:
+  enabled: true
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits: { memory: 256Mi }
+helm-agent:
+  enabled: true
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits: { memory: 256Mi }
+cilium-policy-agent:
+  enabled: true
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits: { memory: 256Mi }
+cilium-debug-agent:
+  enabled: true
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits: { memory: 256Mi }
+
+# ---------------------------------------------------------------------------
+# Footprint trimming on the single node — disable optional MCP add-ons we don't
+# need in Phase 1. grafana-mcp needs a Grafana SA token we haven't provisioned;
+# querydoc is a docs-RAG sidecar (and would need an OpenAI key); kmcp manages
+# user-authored MCPServer CRDs we don't ship yet.
+grafana-mcp:
+  enabled: false
+querydoc:
+  enabled: false
+kmcp:
+  enabled: false
+
+# ---------------------------------------------------------------------------
+# SSO via the bundled oauth2-proxy in trusted-proxy mode, fronting the UI.
+# OIDC client (kagent-ui, confidential) + cookie-secret are delivered by ESO
+# into the kagent-oauth2-proxy Secret (resources/externalsecret-oauth2-proxy.yaml).
+# ---------------------------------------------------------------------------
+oauth2-proxy:
+  enabled: true
+  # The public entry point — give it a request floor + memory bound rather than
+  # scheduling BestEffort (every sibling pod carries a request).
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
+  redis:
+    enabled: false
+  sessionStorage:
+    type: cookie
+  config:
+    existingSecret: kagent-oauth2-proxy
+  extraEnv:
+    - name: OIDC_ISSUER_URL
+      value: "https://auth.pmon.dev/realms/schnappy"
+    - name: OIDC_REDIRECT_URL
+      value: "https://kagent.pmon.dev/oauth2/callback"
+    - name: UPSTREAM_URL
+      value: "http://kagent-ui:8080"
+  extraArgs:
+    # SECURITY: override the chart-default skip-auth-regex, which exempts
+    # `api/agentharnesses/.*/gateway` — that would leave the unauthenticated A2A
+    # agent-gateway path reachable through the proxy. Phase 1 does not expose A2A,
+    # so we drop that clause and keep ONLY the genuine login-page/static-asset
+    # exemptions (login, Next.js assets, branded images, favicon) needed for the
+    # branded login screen and k8s probes to work.
+    skip-auth-regex: "^/(login|_next/static|_next/image|login-bg\\.(jpg|png|webp)|logo-.*\\.png|favicon\\.ico).*$"
+    # Authorization gate: email_domains:["*"] admits any successfully-authenticated
+    # Keycloak user. The schnappy realm is closed-registration (self-registration
+    # was disabled), so realm membership IS the current gate. Tightening to a
+    # dedicated ops group (--allowed-group=<group>) is the follow-up once such a
+    # group exists; no group name is invented here.
+    email-domain: "*"
+    # AUTH PATH NOTE: the chart hard-codes --skip-jwt-bearer-tokens=true, so a
+    # request carrying a Bearer token the proxy can validate against the OIDC
+    # issuer is admitted WITHOUT the interactive cookie flow. Combined with the
+    # gateway no longer enforcing a JWT on kagent.pmon.dev (the schnappy-infra-mesh
+    # passthrough), oauth2-proxy's own token validation is the gate for API
+    # clients. That is intended (realm membership is closed), but it is a second
+    # auth path beyond the cookie login — kept deliberately, documented here.

@@ -1,0 +1,27 @@
+# Anthropic model configs the agents reference. The API key is delivered by ESO
+# (externalsecret-anthropic.yaml) into the kagent-anthropic Secret; we never
+# inline the key here. claude-sonnet is the default tier the agents use;
+# claude-haiku is available for cheap, high-volume tool calls.
+apiVersion: kagent.dev/v1alpha2
+kind: ModelConfig
+metadata:
+  name: claude-sonnet
+  namespace: kagent
+spec:
+  provider: Anthropic
+  model: claude-sonnet-4-6
+  apiKeySecret: kagent-anthropic
+  apiKeySecretKey: ANTHROPIC_API_KEY
+  anthropic: {}
+---
+apiVersion: kagent.dev/v1alpha2
+kind: ModelConfig
+metadata:
+  name: claude-haiku
+  namespace: kagent
+spec:
+  provider: Anthropic
+  model: claude-haiku-4-5-20251001
+  apiKeySecret: kagent-anthropic
+  apiKeySecretKey: ANTHROPIC_API_KEY
+  anthropic: {}

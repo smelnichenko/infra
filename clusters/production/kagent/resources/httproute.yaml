@@ -1,0 +1,20 @@
+# Exposes the kagent console at kagent.pmon.dev. Traffic lands on the
+# oauth2-proxy (not the UI directly), so Keycloak login is enforced before the
+# agent console is reachable. The proxy forwards to kagent-ui upstream after auth.
+# Attaches cross-namespace to the prod gateway (the gateway allows routes from All).
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: kagent
+  namespace: kagent
+spec:
+  hostnames:
+    - kagent.pmon.dev
+  parentRefs:
+    - name: schnappy-infra-gateway
+      namespace: schnappy-infra
+      sectionName: https
+  rules:
+    - backendRefs:
+        - name: kagent-oauth2-proxy
+          port: 4180

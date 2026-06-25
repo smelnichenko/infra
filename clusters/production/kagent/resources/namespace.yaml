@@ -1,0 +1,9 @@
+# The Argo Application also sets CreateNamespace=true, but we declare the namespace
+# explicitly so the istio.io/rev label is present and sidecar injection is on for
+# every kagent pod from the first sync.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kagent
+  labels:
+    istio.io/rev: default

@@ -1,0 +1,32 @@
+# Prometheus scrape config for the kagent controller's /metrics endpoint.
+#
+# The tools metrics endpoint (kagent-tools-metrics:8085) is scraped by the
+# chart's own ServiceMonitor (enabled via kagent-tools.tools.metrics.servicemonitor
+# in values.yaml). This file adds the controller manager metrics, which the chart
+# does not ship a ServiceMonitor for. The controller serves plain-HTTP metrics on
+# :8443 (controller.metrics.secureServing=false), exposed by the
+# kagent-controller-metrics Service.
+#
+# Prometheus's serviceMonitorSelector/serviceMonitorNamespaceSelector are both
+# empty (select everything), so this is picked up regardless of namespace; the
+# release label follows the platform convention.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kagent-controller
+  namespace: kagent
+  labels:
+    release: schnappy
+spec:
+  namespaceSelector:
+    matchNames:
+      - kagent
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kagent
+      app.kubernetes.io/component: controller
+  endpoints:
+    - port: http-metrics
+      path: /metrics
+      interval: 30s
+      scheme: http

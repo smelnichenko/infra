@@ -1,0 +1,23 @@
+# STRICT mTLS for all kagent workloads, matching the platform mesh pattern.
+#
+# Prometheus runs WITHOUT an Istio sidecar by design (it would otherwise need a
+# DestinationRule tls.mode=DISABLE per non-mesh scrape target). So the plaintext
+# metrics ports the ServiceMonitors scrape — controller 8443 and tools 8085 —
+# must accept non-mTLS, exactly like the platform's mimir/alertmanager/minio
+# PeerAuths. Without these PERMISSIVE exceptions the sidecar rejects the scrape
+# and metrics silently go dark (the 2026-04-20 "silent alerts" failure mode).
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: kagent
+  namespace: kagent
+spec:
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    # Controller manager /metrics (controller.metrics, plain HTTP).
+    8443:
+      mode: PERMISSIVE
+    # Tools MCP server /metrics (kagent-tools, plain HTTP).
+    8085:
+      mode: PERMISSIVE

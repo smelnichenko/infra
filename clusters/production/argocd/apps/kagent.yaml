@@ -1,0 +1,80 @@
+# kagent — in-cluster agentic AIOps assistant (Phase 1: read-only / advisory).
+#
+# Two Argo Applications, platform-native (the same multi-source `$values` pattern
+# as apps/cert-manager.yaml and apps/prometheus.yaml). No kustomize-with-helm and
+# no repo-server --enable-helm: each Application is an upstream OCI Helm chart
+# plus, for the main app, an in-repo values file and a directory of raw manifests.
+#
+# - kagent-crds (sync-wave -1): the CRDs chart, applied first so the Agent /
+#   ModelConfig CRDs exist before the main chart's CR instances reconcile.
+# - kagent (sync-wave 0): the controller/engine/ui/tools chart, our values, and
+#   our own resources/ (namespace, mesh policy, network policy, route, model
+#   configs, external secrets, monitoring).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kagent-crds
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/kagent-dev/kagent/helm
+    chart: kagent-crds
+    targetRevision: 0.9.9
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kagent
+  syncPolicy:
+    automated:
+      selfHeal: true
+      # CRDs are retained on teardown so in-flight Agent/ModelConfig objects
+      # aren't yanked mid-reconcile (matches the rollback note in the plan doc).
+      prune: false
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kagent
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    # The upstream chart, pinned, fed by the in-repo values file via $values.
+    - repoURL: ghcr.io/kagent-dev/kagent/helm
+      chart: kagent
+      targetRevision: 0.9.9
+      helm:
+        valueFiles:
+          - $values/clusters/production/kagent/values.yaml
+    # $values ref — the infra repo, used only to resolve the valueFiles path.
+    - repoURL: https://git.pmon.dev/schnappy/infra.git
+      targetRevision: main
+      ref: values
+    # Our own raw manifests layered alongside the chart output.
+    - repoURL: https://git.pmon.dev/schnappy/infra.git
+      targetRevision: main
+      path: clusters/production/kagent/resources
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kagent
+  syncPolicy:
+    automated:
+      selfHeal: true
+      # Stateful: the bundled postgres renders a standalone RWO PVC (a separate
+      # object from its Deployment) — never prune it out from under the app on a
+      # rename/move (no-prune-stateful rule).
+      prune: false
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

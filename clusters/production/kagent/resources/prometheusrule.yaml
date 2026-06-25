@@ -1,0 +1,64 @@
+# Alerting for the kagent control plane. Mirrors the platform convention:
+# severity label + runbook_url/summary/description annotations, runbooks served
+# at https://runbooks.pmon.dev/<AlertName>. Prometheus's ruleSelector is empty
+# (selects all PrometheusRules cluster-wide), so the release label is convention.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: kagent-alerts
+  namespace: kagent
+  labels:
+    release: schnappy
+spec:
+  groups:
+    - name: kagent
+      rules:
+        # UI / oauth2-proxy down — the only public entry point to the console.
+        - alert: KagentUIDown
+          expr: kube_deployment_status_replicas_available{namespace="kagent", deployment="kagent-ui"} == 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            runbook_url: "https://runbooks.pmon.dev/KagentUIDown"
+            summary: "kagent UI has no available replicas"
+            description: "The kagent-ui Deployment has 0 available replicas for 10m; the console is unreachable."
+        - alert: KagentOAuthProxyDown
+          expr: kube_deployment_status_replicas_available{namespace="kagent", deployment="kagent-oauth2-proxy"} == 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            runbook_url: "https://runbooks.pmon.dev/KagentOAuthProxyDown"
+            summary: "kagent oauth2-proxy has no available replicas"
+            description: "The kagent-oauth2-proxy Deployment has 0 available replicas for 10m; SSO login to the console is broken."
+        # Controller down — no agent reconciliation / API.
+        - alert: KagentControllerDown
+          expr: kube_deployment_status_replicas_available{namespace="kagent", deployment="kagent-controller"} == 0
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            runbook_url: "https://runbooks.pmon.dev/KagentControllerDown"
+            summary: "kagent controller has no available replicas"
+            description: "The kagent-controller Deployment has 0 available replicas for 10m; agents are not reconciled and the API is down."
+        # Controller restart-looping — usually a bad DB connection or config.
+        - alert: KagentControllerCrashLooping
+          expr: increase(kube_pod_container_status_restarts_total{namespace="kagent", pod=~"kagent-controller-.*"}[15m]) > 3
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            runbook_url: "https://runbooks.pmon.dev/KagentControllerCrashLooping"
+            summary: "kagent controller is restart-looping"
+            description: "A kagent-controller pod restarted more than 3 times in 15m; check logs (often a DB-connection or config error)."
+        # Tools server restart-looping — the MCP tool executor every agent uses.
+        - alert: KagentToolsCrashLooping
+          expr: increase(kube_pod_container_status_restarts_total{namespace="kagent", pod=~"kagent-tools-.*"}[15m]) > 3
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            runbook_url: "https://runbooks.pmon.dev/KagentToolsCrashLooping"
+            summary: "kagent tools server is restart-looping"
+            description: "A kagent-tools pod restarted more than 3 times in 15m; agents cannot run kubectl/k8s tool calls."

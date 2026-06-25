@@ -1,0 +1,167 @@
+# Namespace network policy for kagent.
+#
+# Two policies, both additive (a pod's allowed egress is the union of every
+# policy that selects it):
+#   - kagent-default       — selects every pod (default-deny + the in-cluster
+#                            allows: DNS, intra-ns, apiserver, Prometheus,
+#                            Grafana, Argo CD, istiod). NO internet egress.
+#   - kagent-agent-egress  — selects ONLY the dynamically-spawned agent pods
+#                            (label kagent.pmon.dev/egress=anthropic, stamped via
+#                            controller.agentDeployment.podLabels) and is the
+#                            ONLY policy granting external :443. So the UI, tools,
+#                            controller and postgres get no internet egress at all.
+#
+# NOTE on the kube-apiserver: under Cilium, traffic to the node host IP
+# (192.168.11.2:6443) is NOT matched by a standard NetworkPolicy ipBlock — that
+# path needs a CiliumNetworkPolicy with toEntities:host (see memory:
+# feedback_cilium_pod_to_node_ip). The agents reach the API via the in-cluster
+# ClusterIP service (kubernetes.default 10.43.0.1:443), allowed below; if direct
+# host-IP API access turns out to be needed, add a CiliumNetworkPolicy alongside.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kagent-default
+  namespace: kagent
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Kubelet health probes (node host IP → pod). With the Istio sidecar,
+    # readiness/liveness are rewritten to the pilot-agent endpoint on :15021;
+    # the kubelet source is the node host IP, which a Cilium ipBlock won't match,
+    # so this is a bare `ports` allow (no `from:`) — the platform default-deny
+    # convention. Without it the sidecars never report Ready and the sync stalls.
+    - ports:
+        - protocol: TCP
+          port: 15021
+    # Gateway (cross-namespace) → oauth2-proxy (4180) and UI (8080).
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              gateway: "true"
+          podSelector:
+            matchLabels:
+              gateway.istio.io/managed: istio.io-gateway-controller
+      ports:
+        - protocol: TCP
+          port: 4180
+        - protocol: TCP
+          port: 8080
+    # Intra-namespace traffic (controller ↔ engine ↔ tools ↔ ui ↔ agents ↔ db).
+    - from:
+        - podSelector: {}
+    # Prometheus scraping — restricted to the two metrics ports we expose:
+    # the tools metrics endpoint (8085) and the controller metrics endpoint (8443).
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: schnappy-infra
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - protocol: TCP
+          port: 8085
+        - protocol: TCP
+          port: 8443
+  egress:
+    # DNS
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Intra-namespace traffic.
+    - to:
+        - podSelector: {}
+    # kube-apiserver via the in-cluster ClusterIP service (kubernetes.default).
+    - to:
+        - ipBlock:
+            cidr: 10.43.0.1/32
+      ports:
+        - protocol: TCP
+          port: 443
+    # istiod (sidecar xDS / CA). namespaceSelector only — matches the cluster
+    # convention (schnappy-default-deny); everything in istio-system is trusted
+    # infra, and a podSelector on app:istiod would silently break mTLS if that
+    # upstream label ever changes.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: istio-system
+      ports:
+        - protocol: TCP
+          port: 15012
+        - protocol: TCP
+          port: 15010
+        - protocol: TCP
+          port: 15014
+        - protocol: TCP
+          port: 443
+    # Prometheus (promql / observability agents query metrics).
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: schnappy-infra
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - protocol: TCP
+          port: 9090
+    # Grafana (observability agent reads dashboards/alerts). The grafana pod is
+    # labelled app.kubernetes.io/component=grafana (its name label is "schnappy",
+    # not "grafana"), so select on the component label.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: schnappy-infra
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/component: grafana
+      ports:
+        - protocol: TCP
+          port: 3000
+    # Argo CD API server (argo reasoning: sync status / health / drift). The
+    # argocd-server pod listens on 8080 (the Service maps 80/443 → 8080); a
+    # NetworkPolicy egress port is the destination POD port, so allow 8080 only.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: argocd
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: argocd-server
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+# External (Anthropic) egress, scoped to the agent pods only. The agent runtime
+# is what makes the outbound LLM call; the controller/ui/tools/postgres do not,
+# so only pods carrying the kagent.pmon.dev/egress=anthropic label (set on every
+# agent pod via controller.agentDeployment.podLabels) get internet :443.
+# 0.0.0.0/0 minus RFC1918 mirrors the monitor app's external-HTTPS rule.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kagent-agent-egress
+  namespace: kagent
+spec:
+  podSelector:
+    matchLabels:
+      kagent.pmon.dev/egress: anthropic
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
