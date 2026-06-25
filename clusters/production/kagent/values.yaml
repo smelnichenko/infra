@@ -343,6 +343,12 @@ oauth2-proxy:
     # dedicated ops group (--allowed-group=<group>) is the follow-up once such a
     # group exists; no group name is invented here.
     email-domain: "*"
+    # Drop the chart-default `groups` scope. kagent authenticates via trusted-proxy
+    # on the `sub` claim (no group-based authz / --allowed-group), and the kagent-ui
+    # Keycloak client has no `groups` client scope assigned — requesting it makes
+    # Keycloak reject the login with `invalid_scope`. Re-add (after assigning the
+    # scope in Keycloak) if/when group-gating lands.
+    scope: "openid profile email"
     # AUTH PATH NOTE: the chart hard-codes --skip-jwt-bearer-tokens=true, so a
     # request carrying a Bearer token the proxy can validate against the OIDC
     # issuer is admitted WITHOUT the interactive cookie flow. Combined with the
