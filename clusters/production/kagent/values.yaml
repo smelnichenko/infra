@@ -46,8 +46,10 @@ rbac:
 #
 # The bundled instance renders as a plain Deployment plus a standalone RWO PVC
 # (not a StatefulSet). With memory/vector OFF the data is ephemeral session
-# state; the PVC is still swept up by Velero's all-namespaces fs-backup, so it is
-# non-critical-but-covered, not a data-loss gap pending the CNPG migration.
+# state; the PVC is caught only by the weekly all-namespaces Velero backup
+# (full-weekly) — the daily schedule is scoped to schnappy-production and
+# excludes kagent — so it is loosely covered, not a data-loss gap pending the
+# CNPG migration.
 database:
   postgres:
     vectorEnabled: false
