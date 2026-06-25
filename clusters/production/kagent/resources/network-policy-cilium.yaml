@@ -1,0 +1,33 @@
+# Cilium-specific quirk: pod→kube-apiserver traffic does NOT match the standard
+# NetworkPolicy `ipBlock: 10.43.0.1/32` egress rule in network-policy.yaml.
+# With kube-proxy replacement + socket-LB, Cilium DNATs the apiserver ClusterIP
+# (10.43.0.1:443) to the backend node host IP (192.168.11.2:6443) at the source
+# socket, then evaluates egress policy against the post-DNAT destination — the
+# `host` entity. The ipBlock never matches that, so the controller's REST-mapper
+# discovery (GET https://10.43.0.1:443/api) is dropped at SYN, controller-runtime
+# manager setup loops on the failed apiserver call, and :8083 never serves Ready.
+#
+# `toEntities: host` is the established cluster convention for this exact
+# pod→node-host-IP class of traffic (see the smartctl-exporter CNP in
+# schnappy-observability, and the note already in network-policy.yaml / memory
+# feedback_cilium_pod_to_node_ip). `host` matches the node's IPs regardless of
+# interface (cilium_host, eth0, etc.). endpointSelector {} scopes to all kagent
+# pods (controller, tools, and the dynamically-spawned agent pods all legitimately
+# call the apiserver), mirroring the podSelector {} scope of kagent-default.
+# This is the Cilium belt-and-suspenders pair to the k8s ipBlock rule
+# (feedback_np_k8s_api): the existing network-policy.yaml stays untouched and
+# Cilium evaluates the union of both.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: kagent-apiserver-egress
+  namespace: kagent
+spec:
+  endpointSelector: {}
+  egress:
+    - toEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
