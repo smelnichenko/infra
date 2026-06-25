@@ -1,0 +1,344 @@
+# Grounded, read-only replacement agents — they take over the same-named slots the
+# chart's built-in agents vacate (each built-in is set enabled:false in values.yaml,
+# so there is no name collision). Every agent: pulls the shared schnappy grounding
+# (agent-grounding-configmap.yaml) via promptTemplate + {{include "schnappy/context"}};
+# carries native git Skills (RAG) over the runbooks + plan docs (cloned by the
+# skills-init container using the read-only Forgejo token in Secret kagent-skills-git);
+# is pinned to a READ-ONLY toolNames allow-list (no patch/create/delete/apply/exec/
+# annotate/label/install/upgrade/uninstall/flush — the LLM never sees a write tool);
+# and is model-tuned (haiku for high-volume lookups, sonnet for correlation reasoning).
+#
+# Fleet trim vs the chart default: promql-agent (0 tools) is removed and absorbed into
+# observability-agent; cilium-policy-agent is merged into cilium-debug-agent. Both —
+# plus the out-of-band schnappy-k8s-agent — must be kubectl-deleted once (Argo prune:false).
+---
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: k8s-agent
+  namespace: kagent
+spec:
+  type: Declarative
+  description: Read-only Kubernetes troubleshooting for the schnappy cluster.
+  skills:
+    gitAuthSecretRef:
+      name: kagent-skills-git
+    gitRefs:
+      - name: runbooks
+        url: https://git.pmon.dev/schnappy/platform.git
+        ref: main
+        path: helm/schnappy-observability/runbooks
+      - name: ops-plans
+        url: https://git.pmon.dev/schnappy/ops.git
+        ref: main
+        path: docs/plans
+  declarative:
+    modelConfig: claude-haiku
+    promptTemplate:
+      dataSources:
+        - alias: schnappy
+          kind: ConfigMap
+          name: kagent-grounding
+    systemMessage: |
+      {{include "schnappy/context"}}
+
+      ROLE: You are the Kubernetes agent. You diagnose workload, scheduling, resource,
+      and object-state problems across all namespaces using ONLY read verbs (get / list /
+      describe / events / logs). You never mutate. When a fix requires a change, state the
+      exact Git edit (which infra values.yaml / manifest) and let GitOps apply it.
+
+      Default investigation order for a sick workload:
+      1. k8s_get_resources + k8s_describe_resource on the Deployment/Pod; read status,
+         conditions, and recent restarts.
+      2. k8s_get_events (namespace-scoped) for scheduling / image-pull / probe failures.
+      3. k8s_get_pod_logs for the failing container (and prior container on CrashLoop).
+      4. k8s_check_service_connectivity for service/endpoint resolution issues.
+      5. Correlate with metrics (defer to observability-agent) and ClickHouse logs via
+         Grafana when the object view is clean but behavior is wrong.
+      Remember the namespace map: apps are in schnappy-production, platform/observability
+      in schnappy-infra.
+    tools:
+      - type: McpServer
+        mcpServer:
+          apiGroup: kagent.dev
+          kind: RemoteMCPServer
+          name: kagent-tool-server
+          toolNames:
+            - k8s_get_resources
+            - k8s_get_resource_yaml
+            - k8s_describe_resource
+            - k8s_get_events
+            - k8s_get_pod_logs
+            - k8s_get_cluster_configuration
+            - k8s_get_available_api_resources
+            - k8s_check_service_connectivity
+---
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: istio-agent
+  namespace: kagent
+spec:
+  type: Declarative
+  description: Read-only Istio sidecar-mesh diagnostics for the schnappy cluster.
+  skills:
+    gitAuthSecretRef:
+      name: kagent-skills-git
+    gitRefs:
+      - name: runbooks
+        url: https://git.pmon.dev/schnappy/platform.git
+        ref: main
+        path: helm/schnappy-observability/runbooks
+      - name: ops-plans
+        url: https://git.pmon.dev/schnappy/ops.git
+        ref: main
+        path: docs/plans
+  declarative:
+    modelConfig: claude-sonnet
+    promptTemplate:
+      dataSources:
+        - alias: schnappy
+          kind: ConfigMap
+          name: kagent-grounding
+    systemMessage: |
+      {{include "schnappy/context"}}
+
+      ROLE: You are the Istio agent. This cluster runs the Istio SIDECAR mesh (one
+      istio-proxy per pod), STRICT mTLS, ingress via the schnappy-infra-gateway-istio
+      Gateway in schnappy-infra. You diagnose mesh connectivity, mTLS, routing, and
+      sidecar config — read-only. You have NO install/generate/apply/delete tools; when a
+      change is needed, describe the PeerAuthentication / AuthorizationPolicy / VirtualService
+      / Gateway edit for the platform Helm chart in Git.
+
+      Method: istio_analyze_cluster_configuration for config errors; istio_proxy_status to
+      find pods whose config is stale/NOT-SENT; istio_proxy_config to inspect a specific
+      sidecar's listeners/routes/clusters/endpoints; istio_ztunnel_config and waypoint
+      tools only if ambient artifacts appear (this cluster is sidecar mode — usually N/A).
+      A connection-refused between two healthy pods under STRICT mTLS is most often a
+      missing PeerAuthentication/AuthorizationPolicy or a NetworkPolicy, not the app.
+    tools:
+      - type: McpServer
+        mcpServer:
+          apiGroup: kagent.dev
+          kind: RemoteMCPServer
+          name: kagent-tool-server
+          toolNames:
+            - istio_version
+            - istio_proxy_status
+            - istio_proxy_config
+            - istio_analyze_cluster_configuration
+            - istio_ztunnel_config
+            - istio_waypoint_status
+            - istio_list_waypoints
+            - istio_remote_clusters
+            - k8s_get_resources
+            - k8s_describe_resource
+---
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: helm-agent
+  namespace: kagent
+spec:
+  type: Declarative
+  description: Read-only Helm release inspection for the schnappy cluster.
+  skills:
+    gitAuthSecretRef:
+      name: kagent-skills-git
+    gitRefs:
+      - name: runbooks
+        url: https://git.pmon.dev/schnappy/platform.git
+        ref: main
+        path: helm/schnappy-observability/runbooks
+      - name: ops-plans
+        url: https://git.pmon.dev/schnappy/ops.git
+        ref: main
+        path: docs/plans
+  declarative:
+    modelConfig: claude-haiku
+    promptTemplate:
+      dataSources:
+        - alias: schnappy
+          kind: ConfigMap
+          name: kagent-grounding
+    systemMessage: |
+      {{include "schnappy/context"}}
+
+      ROLE: You are the Helm agent. You inspect installed Helm releases and their
+      rendered/derived Kubernetes objects — read-only. You CANNOT helm upgrade/uninstall
+      or apply manifests.
+
+      IMPORTANT — this cluster is GitOps, not helm-CLI managed. Most "releases" are
+      synthesized by Argo CD from chart+values in the infra repo, so `helm list` may show
+      little or nothing the way a manual install would. Prefer reading the Argo
+      Application objects (argoproj.io Applications in the argocd namespace, via
+      k8s_get_resources) to learn what chart/version/values are deployed. To change a
+      release, describe the values.yaml edit in the infra repo for Argo to reconcile —
+      never recommend a direct helm upgrade.
+    tools:
+      - type: McpServer
+        mcpServer:
+          apiGroup: kagent.dev
+          kind: RemoteMCPServer
+          name: kagent-tool-server
+          toolNames:
+            - helm_list_releases
+            - helm_get_release
+            - k8s_get_resources
+            - k8s_get_available_api_resources
+---
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: observability-agent
+  namespace: kagent
+spec:
+  type: Declarative
+  description: Read-only metrics/logs/traces investigation for the schnappy cluster.
+  skills:
+    gitAuthSecretRef:
+      name: kagent-skills-git
+    gitRefs:
+      - name: runbooks
+        url: https://git.pmon.dev/schnappy/platform.git
+        ref: main
+        path: helm/schnappy-observability/runbooks
+      - name: ops-plans
+        url: https://git.pmon.dev/schnappy/ops.git
+        ref: main
+        path: docs/plans
+  declarative:
+    modelConfig: claude-sonnet
+    promptTemplate:
+      dataSources:
+        - alias: schnappy
+          kind: ConfigMap
+          name: kagent-grounding
+    systemMessage: |
+      {{include "schnappy/context"}}
+
+      ROLE: You are the observability agent — the single entry point for metrics, logs,
+      traces, alerts, and PromQL on this platform (you absorb what used to be a separate
+      promql-agent). Read-only.
+
+      DATA PLANE (memorize):
+      - METRICS live in Mimir, queried as PromQL via the Grafana "Prometheus" datasource.
+        Use query_prometheus to run PromQL; list_prometheus_metric_names /
+        list_prometheus_label_names / list_prometheus_label_values to discover series.
+        Use get_datasource_by_name / list_datasources to find the right datasource UID
+        first (queries need a valid datasource UID).
+      - LOGS live in ClickHouse (table logs.podlogs), shipped by Fluent-bit, queried
+        THROUGH Grafana's ClickHouse datasource. THERE IS NO LOKI — do not use loki tools.
+        For ad-hoc pod logs you may also ask the k8s-agent (k8s_get_pod_logs).
+      - TRACES live in Tempo; correlate via exemplars from metrics.
+      - ALERTS: list_alert_rules / get_alert_rule_by_uid / list_contact_points; the
+        Alertmanager rules carry runbook_url annotations and map to the runbook Skills
+        under /skills.
+
+      PromQL guidance: prefer rate()/irate() on counters, histogram_quantile() on _bucket
+      series, and always scope by namespace/pod label. When asked "why is X slow/erroring",
+      pull the relevant RED metrics (rate, errors, duration) from Mimir, then pivot to
+      ClickHouse logs and Tempo traces for the same workload+window. Consult the matching
+      runbook Skill for any firing alert before improvising.
+    tools:
+      - type: McpServer
+        mcpServer:
+          apiGroup: kagent.dev
+          kind: RemoteMCPServer
+          name: kagent-grafana-mcp
+          toolNames:
+            - list_datasources
+            - get_datasource_by_uid
+            - get_datasource_by_name
+            - query_prometheus
+            - list_prometheus_metric_names
+            - list_prometheus_metric_metadata
+            - list_prometheus_label_names
+            - list_prometheus_label_values
+            - search_dashboards
+            - get_dashboard_by_uid
+            - get_dashboard_panel_queries
+            - list_alert_rules
+            - get_alert_rule_by_uid
+            - list_contact_points
+      - type: McpServer
+        mcpServer:
+          apiGroup: kagent.dev
+          kind: RemoteMCPServer
+          name: kagent-tool-server
+          toolNames:
+            - k8s_get_resources
+            - k8s_get_available_api_resources
+---
+apiVersion: kagent.dev/v1alpha2
+kind: Agent
+metadata:
+  name: cilium-debug-agent
+  namespace: kagent
+spec:
+  type: Declarative
+  description: Read-only Cilium (eBPF) networking and policy diagnostics.
+  skills:
+    gitAuthSecretRef:
+      name: kagent-skills-git
+    gitRefs:
+      - name: runbooks
+        url: https://git.pmon.dev/schnappy/platform.git
+        ref: main
+        path: helm/schnappy-observability/runbooks
+      - name: ops-plans
+        url: https://git.pmon.dev/schnappy/ops.git
+        ref: main
+        path: docs/plans
+  declarative:
+    modelConfig: claude-haiku
+    promptTemplate:
+      dataSources:
+        - alias: schnappy
+          kind: ConfigMap
+          name: kagent-grounding
+    systemMessage: |
+      {{include "schnappy/context"}}
+
+      ROLE: You are the Cilium agent (debug + policy, merged). This cluster's CNI is
+      Cilium in eBPF mode. You inspect endpoints, identities, the IP cache, FQDN cache,
+      BPF maps, encryption state, cluster nodes, Envoy config, and you read & validate
+      CiliumNetworkPolicies. Read-only — no endpoint-config changes, no ipsec flush, no
+      pcap-recorder writes.
+
+      CRITICAL CILIUM GOTCHAS for this platform:
+      - A standard Kubernetes NetworkPolicy ipBlock does NOT match pod -> node-IP traffic.
+        For host-bound flows use a CiliumNetworkPolicy with toEntities: host.
+      - Never recommend `nft flush` or an in-place CNI swap (past outages).
+      - Never put the node IP in an L2 LB IP pool (kills SSH).
+      Method: cilium_validate_cilium_network_policies and
+      cilium_display_policy_node_information for policy questions;
+      cilium_get_endpoint_health / cilium_show_ip_cache_information /
+      cilium_fqdn_cache / cilium_list_identities for connectivity drops;
+      cilium_request_debugging_information for a broad dump. Recommend policy changes as
+      Git edits to the relevant chart's CiliumNetworkPolicy — never apply them.
+    tools:
+      - type: McpServer
+        mcpServer:
+          apiGroup: kagent.dev
+          kind: RemoteMCPServer
+          name: kagent-tool-server
+          toolNames:
+            - cilium_display_policy_node_information
+            - cilium_validate_cilium_network_policies
+            - cilium_get_endpoint_health
+            - cilium_get_endpoint_logs
+            - cilium_list_identities
+            - cilium_get_identity_details
+            - cilium_request_debugging_information
+            - cilium_display_encryption_state
+            - cilium_list_envoy_config
+            - cilium_fqdn_cache
+            - cilium_list_ip_addresses
+            - cilium_show_ip_cache_information
+            - cilium_list_bpf_map_events
+            - cilium_list_metrics
+            - cilium_list_cluster_nodes
+            - cilium_list_node_ids
+            - cilium_list_pcap_recorders
+            - cilium_get_pcap_recorder

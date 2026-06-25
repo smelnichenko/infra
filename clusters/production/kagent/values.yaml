@@ -231,8 +231,15 @@ kagent-tools:
         verbs: ["get", "list", "watch"]
 
 # ---------------------------------------------------------------------------
-# Agents — Phase-1 read-only/advisory set. The three mutating agents are
-# disabled; the read-leaning ones stay (each runs its own pod).
+# Agents. The chart's built-in agents are DISABLED here and replaced by grounded,
+# read-only, Skills-enabled Agent CRs of the same name in resources/agents.yaml —
+# the chart exposes only enabled/resources per agent (no hook for prompt / tools /
+# model / skills), so disabling the built-in frees the name slot for our CR. The
+# fleet is also trimmed: promql-agent is dropped (0 tools, absorbed into
+# observability-agent) and cilium-policy-agent is merged into cilium-debug-agent.
+# (Disabled built-ins that were already running need a one-time manual delete —
+# Argo prune:false won't remove the now-orphaned objects.) The 3 mutating agents
+# stay off.
 # ---------------------------------------------------------------------------
 argo-rollouts-agent:
   enabled: false
@@ -240,42 +247,20 @@ cilium-manager-agent:
   enabled: false
 kgateway-agent:
   enabled: false
-
 k8s-agent:
-  enabled: true
-  resources:
-    requests: { cpu: 50m, memory: 128Mi }
-    limits: { memory: 256Mi }
+  enabled: false
 istio-agent:
-  enabled: true
-  resources:
-    requests: { cpu: 50m, memory: 128Mi }
-    limits: { memory: 256Mi }
+  enabled: false
 promql-agent:
-  enabled: true
-  resources:
-    requests: { cpu: 50m, memory: 128Mi }
-    limits: { memory: 256Mi }
+  enabled: false
 observability-agent:
-  enabled: true
-  resources:
-    requests: { cpu: 50m, memory: 128Mi }
-    limits: { memory: 256Mi }
+  enabled: false
 helm-agent:
-  enabled: true
-  resources:
-    requests: { cpu: 50m, memory: 128Mi }
-    limits: { memory: 256Mi }
+  enabled: false
 cilium-policy-agent:
-  enabled: true
-  resources:
-    requests: { cpu: 50m, memory: 128Mi }
-    limits: { memory: 256Mi }
+  enabled: false
 cilium-debug-agent:
-  enabled: true
-  resources:
-    requests: { cpu: 50m, memory: 128Mi }
-    limits: { memory: 256Mi }
+  enabled: false
 
 # ---------------------------------------------------------------------------
 # Footprint trimming on the single node — disable optional MCP add-ons we don't
@@ -299,6 +284,14 @@ grafana-mcp:
     # Grafana serves plaintext on :3000; the Istio sidecar adds mTLS transparently.
     url: "http://schnappy-grafana.schnappy-infra:3000"
     secretRef: kagent-grafana
+  # Extra KEY: value pairs merged into the grafana-mcp ConfigMap and consumed via
+  # envFrom. Pin the org explicitly: the Viewer SA token is bound to "Main Org."
+  # (orgId 1, the only org), but with GRAFANA_ORG_ID unset mcp-grafana logs a
+  # per-request WARN ("No org ID found ... using default org"). This silences the
+  # warning and makes the targeted org explicit/reproducible. It does NOT change
+  # which datasources are visible (the token already resolves all 3 in org 1).
+  config:
+    GRAFANA_ORG_ID: "1"
   resources:
     requests: { cpu: 25m, memory: 64Mi }
     limits: { memory: 256Mi }
