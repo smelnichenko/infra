@@ -7,3 +7,9 @@ metadata:
   name: kagent
   labels:
     istio.io/rev: default
+    # schnappy-infra's default-deny egress NetworkPolicy only permits egress to
+    # namespaces labelled environment in [production, test]. Without this label the
+    # Istio gateway and Prometheus (both in schnappy-infra) are denied egress to
+    # kagent at the source: the gateway's SYN to oauth2-proxy:4180 and the metrics
+    # scrapes to :8085/:8443 were dropped. This puts kagent in the production scope.
+    environment: production
