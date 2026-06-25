@@ -292,7 +292,10 @@ kmcp:
 grafana-mcp:
   enabled: true
   grafana:
-    url: "schnappy-grafana.schnappy-infra:3000/api"
+    # Base URL WITH scheme and NO /api suffix — mcp-grafana appends /api/... itself,
+    # and a scheme-less value yields "https:///api/..." (no host). http:// because
+    # Grafana serves plaintext on :3000; the Istio sidecar adds mTLS transparently.
+    url: "http://schnappy-grafana.schnappy-infra:3000"
     secretRef: kagent-grafana
   resources:
     requests: { cpu: 25m, memory: 64Mi }
