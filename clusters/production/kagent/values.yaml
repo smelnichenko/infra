@@ -70,6 +70,17 @@ controller:
   replicas: 1
   auth:
     mode: trusted-proxy
+  # The controller-runtime manager's cache sync can take >60s on a busy API server,
+  # which the chart's default startup probe (delay 15s + 3x15s = 60s) kills mid-start
+  # (exit 137, "failed startup probe"). Give it generous startup headroom; the
+  # readiness probe (period 30s) governs once it's healthy.
+  startupProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 15
+    periodSeconds: 15
+    failureThreshold: 30
   resources:
     requests:
       cpu: 50m
