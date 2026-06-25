@@ -83,6 +83,15 @@ spec:
       ports:
         - protocol: TCP
           port: 443
+    # Pi Keycloak via the VIP (oauth2-proxy OIDC discovery/token + the controller's
+    # trusted-proxy JWT validation). The agent-egress policy's external-HTTPS rule
+    # excludes RFC1918, so the VIP needs its own allow (mirrors the monitor app).
+    - to:
+        - ipBlock:
+            cidr: 192.168.11.5/32
+      ports:
+        - protocol: TCP
+          port: 443
     # istiod (sidecar xDS / CA). namespaceSelector only — matches the cluster
     # convention (schnappy-default-deny); everything in istio-system is trusted
     # infra, and a podSelector on app:istiod would silently break mTLS if that

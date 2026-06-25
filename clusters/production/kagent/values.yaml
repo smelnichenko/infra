@@ -66,8 +66,10 @@ controller:
     requests:
       cpu: 50m
       memory: 128Mi
+    # Watches all namespaces (caches cluster-wide objects), so 512Mi OOMs (exit 137);
+    # 1Gi gives the controller-runtime cache headroom on first sync.
     limits:
-      memory: 512Mi
+      memory: 1Gi
   # Plain-HTTP /metrics so the ServiceMonitor (resources/servicemonitor.yaml) can
   # scrape without client TLS/bearer plumbing. The dedicated metrics Service is
   # only reachable in-namespace + from Prometheus (NetworkPolicy).
