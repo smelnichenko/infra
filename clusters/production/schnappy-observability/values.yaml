@@ -85,6 +85,9 @@ grafana:
   existingSecret: schnappy-grafana
   image: grafana/grafana:12.4.2
   host: grafana.pmon.dev
+  # kagent's grafana-mcp reaches the Grafana API with a read-only Viewer SA.
+  extraIngressNamespaces:
+    - kagent
   ingress:
     enabled: false
   oauth:
