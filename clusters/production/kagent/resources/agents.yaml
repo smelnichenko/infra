@@ -33,6 +33,14 @@ spec:
         ref: main
         path: docs/plans
   declarative:
+    # skills-init clones git.pmon.dev (192.168.11.5, the Pi VIP) during pod init —
+    # BEFORE the istio-proxy sidecar starts. istio-validation/CNI has already set up
+    # the outbound iptables redirect to the not-yet-running sidecar, so the clone gets
+    # an instant connection-refused. Exclude the git VIP from the mesh redirect so the
+    # init clone goes direct (the kagent-default NetworkPolicy already allows VIP:443).
+    deployment:
+      annotations:
+        traffic.sidecar.istio.io/excludeOutboundIPRanges: "192.168.11.5/32"
     modelConfig: claude-haiku
     promptTemplate:
       dataSources:
@@ -94,6 +102,14 @@ spec:
         ref: main
         path: docs/plans
   declarative:
+    # skills-init clones git.pmon.dev (192.168.11.5, the Pi VIP) during pod init —
+    # BEFORE the istio-proxy sidecar starts. istio-validation/CNI has already set up
+    # the outbound iptables redirect to the not-yet-running sidecar, so the clone gets
+    # an instant connection-refused. Exclude the git VIP from the mesh redirect so the
+    # init clone goes direct (the kagent-default NetworkPolicy already allows VIP:443).
+    deployment:
+      annotations:
+        traffic.sidecar.istio.io/excludeOutboundIPRanges: "192.168.11.5/32"
     modelConfig: claude-sonnet
     promptTemplate:
       dataSources:
@@ -155,6 +171,14 @@ spec:
         ref: main
         path: docs/plans
   declarative:
+    # skills-init clones git.pmon.dev (192.168.11.5, the Pi VIP) during pod init —
+    # BEFORE the istio-proxy sidecar starts. istio-validation/CNI has already set up
+    # the outbound iptables redirect to the not-yet-running sidecar, so the clone gets
+    # an instant connection-refused. Exclude the git VIP from the mesh redirect so the
+    # init clone goes direct (the kagent-default NetworkPolicy already allows VIP:443).
+    deployment:
+      annotations:
+        traffic.sidecar.istio.io/excludeOutboundIPRanges: "192.168.11.5/32"
     modelConfig: claude-haiku
     promptTemplate:
       dataSources:
@@ -208,6 +232,14 @@ spec:
         ref: main
         path: docs/plans
   declarative:
+    # skills-init clones git.pmon.dev (192.168.11.5, the Pi VIP) during pod init —
+    # BEFORE the istio-proxy sidecar starts. istio-validation/CNI has already set up
+    # the outbound iptables redirect to the not-yet-running sidecar, so the clone gets
+    # an instant connection-refused. Exclude the git VIP from the mesh redirect so the
+    # init clone goes direct (the kagent-default NetworkPolicy already allows VIP:443).
+    deployment:
+      annotations:
+        traffic.sidecar.istio.io/excludeOutboundIPRanges: "192.168.11.5/32"
     modelConfig: claude-sonnet
     promptTemplate:
       dataSources:
@@ -291,6 +323,14 @@ spec:
         ref: main
         path: docs/plans
   declarative:
+    # skills-init clones git.pmon.dev (192.168.11.5, the Pi VIP) during pod init —
+    # BEFORE the istio-proxy sidecar starts. istio-validation/CNI has already set up
+    # the outbound iptables redirect to the not-yet-running sidecar, so the clone gets
+    # an instant connection-refused. Exclude the git VIP from the mesh redirect so the
+    # init clone goes direct (the kagent-default NetworkPolicy already allows VIP:443).
+    deployment:
+      annotations:
+        traffic.sidecar.istio.io/excludeOutboundIPRanges: "192.168.11.5/32"
     modelConfig: claude-haiku
     promptTemplate:
       dataSources:
