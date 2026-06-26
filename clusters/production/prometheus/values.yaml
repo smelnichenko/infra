@@ -29,6 +29,10 @@ prometheus:
       limits: { cpu: 4000m, memory: 4Gi }
     remoteWrite:
       - url: http://schnappy-mimir.schnappy-infra.svc:9009/api/v1/push
+        # Forward the trace_id exemplars Prometheus stores (exemplar-storage) on to
+        # Mimir — without this they never leave Prometheus, so Grafana (which queries
+        # Mimir) shows no metric->trace exemplar links.
+        sendExemplars: true
     alertingEndpoints:
       - name: schnappy-alertmanager
         namespace: schnappy-infra
