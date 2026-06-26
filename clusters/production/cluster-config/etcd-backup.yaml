@@ -105,12 +105,28 @@ spec:
               volumeMounts:
                 - { name: etcd-certs, mountPath: /etc/kubernetes/pki/etcd, readOnly: true }
                 - { name: backup, mountPath: /backup }
+            - name: prepare
+              # etcdctl writes the snapshot 0600 root; make it readable so the
+              # non-root verify/upload containers can access it. Reuses the mc image
+              # (already pulled) to avoid an extra image just for chmod.
+              image: quay.io/minio/mc:latest
+              command: ["/bin/sh", "-ec"]
+              args: ["chmod 0644 /backup/etcd.db; ls -l /backup/etcd.db"]
+              securityContext:
+                runAsUser: 0
+                readOnlyRootFilesystem: true
+                allowPrivilegeEscalation: false
+                capabilities: { drop: ["ALL"] }
+              resources:
+                requests: { cpu: 20m, memory: 32Mi, ephemeral-storage: 64Mi }
+                limits: { memory: 64Mi, ephemeral-storage: 128Mi }
+              volumeMounts:
+                - { name: backup, mountPath: /backup }
             - name: verify
               image: registry.k8s.io/etcd:3.6.5-0
-              command: ["etcdctl"]
+              # snapshot status/restore moved from etcdctl to etcdutl in etcd 3.5+.
+              command: ["etcdutl"]
               args: ["snapshot", "status", "/backup/etcd.db", "-w", "table"]
-              env:
-                - { name: ETCDCTL_API, value: "3" }
               securityContext:
                 runAsNonRoot: true
                 runAsUser: 65534
