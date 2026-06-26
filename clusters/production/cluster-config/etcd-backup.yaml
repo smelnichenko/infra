@@ -1,0 +1,165 @@
+# Hourly etcd snapshot → Pi MinIO (off-node DR backup).
+#
+# Gap this closes: etcd on `ten` had only the in-tree static-pod auto-snapshots on
+# the same NVMe as live etcd — a single point of failure, and the only off-node copy
+# of cluster state. (Plan 071-A proposed this and was never built.)
+#
+# Design: a kube-system CronJob (GitOps, reuses ESO/Vault — no host binaries or
+# cred files on `ten`). Two etcd-image initContainers take + verify the snapshot
+# (the etcd image has no shell, so each is a single etcdctl invocation), then an mc
+# container uploads it to the Pi MinIO `etcd-backups` bucket with a timestamped name
+# and prunes >7d. hostNetwork is used to reach etcd on 127.0.0.1:2379; the snapshot
+# container runs as root only to read the root-owned etcd server key (read-only).
+#
+# Restore (manual, host-level): copy the .db to `ten`, `etcdctl snapshot restore`,
+# repoint the etcd static pod's data-dir, restart kubelet. See ops DR-PROCEDURE.md.
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: etcd-backup
+  namespace: kube-system
+# No RBAC: the job never touches the Kubernetes API — it snapshots etcd directly
+# and uploads to MinIO.
+automountServiceAccountToken: false
+---
+# Pi MinIO credentials (same store Velero/CNPG back up to — secret/schnappy/velero).
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: etcd-backup-minio
+  namespace: kube-system
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: vault-backend
+    kind: ClusterSecretStore
+  target:
+    name: etcd-backup-minio
+  data:
+    - secretKey: ACCESS_KEY
+      remoteRef:
+        key: secret/data/schnappy/velero
+        property: minio_access_key
+    - secretKey: SECRET_KEY
+      remoteRef:
+        key: secret/data/schnappy/velero
+        property: minio_secret_key
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: etcd-backup
+  namespace: kube-system
+  labels:
+    app: etcd-backup
+spec:
+  schedule: "0 * * * *"            # hourly, on the hour
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 600
+      template:
+        metadata:
+          labels:
+            app: etcd-backup
+        spec:
+          restartPolicy: Never
+          hostNetwork: true         # reach etcd on 127.0.0.1:2379
+          serviceAccountName: etcd-backup
+          automountServiceAccountToken: false
+          # Single node today; tolerate the control-plane taint so this still lands
+          # on the etcd node if the cluster ever grows / gets tainted.
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          initContainers:
+            - name: snapshot
+              image: registry.k8s.io/etcd:3.6.5-0
+              command: ["etcdctl"]
+              args:
+                - "--endpoints=https://127.0.0.1:2379"
+                - "--cacert=/etc/kubernetes/pki/etcd/ca.crt"
+                - "--cert=/etc/kubernetes/pki/etcd/server.crt"
+                - "--key=/etc/kubernetes/pki/etcd/server.key"
+                - "snapshot"
+                - "save"
+                - "/backup/etcd.db"
+              env:
+                - { name: ETCDCTL_API, value: "3" }
+              securityContext:
+                runAsUser: 0          # read the root-owned etcd server key (RO mount)
+                readOnlyRootFilesystem: true
+                allowPrivilegeEscalation: false
+                capabilities: { drop: ["ALL"] }
+              resources:
+                requests: { cpu: 50m, memory: 64Mi, ephemeral-storage: 256Mi }
+                limits: { memory: 256Mi, ephemeral-storage: 2Gi }
+              volumeMounts:
+                - { name: etcd-certs, mountPath: /etc/kubernetes/pki/etcd, readOnly: true }
+                - { name: backup, mountPath: /backup }
+            - name: verify
+              image: registry.k8s.io/etcd:3.6.5-0
+              command: ["etcdctl"]
+              args: ["snapshot", "status", "/backup/etcd.db", "-w", "table"]
+              env:
+                - { name: ETCDCTL_API, value: "3" }
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 65534
+                readOnlyRootFilesystem: true
+                allowPrivilegeEscalation: false
+                capabilities: { drop: ["ALL"] }
+              resources:
+                requests: { cpu: 50m, memory: 64Mi, ephemeral-storage: 256Mi }
+                limits: { memory: 256Mi, ephemeral-storage: 2Gi }
+              volumeMounts:
+                - { name: backup, mountPath: /backup, readOnly: true }
+          containers:
+            - name: upload
+              image: quay.io/minio/mc:latest
+              command: ["/bin/sh", "-ec"]
+              args:
+                - |
+                  TS=$(date +%Y%m%d-%H%M%S)
+                  mc alias set pi "http://192.168.11.5:9000" "$ACCESS_KEY" "$SECRET_KEY"
+                  mc mb --ignore-existing pi/etcd-backups
+                  mc cp /backup/etcd.db "pi/etcd-backups/etcd-${TS}.db"
+                  mc rm --recursive --force --older-than 7d pi/etcd-backups/ || true
+                  echo "etcd-backup OK: etcd-${TS}.db uploaded; current backups:"
+                  mc ls pi/etcd-backups/ | tail -5
+              env:
+                - { name: ACCESS_KEY, valueFrom: { secretKeyRef: { name: etcd-backup-minio, key: ACCESS_KEY } } }
+                - { name: SECRET_KEY, valueFrom: { secretKeyRef: { name: etcd-backup-minio, key: SECRET_KEY } } }
+                - { name: HOME, value: /tmp }
+                - { name: MC_CONFIG_DIR, value: /tmp/.mc }
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 65534
+                readOnlyRootFilesystem: true
+                allowPrivilegeEscalation: false
+                capabilities: { drop: ["ALL"] }
+              resources:
+                requests: { cpu: 50m, memory: 64Mi, ephemeral-storage: 256Mi }
+                limits: { memory: 128Mi, ephemeral-storage: 2Gi }
+              volumeMounts:
+                - { name: backup, mountPath: /backup, readOnly: true }
+                - { name: tmp, mountPath: /tmp }
+          volumes:
+            - name: etcd-certs
+              hostPath:
+                path: /etc/kubernetes/pki/etcd
+                type: Directory
+            - name: backup
+              emptyDir:
+                sizeLimit: 2Gi
+            - name: tmp
+              emptyDir:
+                sizeLimit: 64Mi
