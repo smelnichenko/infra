@@ -1,0 +1,130 @@
+# alert2agent adapter source — mounted into a stock python:3.13-slim image (the
+# code is stdlib-only, so no custom image build is needed). See alert2agent.yaml.
+apiVersion: v1
+data:
+  main.py: |
+    #!/usr/bin/env python3
+    """alert2agent — Alertmanager webhook -> kagent A2A auto-investigation adapter.
+
+    Flow: Alertmanager POSTs a webhook (Bearer == shared secret) -> we pick an agent
+    by alert labels -> POST JSON-RPC message/send to the kagent controller A2A
+    endpoint (auth = our own projected ServiceAccount token; the controller decodes
+    its `sub` and accepts it) -> email the agent's diagnosis via Resend.
+
+    No inbound k8s API access, no Keycloak client. ~110 lines incl. comments.
+    """
+    import json
+    import os
+    import smtplib
+    import ssl
+    import sys
+    import urllib.request
+    from email.message import EmailMessage
+    from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+    A2A_BASE   = os.environ["A2A_BASE"]            # http://kagent-controller.kagent.svc.cluster.local:8083
+    SA_TOKEN_F = os.environ.get("SA_TOKEN_FILE", "/var/run/secrets/kubernetes.io/serviceaccount/token")
+    WH_SECRET_F = os.environ["WEBHOOK_SECRET_FILE"]  # /etc/alert2agent/ALERTMANAGER_WEBHOOK_SECRET
+    SMTP_HOST  = os.environ.get("SMTP_HOST", "smtp.resend.com")
+    SMTP_PORT  = int(os.environ.get("SMTP_PORT", "587"))
+    SMTP_USER  = os.environ.get("SMTP_USER", "resend")
+    SMTP_PASS_F = os.environ["SMTP_PASSWORD_FILE"]   # /etc/alert2agent/MAIL_PASSWORD
+    MAIL_FROM  = os.environ.get("MAIL_FROM", "alerts@pmon.dev")
+    MAIL_TO    = os.environ["MAIL_TO"]
+    NS         = os.environ.get("KAGENT_NS", "kagent")
+    TIMEOUT    = int(os.environ.get("A2A_TIMEOUT", "120"))
+
+    def _read(p):  # tokens/secrets are projected files; re-read each time (rotation)
+        with open(p) as f:
+            return f.read().strip()
+
+    # Route by alert labels. Conservative default = k8s-agent.
+    def pick_agent(labels):
+        job = (labels.get("job", "") + " " + labels.get("alertname", "")).lower()
+        if labels.get("namespace") == "istio-system" or "istio" in job or "envoy" in job:
+            return "istio-agent"
+        if any(k in job for k in ("prometheus", "alertmanager", "mimir", "grafana", "fluentbit", "tempo", "scrape", "notification")):
+            return "observability-agent"
+        return "k8s-agent"
+
+    def build_prompt(alert):
+        L, A = alert.get("labels", {}), alert.get("annotations", {})
+        runbook = A.get("runbook_url", "")
+        return (
+            f"A Prometheus alert is FIRING in the cluster. Investigate it read-only "
+            f"(kubectl get/describe/logs, metrics, traces — never mutate) and produce a "
+            f"concise root-cause diagnosis with the single highest-confidence next action.\n\n"
+            f"Alert: {L.get('alertname','?')}  severity={L.get('severity','?')}\n"
+            f"namespace={L.get('namespace','?')}  pod={L.get('pod','-')}  job={L.get('job','-')}\n"
+            f"summary: {A.get('summary','')}\n"
+            f"description: {A.get('description','')}\n"
+            + (f"\nFirst READ this runbook and cite the relevant step in your answer: {runbook}\n" if runbook else "")
+        )
+
+    def a2a_investigate(agent, prompt):
+        url = f"{A2A_BASE}/api/a2a/{NS}/{agent}/"
+        body = json.dumps({
+            "jsonrpc": "2.0", "id": "alert", "method": "message/send",
+            "params": {"message": {"role": "user", "messageId": "alert-msg",
+                                   "parts": [{"kind": "text", "text": prompt}]}},
+        }).encode()
+        req = urllib.request.Request(url, data=body, method="POST", headers={
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + _read(SA_TOKEN_F),
+        })
+        with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
+            rpc = json.load(r)
+        # Diagnosis text lives in result.artifacts[].parts[].text (kind=task).
+        out = []
+        for art in rpc.get("result", {}).get("artifacts", []):
+            for p in art.get("parts", []):
+                if p.get("kind") == "text":
+                    out.append(p["text"])
+        return "\n".join(out) or json.dumps(rpc)[:2000]
+
+    def email(subject, body):
+        msg = EmailMessage()
+        msg["From"], msg["To"], msg["Subject"] = MAIL_FROM, MAIL_TO, subject
+        msg.set_content(body)
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as s:
+            s.starttls(context=ssl.create_default_context())
+            s.login(SMTP_USER, _read(SMTP_PASS_F))
+            s.send_message(msg)
+
+    class H(BaseHTTPRequestHandler):
+        def _send(self, code, msg=b""):
+            self.send_response(code); self.end_headers(); self.wfile.write(msg)
+
+        def do_GET(self):  # liveness
+            self._send(200, b"ok") if self.path == "/healthz" else self._send(404)
+
+        def do_POST(self):
+            if self.path != "/webhook":
+                return self._send(404)
+            # AuthN: Alertmanager sends Authorization: Bearer <shared secret>.
+            if self.headers.get("Authorization", "") != "Bearer " + _read(WH_SECRET_F):
+                return self._send(401, b"unauthorized")
+            try:
+                payload = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))))
+            except Exception:
+                return self._send(400, b"bad json")
+            self._send(202, b"accepted")  # ack fast; Alertmanager retries on non-2xx
+            # Only firing alerts; one investigation per distinct alert.
+            for alert in payload.get("alerts", []):
+                if alert.get("status") != "firing":
+                    continue
+                L = alert.get("labels", {})
+                agent = pick_agent(L)
+                try:
+                    diagnosis = a2a_investigate(agent, build_prompt(alert))
+                    email(f"[kagent:{agent}] {L.get('alertname','alert')} ({L.get('namespace','-')})",
+                          diagnosis + f"\n\n— investigated by {agent}")
+                except Exception as e:  # never crash the server on one bad alert
+                    print(f"alert2agent error agent={agent} alert={L.get('alertname')}: {e}", file=sys.stderr, flush=True)
+
+    if __name__ == "__main__":
+        ThreadingHTTPServer(("0.0.0.0", 8080), H).serve_forever()
+kind: ConfigMap
+metadata:
+  name: alert2agent-code
+  namespace: kagent

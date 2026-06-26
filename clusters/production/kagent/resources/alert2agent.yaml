@@ -1,0 +1,114 @@
+# alert2agent — Alertmanager webhook -> kagent A2A auto-investigation adapter.
+#
+# Runs the stdlib-only adapter (configmap-alert2agent-code.yaml) in a stock
+# python:3.13-slim image, so there is NO custom image to build. Flow: Alertmanager
+# POSTs a critical-alert webhook (Bearer == the shared webhook_secret) -> the adapter
+# routes by alert labels to a read-only agent -> calls the controller A2A endpoint
+# (auth = its OWN projected ServiceAccount token; the controller in trusted-proxy
+# mode decodes the token's `sub` without validating signature/issuer — see SECURITY
+# below) -> emails the agent's root-cause diagnosis via Resend.
+#
+# SECURITY: kagent v0.9.9 has no per-caller authz (the controller trusts any decodable
+# in-namespace JWT on the A2A port). The blast radius is bounded three ways: (1) the
+# agents are READ-ONLY, so a spurious call costs tokens but cannot mutate; (2) the
+# network-policy-alert2agent.yaml + STRICT mTLS limit who can reach the A2A port;
+# (3) the alert2agent SA has NO RBAC. Revisit when kagent ships authz.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: alert2agent
+  namespace: kagent
+automountServiceAccountToken: true
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alert2agent
+  namespace: kagent
+  labels:
+    app: alert2agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alert2agent
+  template:
+    metadata:
+      labels:
+        app: alert2agent
+    spec:
+      serviceAccountName: alert2agent
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: alert2agent
+          image: python:3.13-slim
+          command: ["python", "/app/main.py"]
+          env:
+            - name: A2A_BASE
+              value: http://kagent-controller.kagent.svc.cluster.local:8083
+            - name: WEBHOOK_SECRET_FILE
+              value: /etc/alert2agent/ALERTMANAGER_WEBHOOK_SECRET
+            - name: SMTP_PASSWORD_FILE
+              value: /etc/alert2agent/SMTP_PASSWORD
+            - name: MAIL_TO
+              value: sergei.melnichenko@gmail.com
+            - name: MAIL_FROM
+              value: alerts@pmon.dev
+            - name: PYTHONDONTWRITEBYTECODE
+              value: "1"
+            - name: PYTHONUNBUFFERED
+              value: "1"
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet: { path: /healthz, port: 8080 }
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          readinessProbe:
+            httpGet: { path: /healthz, port: 8080 }
+            periodSeconds: 30
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits: { memory: 64Mi }
+          volumeMounts:
+            - name: code
+              mountPath: /app
+              readOnly: true
+            - name: secrets
+              mountPath: /etc/alert2agent
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: code
+          configMap:
+            name: alert2agent-code
+        - name: secrets
+          secret:
+            secretName: alert2agent
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alert2agent
+  namespace: kagent
+  labels:
+    app: alert2agent
+spec:
+  selector:
+    app: alert2agent
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

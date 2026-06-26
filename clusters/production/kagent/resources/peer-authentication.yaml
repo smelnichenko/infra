@@ -44,3 +44,19 @@ spec:
   portLevelMtls:
     8085:
       mode: PERMISSIVE
+---
+# alert2agent webhook :8080 — Alertmanager has no Istio sidecar, so it posts the
+# webhook in plaintext; PERMISSIVE lets that in while everything else stays STRICT.
+# (The webhook is authenticated at the app layer by a shared Bearer secret.)
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: kagent-alert2agent-webhook
+  namespace: kagent
+spec:
+  selector:
+    matchLabels:
+      app: alert2agent
+  portLevelMtls:
+    8080:
+      mode: PERMISSIVE
