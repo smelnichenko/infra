@@ -1,11 +1,13 @@
-# STRICT mTLS for all kagent workloads, matching the platform mesh pattern.
+# STRICT mTLS for all kagent workloads (matching the platform mesh pattern), with
+# PERMISSIVE exceptions on the two plaintext metrics ports the sidecar-less
+# Prometheus scrapes — controller 8443 and tools 8085 — exactly like the platform's
+# mimir/alertmanager PeerAuths. Without these the sidecar rejects the scrape and
+# metrics go dark (the 2026-04-20 "silent alerts" failure mode).
 #
-# Prometheus runs WITHOUT an Istio sidecar by design (it would otherwise need a
-# DestinationRule tls.mode=DISABLE per non-mesh scrape target). So the plaintext
-# metrics ports the ServiceMonitors scrape — controller 8443 and tools 8085 —
-# must accept non-mTLS, exactly like the platform's mimir/alertmanager/minio
-# PeerAuths. Without these PERMISSIVE exceptions the sidecar rejects the scrape
-# and metrics silently go dark (the 2026-04-20 "silent alerts" failure mode).
+# Istio REQUIRES portLevelMtls to be workload-scoped: a namespace-wide PeerAuth with
+# portLevelMtls is rejected ("portLevelMtls requires selector"), which is why the
+# earlier single-object form silently never applied (kagent ran PERMISSIVE). So the
+# namespace STRICT default and the per-port exceptions are split into three objects.
 apiVersion: security.istio.io/v1
 kind: PeerAuthentication
 metadata:
@@ -14,10 +16,31 @@ metadata:
 spec:
   mtls:
     mode: STRICT
+---
+# Controller manager /metrics (controller.metrics bindAddress :8443, plain HTTP).
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: kagent-controller-metrics
+  namespace: kagent
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kagent
   portLevelMtls:
-    # Controller manager /metrics (controller.metrics, plain HTTP).
     8443:
       mode: PERMISSIVE
-    # Tools MCP server /metrics (kagent-tools, plain HTTP).
+---
+# Tools MCP server /metrics (kagent-tools :8085, plain HTTP).
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: kagent-tools-metrics
+  namespace: kagent
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kagent-tools
+  portLevelMtls:
     8085:
       mode: PERMISSIVE
