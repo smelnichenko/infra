@@ -10,11 +10,24 @@ metadata:
 spec:
   hostnames:
     - kagent.pmon.dev
+  # The Gateway-API-defaulted fields (parentRefs group/kind, backendRefs group/kind/
+  # weight, the implicit match-all path) are spelled out explicitly: the kagent Argo
+  # app uses ServerSideApply, which compares against the apiserver-defaulted live
+  # object and would otherwise flag these defaults as perpetual drift (OutOfSync).
   parentRefs:
-    - name: schnappy-infra-gateway
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: schnappy-infra-gateway
       namespace: schnappy-infra
       sectionName: https
   rules:
-    - backendRefs:
-        - name: kagent-oauth2-proxy
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: kagent-oauth2-proxy
           port: 4180
+          weight: 1
