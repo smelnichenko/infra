@@ -2,8 +2,11 @@
 # chart's built-in agents vacate (each built-in is set enabled:false in values.yaml,
 # so there is no name collision). Every agent: pulls the shared schnappy grounding
 # (agent-grounding-configmap.yaml) via promptTemplate + {{include "schnappy/context"}};
-# carries native git Skills (RAG) over the runbooks + plan docs (cloned by the
-# skills-init container using the read-only Forgejo token in Secret kagent-skills-git);
+# carries a native git Skill (RAG) over the alert runbooks — small and directly
+# alert-relevant — cloned by the skills-init container using the read-only Forgejo
+# token in Secret kagent-skills-git (the full docs/plans tree was deliberately NOT
+# made a Skill: at ~116k tokens it blew the model's context window — every prompt
+# dumps the whole corpus, since these Skills inject rather than retrieve);
 # is pinned to a READ-ONLY toolNames allow-list (no patch/create/delete/apply/exec/
 # annotate/label/install/upgrade/uninstall/flush — the LLM never sees a write tool);
 # and is model-tuned (haiku for high-volume lookups, sonnet for correlation reasoning).
@@ -28,10 +31,6 @@ spec:
         url: https://git.pmon.dev/schnappy/platform.git
         ref: main
         path: helm/schnappy-observability/runbooks
-      - name: ops-plans
-        url: https://git.pmon.dev/schnappy/ops.git
-        ref: main
-        path: docs/plans
   declarative:
     # skills-init clones git.pmon.dev (192.168.11.5, the Pi VIP) during pod init —
     # BEFORE the istio-proxy sidecar starts. istio-validation/CNI has already set up
@@ -97,10 +96,6 @@ spec:
         url: https://git.pmon.dev/schnappy/platform.git
         ref: main
         path: helm/schnappy-observability/runbooks
-      - name: ops-plans
-        url: https://git.pmon.dev/schnappy/ops.git
-        ref: main
-        path: docs/plans
   declarative:
     # skills-init clones git.pmon.dev (192.168.11.5, the Pi VIP) during pod init —
     # BEFORE the istio-proxy sidecar starts. istio-validation/CNI has already set up
@@ -166,10 +161,6 @@ spec:
         url: https://git.pmon.dev/schnappy/platform.git
         ref: main
         path: helm/schnappy-observability/runbooks
-      - name: ops-plans
-        url: https://git.pmon.dev/schnappy/ops.git
-        ref: main
-        path: docs/plans
   declarative:
     # skills-init clones git.pmon.dev (192.168.11.5, the Pi VIP) during pod init —
     # BEFORE the istio-proxy sidecar starts. istio-validation/CNI has already set up
@@ -227,10 +218,6 @@ spec:
         url: https://git.pmon.dev/schnappy/platform.git
         ref: main
         path: helm/schnappy-observability/runbooks
-      - name: ops-plans
-        url: https://git.pmon.dev/schnappy/ops.git
-        ref: main
-        path: docs/plans
   declarative:
     # skills-init clones git.pmon.dev (192.168.11.5, the Pi VIP) during pod init —
     # BEFORE the istio-proxy sidecar starts. istio-validation/CNI has already set up
@@ -318,10 +305,6 @@ spec:
         url: https://git.pmon.dev/schnappy/platform.git
         ref: main
         path: helm/schnappy-observability/runbooks
-      - name: ops-plans
-        url: https://git.pmon.dev/schnappy/ops.git
-        ref: main
-        path: docs/plans
   declarative:
     # skills-init clones git.pmon.dev (192.168.11.5, the Pi VIP) during pod init —
     # BEFORE the istio-proxy sidecar starts. istio-validation/CNI has already set up
