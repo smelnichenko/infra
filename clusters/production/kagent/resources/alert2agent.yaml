@@ -9,16 +9,19 @@
 # below) -> emails the agent's root-cause diagnosis via Resend.
 #
 # SECURITY: kagent v0.9.9 has no per-caller authz (the controller trusts any decodable
-# in-namespace JWT on the A2A port). The blast radius is bounded three ways: (1) the
-# agents are READ-ONLY, so a spurious call costs tokens but cannot mutate; (2) the
+# in-namespace JWT on the A2A port). The blast radius is bounded: (1) the agents are
+# READ-ONLY, so a spurious call costs tokens but cannot mutate; (2) the
 # network-policy-alert2agent.yaml + STRICT mTLS limit who can reach the A2A port;
-# (3) the alert2agent SA has NO RBAC. Revisit when kagent ships authz.
+# (3) the SA has NO RBAC and its token is projected with a non-apiserver audience, so
+# it cannot be replayed against the Kubernetes API. Revisit when kagent ships authz.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: alert2agent
   namespace: kagent
-automountServiceAccountToken: true
+# No default token mount — the adapter gets a scoped-audience token via the projected
+# a2a-token volume below (least privilege; the SA has no RBAC anyway).
+automountServiceAccountToken: false
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -36,8 +39,14 @@ spec:
     metadata:
       labels:
         app: alert2agent
+      annotations:
+        # Bump on every main.py change (sha256[:12] of the adapter source) so Argo
+        # re-rolls the pod to load the new ConfigMap code — a raw Deployment does not
+        # restart on a ConfigMap change by itself.
+        checksum/code: "bbc1fac09c72"
     spec:
       serviceAccountName: alert2agent
+      automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 65534
@@ -50,6 +59,8 @@ spec:
           env:
             - name: A2A_BASE
               value: http://kagent-controller.kagent.svc.cluster.local:8083
+            - name: SA_TOKEN_FILE
+              value: /var/run/secrets/a2a-token/token
             - name: WEBHOOK_SECRET_FILE
               value: /etc/alert2agent/ALERTMANAGER_WEBHOOK_SECRET
             - name: SMTP_PASSWORD_FILE
@@ -77,14 +88,17 @@ spec:
             capabilities:
               drop: ["ALL"]
           resources:
-            requests: { cpu: 10m, memory: 32Mi }
-            limits: { memory: 64Mi }
+            requests: { cpu: 10m, memory: 32Mi, ephemeral-storage: 16Mi }
+            limits: { memory: 64Mi, ephemeral-storage: 64Mi }
           volumeMounts:
             - name: code
               mountPath: /app
               readOnly: true
             - name: secrets
               mountPath: /etc/alert2agent
+              readOnly: true
+            - name: a2a-token
+              mountPath: /var/run/secrets/a2a-token
               readOnly: true
             - name: tmp
               mountPath: /tmp
@@ -95,6 +109,15 @@ spec:
         - name: secrets
           secret:
             secretName: alert2agent
+        - name: a2a-token
+          projected:
+            sources:
+              - serviceAccountToken:
+                  path: token
+                  # Non-apiserver audience: the controller only base64-decodes the sub,
+                  # but scoping the audience means this token can't hit the K8s API.
+                  audience: kagent-a2a
+                  expirationSeconds: 3600
         - name: tmp
           emptyDir: {}
 ---
