@@ -18,6 +18,7 @@ data:
     import smtplib
     import ssl
     import sys
+    import threading
     import urllib.request
     from email.message import EmailMessage
     from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -93,7 +94,13 @@ data:
 
     class H(BaseHTTPRequestHandler):
         def _send(self, code, msg=b""):
-            self.send_response(code); self.end_headers(); self.wfile.write(msg)
+            # Content-Length lets the client see a complete response and return at once;
+            # without it the client blocks until the connection closes (i.e. until the
+            # background investigation finishes), which trips Alertmanager's notify timeout.
+            self.send_response(code)
+            self.send_header("Content-Length", str(len(msg)))
+            self.end_headers()
+            self.wfile.write(msg)
 
         def do_GET(self):  # liveness
             self._send(200, b"ok") if self.path == "/healthz" else self._send(404)
@@ -109,6 +116,12 @@ data:
             except Exception:
                 return self._send(400, b"bad json")
             self._send(202, b"accepted")  # ack fast; Alertmanager retries on non-2xx
+            # Investigate off the request thread so the webhook returns immediately — an
+            # LLM investigation takes ~minutes; holding the connection that long would trip
+            # Alertmanager's notify timeout and it would retry (duplicate investigations).
+            threading.Thread(target=self._investigate, args=(payload,), daemon=True).start()
+
+        def _investigate(self, payload):
             # Only firing alerts; one investigation per distinct alert.
             for alert in payload.get("alerts", []):
                 if alert.get("status") != "firing":
@@ -119,7 +132,8 @@ data:
                     diagnosis = a2a_investigate(agent, build_prompt(alert))
                     email(f"[kagent:{agent}] {L.get('alertname','alert')} ({L.get('namespace','-')})",
                           diagnosis + f"\n\n— investigated by {agent}")
-                except Exception as e:  # never crash the server on one bad alert
+                    print(f"alert2agent OK agent={agent} alert={L.get('alertname')} -> emailed {MAIL_TO}", file=sys.stderr, flush=True)
+                except Exception as e:  # never crash on one bad alert
                     print(f"alert2agent error agent={agent} alert={L.get('alertname')}: {e}", file=sys.stderr, flush=True)
 
     if __name__ == "__main__":
