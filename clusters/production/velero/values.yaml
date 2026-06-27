@@ -19,6 +19,13 @@ configuration:
   volumeSnapshotLocation: []
   defaultVolumesToFsBackup: true
   features: ""
+  # Keep only the most recent maintenance Job per repository (chart default is 3).
+  # With 12 BackupRepositories that default leaves 36 completed maintenance pods
+  # lingering; one is plenty to inspect the last run on this single node.
+  repositoryMaintenanceJob:
+    repositoryConfigData:
+      global:
+        keepLatestMaintenanceJobs: 1
 deployNodeAgent: true
 snapshotsEnabled: false
 schedules:
