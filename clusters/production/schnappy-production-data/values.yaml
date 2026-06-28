@@ -146,7 +146,9 @@ cnpg:
   recovery: false
   backup: true
   backupEndpoint: http://192.168.11.5:9000
-  backupSecret: schnappy-production-minio-backup
+  backupSecret: schnappy-production-backup-store
+  backupAccessKeyName: ACCESS_KEY
+  backupSecretKeyName: SECRET_KEY
 
 aptCache:
   enabled: false
