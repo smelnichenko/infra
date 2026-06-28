@@ -1,4 +1,4 @@
-# Hourly etcd snapshot → Pi MinIO (off-node DR backup).
+# Hourly etcd snapshot → the Pi backup store (off-node DR backup).
 #
 # Gap this closes: etcd on `ten` had only the in-tree static-pod auto-snapshots on
 # the same NVMe as live etcd — a single point of failure, and the only off-node copy
@@ -7,7 +7,7 @@
 # Design: a kube-system CronJob (GitOps, reuses ESO/Vault — no host binaries or
 # cred files on `ten`). Two etcd-image initContainers take + verify the snapshot
 # (the etcd image has no shell, so each is a single etcdctl invocation), then an mc
-# container uploads it to the Pi MinIO `etcd-backups` bucket with a timestamped name
+# container uploads it to the Pi backup store's `etcd-backups` bucket with a timestamped name
 # and prunes >7d. hostNetwork is used to reach etcd on 127.0.0.1:2379; the snapshot
 # container runs as root only to read the root-owned etcd server key (read-only).
 #
@@ -20,10 +20,10 @@ metadata:
   name: etcd-backup
   namespace: kube-system
 # No RBAC: the job never touches the Kubernetes API — it snapshots etcd directly
-# and uploads to MinIO.
+# and uploads to the backup store.
 automountServiceAccountToken: false
 ---
-# Pi MinIO credentials (same store Velero/CNPG back up to — secret/schnappy/velero).
+# Pi backup-store credentials (same store Velero/CNPG back up to — secret/schnappy/velero).
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:

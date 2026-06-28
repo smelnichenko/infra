@@ -100,14 +100,14 @@ scyllaOperator:
   # Legacy `backups[]` removed — superseded by scyllaManager.backup
   # (which uses the ScyllaDBManagerTask CRD). Both blocks were active
   # at once and emitted duplicate daily-backup tasks pointing at
-  # different buckets, both nonexistent in MinIO.
+  # different buckets, both nonexistent in the backup store.
   scyllaManager:
     enabled: true
     backup:
       enabled: true
       cron: "0 3 * * *"
       retention: 7
-      # Pi MinIO (192.168.11.5) hosts the canonical scylla-backups
+      # The Pi backup store (192.168.11.5) hosts the canonical scylla-backups
       # bucket (preexisting). Don't invent a new bucket name —
       # just point at what's already there.
       location: "s3:scylla-backups"
@@ -125,7 +125,7 @@ minio:
   buckets:
     - email-attachments
     - postgres-backups
-    # Scylla Manager backs up to Pi MinIO's scylla-backups bucket
+    # Scylla Manager backs up to the Pi backup store's scylla-backups bucket
     # (see scyllaManager.backup.location above), not to a bucket on
     # this in-cluster MinIO.
   image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
