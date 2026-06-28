@@ -27,29 +27,6 @@ automountServiceAccountToken: false
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
-  name: etcd-backup-minio
-  namespace: kube-system
-spec:
-  refreshInterval: 1h
-  secretStoreRef:
-    name: vault-backend
-    kind: ClusterSecretStore
-  target:
-    name: etcd-backup-minio
-  data:
-    - secretKey: ACCESS_KEY
-      remoteRef:
-        key: secret/data/schnappy/velero
-        property: access_key
-    - secretKey: SECRET_KEY
-      remoteRef:
-        key: secret/data/schnappy/velero
-        property: secret_key
----
-# New neutral name; the etcd-backup-minio ExternalSecret above is retired after verify.
-apiVersion: external-secrets.io/v1
-kind: ExternalSecret
-metadata:
   name: etcd-backup-store
   namespace: kube-system
 spec:
