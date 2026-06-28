@@ -40,11 +40,11 @@ spec:
     - secretKey: ACCESS_KEY
       remoteRef:
         key: secret/data/schnappy/velero
-        property: minio_access_key
+        property: access_key
     - secretKey: SECRET_KEY
       remoteRef:
         key: secret/data/schnappy/velero
-        property: minio_secret_key
+        property: secret_key
 ---
 apiVersion: batch/v1
 kind: CronJob
