@@ -37,6 +37,19 @@ minio:
     requests: { cpu: 50m, memory: 128Mi }
     limits: { cpu: 500m, memory: 512Mi }
 
+# versitygw migration (the real target: Mimir/Tempo block storage, ~20G live).
+# Gateway only for now; the data mirror is enabled separately once the live-write
+# mirror strategy is settled. PVC sized above the ~20G payload (node has ~600G free).
+s3gw:
+  enabled: true
+  mirror: false
+  storage:
+    size: 30Gi
+    storageClass: local-path
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { cpu: "1", memory: 1Gi }
+
 strimzi:
   enabled: false
 
