@@ -20,32 +20,17 @@ scylla:
 scyllaOperator:
   enabled: false
 
-minio:
-  # DECOMMISSIONED — Mimir/Tempo/reports migrated to versitygw (s3gw). Disabled so
-  # Argo stops managing it; the Deployment/PVC are deleted manually (data app has
-  # prune:false). existingSecret kept: s3gw still references it for creds.
-  enabled: false
+# versitygw — the in-cluster S3 object store (Mimir/Tempo blocks, hyperfoil reports).
+# Cross-namespace reads allowed for Hyperfoil (production) + reports (infra). PVC
+# sized above the ~20G payload (node has ~600G free).
+s3gw:
+  enabled: true
   existingSecret: schnappy-infra-minio
-  bucket: mimir-blocks
+  allowCrossNamespace: true
   buckets:
     - mimir-blocks
     - tempo-traces
     - hyperfoil-reports
-  allowCrossNamespace: true
-  image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
-  storage:
-    size: 10Gi
-    storageClass: local-path
-  resources:
-    requests: { cpu: 50m, memory: 128Mi }
-    limits: { cpu: 500m, memory: 512Mi }
-
-# versitygw migration (the real target: Mimir/Tempo block storage, ~20G live).
-# Gateway only for now; the data mirror is enabled separately once the live-write
-# mirror strategy is settled. PVC sized above the ~20G payload (node has ~600G free).
-s3gw:
-  enabled: true
-  mirror: false
   storage:
     size: 30Gi
     storageClass: local-path

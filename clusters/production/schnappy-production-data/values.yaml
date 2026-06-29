@@ -118,28 +118,6 @@ scyllaOperator:
       parallel: 1
       smallTableThreshold: "1Gi"
 
-minio:
-  # DECOMMISSIONED — app-data minio is unused: the monitor app never wired
-  # email-attachments, hyperfoil now writes to the infra s3gw, and CNPG/Scylla
-  # back up to the Pi store. Disabled; resources deleted manually (data app
-  # prune:false). Part of the full in-cluster minio retirement.
-  enabled: false
-  existingSecret: schnappy-production-minio
-  bucket: email-attachments
-  buckets:
-    - email-attachments
-    - postgres-backups
-    # Scylla Manager backs up to the Pi backup store's scylla-backups bucket
-    # (see scyllaManager.backup.location above), not to a bucket on
-    # this in-cluster MinIO.
-  image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
-  storage:
-    size: 20Gi
-    storageClass: local-path
-  resources:
-    requests: { cpu: 100m, memory: 256Mi, ephemeral-storage: 128Mi }
-    limits: { cpu: 1000m, memory: 1Gi, ephemeral-storage: 512Mi }
-
 strimzi:
   enabled: true
 
