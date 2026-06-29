@@ -63,6 +63,17 @@ minio:
     requests: { cpu: 25m, memory: 128Mi }
     limits: { cpu: 500m, memory: 512Mi }
 
+# versitygw migration: stand the gateway up alongside MinIO. Data mirror,
+# endpoint flip, and MinIO decommission follow as subsequent gated steps.
+s3gw:
+  enabled: true
+  storage:
+    size: 5Gi
+    storageClass: local-path
+  resources:
+    requests: { cpu: 25m, memory: 128Mi }
+    limits: { cpu: 500m, memory: 512Mi }
+
 strimzi:
   enabled: true
 
