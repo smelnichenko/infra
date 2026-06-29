@@ -119,7 +119,11 @@ scyllaOperator:
       smallTableThreshold: "1Gi"
 
 minio:
-  enabled: true
+  # DECOMMISSIONED — app-data minio is unused: the monitor app never wired
+  # email-attachments, hyperfoil now writes to the infra s3gw, and CNPG/Scylla
+  # back up to the Pi store. Disabled; resources deleted manually (data app
+  # prune:false). Part of the full in-cluster minio retirement.
+  enabled: false
   existingSecret: schnappy-production-minio
   bucket: email-attachments
   buckets:
