@@ -21,7 +21,10 @@ scyllaOperator:
   enabled: false
 
 minio:
-  enabled: true
+  # DECOMMISSIONED — Mimir/Tempo/reports migrated to versitygw (s3gw). Disabled so
+  # Argo stops managing it; the Deployment/PVC are deleted manually (data app has
+  # prune:false). existingSecret kept: s3gw still references it for creds.
+  enabled: false
   existingSecret: schnappy-infra-minio
   bucket: mimir-blocks
   buckets:
