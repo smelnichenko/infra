@@ -164,8 +164,7 @@ hyperfoil:
   reportsUrl: https://reports.pmon.dev
   clientSecretName: schnappy-hyperfoil
   # Reports go to the infra s3gw (versitygw), where the reports nginx serves them.
-  # (Was schnappy-infra-minio, decommissioned in the versitygw migration.)
-  minioEndpoint: schnappy-infra-s3gw.schnappy-infra.svc:9000
+  s3Endpoint: schnappy-infra-s3gw.schnappy-infra.svc:9000
 
 # Cross-chart references (secret names for env var mounts, keycloak for admin service)
 postgres:
