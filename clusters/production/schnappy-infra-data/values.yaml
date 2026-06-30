@@ -25,11 +25,7 @@ scyllaOperator:
 # sized above the ~20G payload (node has ~600G free).
 s3gw:
   enabled: true
-  existingSecret: schnappy-infra-minio
-  # Wave-5 transitional: renders the renamed creds secret (ACCESS_KEY/SECRET_KEY)
-  # alongside schnappy-infra-minio. Consumers flip to it, then existingSecret
-  # becomes this and the old one is removed.
-  newSecretName: schnappy-infra-s3
+  existingSecret: schnappy-infra-s3
   allowCrossNamespace: true
   buckets:
     - mimir-blocks
