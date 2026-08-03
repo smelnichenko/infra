@@ -24,6 +24,14 @@ gateway:
     ci: ci.pmon.dev
     hubble: hubble.pmon.dev
 
+# Publish the Pi-hosted Keycloak's OIDC surface (schnappy realm only)
+# through the gateway so public-internet clients can log in. Paired with
+# the explicit gateway->VIP:443 egress rule in
+# cluster-config/schnappy-infra-default-deny.yaml.
+keycloakExternal:
+  enabled: true
+  address: "192.168.11.5"
+
 jwt:
   enabled: true
   issuer: https://auth.pmon.dev/realms/schnappy
