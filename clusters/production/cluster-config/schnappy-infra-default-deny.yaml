@@ -55,6 +55,15 @@ spec:
             cidr: 192.168.11.6/32
       ports:
         - { protocol: TCP, port: 8200 }
+    # Gateway egress to the Pi Caddy VIP: the external Keycloak route
+    # (schnappy-mesh keycloakExternal). Explicit even though the unscoped
+    # :443 Kubernetes-API rule above currently also matches — that rule
+    # may be tightened.
+    - to:
+        - ipBlock:
+            cidr: 192.168.11.5/32
+      ports:
+        - { protocol: TCP, port: 443 }
     # Gateway egress to all environment namespaces
     - to:
         - namespaceSelector:
