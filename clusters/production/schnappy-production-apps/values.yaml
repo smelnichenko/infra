@@ -10,7 +10,7 @@ app:
   image:
     pullPolicy: IfNotPresent
     repository: git.pmon.dev/schnappy/monitor
-    tag: "4269ecd"  # monitor
+    tag: "e39c7bb"  # monitor
   ingress:
     enabled: false
   hikari:
@@ -34,7 +34,7 @@ site:
   image:
     pullPolicy: IfNotPresent
     repository: git.pmon.dev/schnappy/site
-    tag: "755ca77"  # site
+    tag: "ded0b29"  # site
   resources:
     requests: { cpu: 100m, memory: 64Mi }
     limits: { cpu: 2000m, memory: 256Mi }
