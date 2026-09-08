@@ -146,18 +146,15 @@ chessService:
 
 tracing:
   enabled: true
-  # gRPC OTLP (port 4317) — chart default. Removing the explicit
-  # endpoint override here so chart-default `tempoEndpoint` +
-  # `tempoTransport: grpc` apply.
+  # Chart-default exporter: OTLP/HTTP to schnappy-tempo.schnappy-infra:4318
+  # (the namespace default-deny must allow that egress).
   samplingProbability: "0.01"
 
 smokeTest:
   enabled: true
   image: grafana/k6:1.7.1
-  schedule: "0 6 * * *"
   baseUrl: https://pmon.dev
   clientSecretName: schnappy-k6-smoke
-  baseUrl: https://pmon.dev
 
 hyperfoil:
   enabled: true

@@ -65,14 +65,28 @@ spec:
       ports:
         - protocol: TCP
           port: 8200
-    # Observability (traces to prod Tempo)
+    # Observability: OTLP traces to Tempo, k6 smoke remote-write to Mimir
+    # (scoped to the receiving pods)
     - to:
         - namespaceSelector:
             matchLabels:
               gateway: "true"
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/component: tempo
       ports:
         - protocol: TCP
           port: 4318
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              gateway: "true"
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/component: mimir
+      ports:
+        - protocol: TCP
+          port: 9009
 ---
 apiVersion: v1
 kind: ResourceQuota

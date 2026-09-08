@@ -94,3 +94,27 @@ spec:
           port: 8000
         - protocol: TCP
           port: 9000
+    # Observability: OTLP traces to Tempo (apps) and k6 smoke remote-write to
+    # Mimir (the k6 pod runs without a sidecar). Neither was allowed: prod
+    # spans failed to export and every smoke run logged "Failed to send the
+    # time series" while still exiting 0. Scoped to the receiving pods.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              gateway: "true"
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/component: tempo
+      ports:
+        - protocol: TCP
+          port: 4318
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              gateway: "true"
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/component: mimir
+      ports:
+        - protocol: TCP
+          port: 9009
