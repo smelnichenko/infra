@@ -33,6 +33,18 @@ prometheus:
         # Mimir — without this they never leave Prometheus, so Grafana (which queries
         # Mimir) shows no metric->trace exemplar links.
         sendExemplars: true
+    # k6 smoke metrics are pushed by the k6 pod straight to Mimir, but the k6
+    # PrometheusRules (platform helm/schnappy) are evaluated here. Read them
+    # back from Mimir — only for queries that carry source="k6", so nothing
+    # else fans out to Mimir.
+    remoteRead:
+      - url: http://schnappy-mimir.schnappy-infra.svc:9009/prometheus/api/v1/read
+        # readRecent is load-bearing: without it Prometheus clamps remote reads
+        # to before its own oldest local block, so the k6 rules' [1d] windows
+        # would never reach Mimir and the alerts would go silently blind.
+        readRecent: true
+        requiredMatchers:
+          source: k6
     alertingEndpoints:
       - name: schnappy-alertmanager
         namespace: schnappy-infra
