@@ -125,11 +125,10 @@ tracing:
   enabled: true
   samplingProbability: "1.0"
 
+# k6 smoke runs in production only (operator decision 2026-09-09): no PostSync
+# hook and no k6 alerts for the test namespace.
 smokeTest:
-  enabled: true
-  image: grafana/k6:1.7.1
-  baseUrl: https://test.pmon.dev
-  clientSecretName: schnappy-k6-smoke
+  enabled: false
 
 hyperfoil:
   enabled: false
