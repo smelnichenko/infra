@@ -1,0 +1,32 @@
+# CI: validate the GitOps manifests on every push / PR.
+#
+# The only other gate for this repo is Argo CD applying to the live cluster.
+# kubeconform checks every plain manifest (cluster-config, argocd apps, …)
+# against the Kubernetes and CRD JSON schemas; -strict rejects unknown fields
+# (the class of typo that would otherwise silently widen a NetworkPolicy).
+# Helm values files carry no kind and are skipped by kubeconform.
+
+when:
+  - event: push
+  - event: pull_request
+
+clone:
+  - name: git
+    image: woodpeckerci/plugin-git
+    settings:
+      partial: false
+      depth: 50
+
+steps:
+  - name: kubeconform
+    image: ghcr.io/yannh/kubeconform:v0.7.0-alpine
+    commands:
+      # the alpine image ships the binary at /kubeconform, not on PATH
+      - >-
+        /kubeconform -strict -summary -ignore-missing-schemas -ignore-filename-pattern 'values\.yaml$'
+        -kubernetes-version 1.34.0
+        -schema-location default
+        -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
+        clusters/production/cluster-config
+        clusters/production/argocd
+        clusters/production/kagent
