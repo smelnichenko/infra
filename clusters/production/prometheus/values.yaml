@@ -45,6 +45,10 @@ prometheus:
         readRecent: true
         requiredMatchers:
           source: k6
+        # Default true appends this Prometheus' external labels (prometheus,
+        # prometheus_replica) as matchers to every remote read; the k6 series
+        # are pushed by k6 itself and carry neither, so nothing matched.
+        filterExternalLabels: false
     alertingEndpoints:
       - name: schnappy-alertmanager
         namespace: schnappy-infra
