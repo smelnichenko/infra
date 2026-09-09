@@ -20,9 +20,12 @@ spec:
       jqPathExpressions:
         - .status
         - .operation
-      managedFieldsManagers:
-        - argocd-controller
-        - before-first-apply
+        # apiserver-defaulted on directory sources; not in git
+        - .spec.source.directory.jsonnet
+      # No managedFieldsManagers here: every spec field the root itself applies is
+      # owned by argocd-controller, so ignoring that manager made the root blind to
+      # ALL child Application changes (woodpecker sat on chart 3.6.4 for months
+      # while git said 3.6.5, and the root's own prune:false never applied).
   syncPolicy:
     automated:
       selfHeal: true
