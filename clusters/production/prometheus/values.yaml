@@ -7,6 +7,9 @@ prometheus:
       labels:
         sidecar.istio.io/inject: "false"
     retention: 15d
+    # Alert emails link to externalUrl ("View in Prometheus"); the in-cluster default
+    # (schnappy-prometheus.schnappy-infra:9090) does not resolve from a mail client.
+    externalUrl: https://prometheus.pmon.dev
     enableFeatures:
       - exemplar-storage
     # Discover ServiceMonitors/PodMonitors/PrometheusRules from all namespaces

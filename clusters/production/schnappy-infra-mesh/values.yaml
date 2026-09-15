@@ -60,6 +60,7 @@ jwt:
     - reports.pmon.dev
     - hubble.pmon.dev
     - alerts.pmon.dev
+    - prometheus.pmon.dev
     - runbooks.pmon.dev
     # kagent does its own SSO (oauth2-proxy → Keycloak, cookie session), so the
     # gateway must not also enforce a Bearer JWT on its host — same as grafana/logs.
