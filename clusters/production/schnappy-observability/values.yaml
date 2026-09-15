@@ -42,6 +42,7 @@ prometheus:
   # Probed from a pod, so each must get 403 (schnappy-infra-mesh gatewayLanOnly).
   lanOnlyProbeUrls:
     - https://alerts.pmon.dev/-/ready
+    - https://prometheus.pmon.dev/-/ready
     - https://hubble.pmon.dev/
     - https://reports.pmon.dev/
     - https://runbooks.pmon.dev/
@@ -62,6 +63,7 @@ gateway:
     alerts: alerts.pmon.dev
     prometheus: prometheus.pmon.dev
     runbooks: runbooks.pmon.dev
+  prometheusService: schnappy-prometheus
 
 mimir:
   enabled: true

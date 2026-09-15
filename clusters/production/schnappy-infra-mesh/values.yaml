@@ -38,6 +38,7 @@ keycloakExternal:
 gatewayLanOnly:
   hosts:
     - alerts.pmon.dev
+    - prometheus.pmon.dev
     - hubble.pmon.dev
     - reports.pmon.dev
     - runbooks.pmon.dev
