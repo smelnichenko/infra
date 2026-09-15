@@ -32,6 +32,19 @@ keycloakExternal:
   enabled: true
   address: "192.168.11.5"
 
+# No login of their own, and the router forwards public :443 here: LAN (and the WireGuard
+# subnet, in case a peer is not masqueraded) only. Everyone else gets 403 at the gateway.
+# Keep in step with schnappy-observability prometheus.lanOnlyProbeUrls.
+gatewayLanOnly:
+  hosts:
+    - alerts.pmon.dev
+    - hubble.pmon.dev
+    - reports.pmon.dev
+    - runbooks.pmon.dev
+  allowedCidrs:
+    - 192.168.11.0/24
+    - 10.13.13.0/24
+
 jwt:
   enabled: true
   issuer: https://auth.pmon.dev/realms/schnappy
