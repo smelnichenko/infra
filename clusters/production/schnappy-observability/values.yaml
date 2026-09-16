@@ -61,7 +61,9 @@ gateway:
     logs: logs.pmon.dev
     reports: reports.pmon.dev
     alerts: alerts.pmon.dev
+    prometheus: prometheus.pmon.dev
     runbooks: runbooks.pmon.dev
+  prometheusService: schnappy-prometheus
 
 mimir:
   enabled: true
