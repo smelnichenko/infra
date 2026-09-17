@@ -1,8 +1,11 @@
 server:
   createAgentSecret: false
-  # Image tag follows the chart's appVersion (chart 3.7.3 → Woodpecker v3.18.0).
-  # v3.18 migrates the log storage table on first start (back up the SQLite file
-  # before bumping; allow a few minutes of downtime).
+  # Chart 3.7.3 (latest) pins appVersion v3.18.0; the image tag is overridden to
+  # the latest Woodpecker release. Keep server and agent on the same tag. v3.18
+  # migrated the log storage table on first start (back up the SQLite file before
+  # a major/minor bump; allow a few minutes of downtime).
+  image:
+    tag: v3.18.1
   env:
     WOODPECKER_HOST: "https://ci.pmon.dev"
     WOODPECKER_FORGEJO: "true"
@@ -30,6 +33,8 @@ server:
     size: 1Gi
     storageClass: local-path
 agent:
+  image:
+    tag: v3.18.1
   env:
     WOODPECKER_SERVER: "woodpecker-server:9000"
     WOODPECKER_BACKEND: "kubernetes"
