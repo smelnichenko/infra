@@ -6,14 +6,12 @@
 # (the class of typo that would otherwise silently widen a NetworkPolicy).
 # Helm values files carry no kind and are skipped by kubeconform.
 
-# ONCE per commit. Listing both events fired BOTH pipelines for every push to a branch with an open
-# PR - two identical runs of the same checks on the same sha, racing for the same agent (seen on
-# schnappy-data, 2026-09-17). A PR branch is covered by its pull_request run; main is covered by the
-# push that merges it, which is what Argo then applies.
+# ONE run per change: the pull request's. Listing `push` as well fired a second pipeline - first for
+# every push to a branch with an open PR (two identical runs on the same sha), then, once that was
+# narrowed to main, for the merge commit as well. Nothing lands here without a PR, so the PR run is
+# the gate; the merge commit carries the same tree that just passed it.
 when:
   - event: pull_request
-  - event: push
-    branch: main
 
 clone:
   - name: git
