@@ -144,6 +144,28 @@ chessService:
     requests: { cpu: 1000m, memory: 1536Mi }
     limits: { cpu: 3000m, memory: 2Gi }
 
+# masi — disabled in production until the UI ships (plan 094 PR9); the tag line is kept so
+# `promote:prod` can carry the test tag forward.
+masiService:
+  enabled: false
+  image:
+    repository: git.pmon.dev/schnappy/masi
+    pullPolicy: IfNotPresent
+    tag: "8b0a5cf"  # masi
+  replicas: 1
+  javaOpts: -Xmx768m -XX:+UseZGC
+  resources:
+    requests: { cpu: 200m, memory: 512Mi }
+    limits: { cpu: 2000m, memory: 1536Mi }
+  ai:
+    enabled: false
+    existingSecret: ""
+  tuning:
+    auto: false
+  browser:
+    enabled: false
+    existingSecret: schnappy-production-masi-browser
+
 tracing:
   enabled: true
   # Chart-default exporter: OTLP/HTTP to schnappy-tempo.schnappy-infra:4318

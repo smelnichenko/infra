@@ -121,6 +121,34 @@ chessService:
     requests: { cpu: 50m, memory: 256Mi }
     limits: { cpu: 1000m, memory: 1Gi }
 
+# masi — job registry with reviewed CV tuning (/api/masi). tuning.auto stays off and the
+# daily budget is 1 USD: the test namespace must never spend real money on its own. AI stays
+# disabled until MASI_ANTHROPIC_API_KEY is seeded (ops .env → Vault <prefix>/ai-masi).
+masiService:
+  enabled: true
+  image:
+    repository: git.pmon.dev/schnappy/masi
+    pullPolicy: IfNotPresent
+    tag: "8b0a5cf"  # masi
+  replicas: 1
+  javaOpts: -Xmx512m -XX:+UseZGC
+  resources:
+    requests: { cpu: 50m, memory: 384Mi }
+    limits: { cpu: 1000m, memory: 1Gi }
+  ai:
+    enabled: false
+    existingSecret: ""
+    dailyBudgetUsd: "1"
+    monthlyBudgetUsd: "10"
+  tuning:
+    auto: false
+  browser:
+    enabled: true
+    existingSecret: schnappy-test-masi-browser
+    resources:
+      requests: { cpu: 50m, memory: 512Mi }
+      limits: { cpu: 1000m, memory: 1536Mi, ephemeral-storage: 2Gi }
+
 tracing:
   enabled: true
   samplingProbability: "1.0"

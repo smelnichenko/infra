@@ -43,6 +43,8 @@ sonarqube:
         name: Schnappy Chat
       - key: schnappy-chess
         name: Schnappy Chess
+      - key: schnappy-masi
+        name: Schnappy Masi
       - key: schnappy-site
         name: Schnappy Site
         gate: Frontend
