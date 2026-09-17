@@ -13,7 +13,19 @@ server:
     WOODPECKER_ADMIN: "forgejo_admin,sm"
     WOODPECKER_OPEN: "true"
     WOODPECKER_LOG_LEVEL: "warn"
-    WOODPECKER_PIPELINE_CANCEL_RUNNING: "false"
+    # Never cancel a PUSH pipeline. Woodpecker cancels a running pipeline when a newer one starts
+    # for the same branch, and its default event list is "push, pull_request" — so two merges to
+    # main in a row killed the first one mid-flight, which on this cluster is a deployment.
+    # Superseding a PR run is still right: that commit is already obsolete.
+    #
+    # The variable this replaces, WOODPECKER_PIPELINE_CANCEL_RUNNING, is NOT a Woodpecker option
+    # (checked against `woodpecker-server --help` on v3.18.1): it was silently ignored, so the
+    # cancelling has been on the whole time it looked disabled.
+    #
+    # DEFAULT means default for repos Woodpecker has not seen yet. Repos already registered keep
+    # the setting stored against them and must be changed per repo (Settings -> Cancel previous
+    # pipelines) or through the API.
+    WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS: "pull_request"
     WOODPECKER_METRICS_SERVER_ADDR: ":9001"
   extraSecretNamesForEnvFrom:
     - woodpecker-forgejo-secret
