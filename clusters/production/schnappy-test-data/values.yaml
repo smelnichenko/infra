@@ -12,6 +12,7 @@ postgres:
     - name: admin
     - name: chat
     - name: chess
+    - name: masi
 
 valkey:
   enabled: true
