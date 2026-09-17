@@ -12,6 +12,11 @@
 # the gate; the merge commit carries the same tree that just passed it.
 when:
   - event: pull_request
+  # AND the merge commit on main. Not a duplicate: the pull_request run tests the PR's own head, and two
+  # PRs that were each green apart can still break main together. This repo has no other gate - Argo
+  # applies main to the live cluster - so the tree that actually lands is checked here.
+  - event: push
+    branch: main
 
 clone:
   - name: git
