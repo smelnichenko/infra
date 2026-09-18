@@ -1,0 +1,20 @@
+# The persistent dependency cache every Gradle and npm pipeline step mounts as `ci-cache:/cache`
+# (GRADLE_USER_HOME=/cache/gradle, npm_config_cache=/cache/npm, NVD data for depcheck).
+# Without it every build re-fetched its whole dependency graph through Nexus: ~1,300 requests
+# per build, 111k on 2026-09-18, and Nexus Community Edition stops caching new components above
+# 100k requests/day (403 PAYMENT REQUIRED on the proxy, 404 through the group).
+# Step volumes need the repo's "Trusted → Volumes" flag in Woodpecker; the k8s backend mounts an
+# EXISTING claim by name (backend_options.kubernetes.volumes/hostPath is not a thing and was
+# silently ignored by the old depcheck pipeline).
+# RWO is fine: one node, and RWO is enforced per node, so concurrent step pods share it.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ci-cache
+  namespace: woodpecker
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 20Gi

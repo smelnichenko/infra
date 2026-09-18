@@ -17,6 +17,10 @@ spec:
     - repoURL: https://git.pmon.dev/schnappy/infra.git
       targetRevision: main
       ref: values
+    # plain manifests beside the chart: the ci-cache PVC the pipelines mount
+    - repoURL: https://git.pmon.dev/schnappy/infra.git
+      targetRevision: main
+      path: clusters/production/woodpecker/manifests
   destination:
     server: https://kubernetes.default.svc
     namespace: woodpecker
