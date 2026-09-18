@@ -129,7 +129,7 @@ masiService:
   image:
     repository: git.pmon.dev/schnappy/masi
     pullPolicy: IfNotPresent
-    tag: "adf5265"  # masi
+    tag: "72d5142"  # masi
   replicas: 1
   javaOpts: -Xmx512m -XX:+UseZGC
   resources:
