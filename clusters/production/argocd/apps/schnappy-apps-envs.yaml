@@ -40,10 +40,3 @@ spec:
           prune: true
         syncOptions:
           - CreateNamespace=true
-          - RespectIgnoreDifferences=true
-      ignoreDifferences:
-        - group: batch
-          kind: Job
-          jqPathExpressions:
-            - .spec.selector
-            - .spec.template.metadata.labels
