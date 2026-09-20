@@ -45,6 +45,9 @@ sonarqube:
         name: Schnappy Chess
       - key: schnappy-masi
         name: Schnappy Masi
+      # pull requests analyse here, so schnappy-masi is written by main alone and always shows main (CE has no branch analysis)
+      - key: schnappy-masi-pr
+        name: Schnappy Masi (pull requests)
       - key: schnappy-site
         name: Schnappy Site
         gate: Frontend
