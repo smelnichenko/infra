@@ -80,7 +80,13 @@ ai:
   model: claude-haiku-4-5-20251001
 
 mail:
+  # monitor's and admin's mails stay off in test. The server settings below are what masiService.mail uses (its own
+  # switch pulls in the Vault secret schnappy-test/mail on its own).
   enabled: false
+  host: smtp.resend.com
+  port: "587"
+  username: resend
+  fromAddress: noreply@pmon.dev
 
 webhook:
   enabled: false
@@ -144,6 +150,11 @@ masiService:
     monthlyBudgetUsd: "10"
   tuning:
     auto: false
+  mail:
+    # the weekly digest to every enabled user with an active CV master (in test: the one test user). Figures and
+    # company names only. One SMTP egress rule comes with it.
+    enabled: true
+    siteUrl: https://test.pmon.dev
   browser:
     enabled: true
     existingSecret: schnappy-test-masi-browser
