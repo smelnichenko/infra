@@ -31,7 +31,8 @@ metadata:
   labels:
     app: alert2agent
 spec:
-  replicas: 1
+  # DISABLED 2026-09-21: it turned one incident into nine agent runs and spent the API balance (see externalsecret-anthropic.yaml)
+  replicas: 0
   selector:
     matchLabels:
       app: alert2agent

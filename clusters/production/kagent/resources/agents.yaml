@@ -38,6 +38,8 @@ spec:
     # an instant connection-refused. Exclude the git VIP from the mesh redirect so the
     # init clone goes direct (the kagent-default NetworkPolicy already allows VIP:443).
     deployment:
+      # DISABLED 2026-09-21: no agent runs. See externalsecret-anthropic.yaml for why.
+      replicas: 0
       annotations:
         traffic.sidecar.istio.io/excludeOutboundIPRanges: "192.168.11.5/32"
     modelConfig: claude-haiku
@@ -103,6 +105,8 @@ spec:
     # an instant connection-refused. Exclude the git VIP from the mesh redirect so the
     # init clone goes direct (the kagent-default NetworkPolicy already allows VIP:443).
     deployment:
+      # DISABLED 2026-09-21: no agent runs. See externalsecret-anthropic.yaml for why.
+      replicas: 0
       annotations:
         traffic.sidecar.istio.io/excludeOutboundIPRanges: "192.168.11.5/32"
     modelConfig: claude-sonnet
@@ -168,6 +172,8 @@ spec:
     # an instant connection-refused. Exclude the git VIP from the mesh redirect so the
     # init clone goes direct (the kagent-default NetworkPolicy already allows VIP:443).
     deployment:
+      # DISABLED 2026-09-21: no agent runs. See externalsecret-anthropic.yaml for why.
+      replicas: 0
       annotations:
         traffic.sidecar.istio.io/excludeOutboundIPRanges: "192.168.11.5/32"
     modelConfig: claude-haiku
@@ -225,6 +231,8 @@ spec:
     # an instant connection-refused. Exclude the git VIP from the mesh redirect so the
     # init clone goes direct (the kagent-default NetworkPolicy already allows VIP:443).
     deployment:
+      # DISABLED 2026-09-21: no agent runs. See externalsecret-anthropic.yaml for why.
+      replicas: 0
       annotations:
         traffic.sidecar.istio.io/excludeOutboundIPRanges: "192.168.11.5/32"
     modelConfig: claude-sonnet
@@ -312,6 +320,8 @@ spec:
     # an instant connection-refused. Exclude the git VIP from the mesh redirect so the
     # init clone goes direct (the kagent-default NetworkPolicy already allows VIP:443).
     deployment:
+      # DISABLED 2026-09-21: no agent runs. See externalsecret-anthropic.yaml for why.
+      replicas: 0
       annotations:
         traffic.sidecar.istio.io/excludeOutboundIPRanges: "192.168.11.5/32"
     modelConfig: claude-haiku
