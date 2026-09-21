@@ -155,6 +155,9 @@ masiService:
     # company names only. One SMTP egress rule comes with it.
     enabled: true
     siteUrl: https://test.pmon.dev
+    # nothing is mailed on a schedule (weeklyAuto stays false): a digest leaves when somebody asks for it
+    # ("mail me this report"). And whoever asks, test mails the operator — never an address from its user table.
+    deliverAllTo: sergei.melnichenko@gmail.com
   browser:
     enabled: true
     existingSecret: schnappy-test-masi-browser
