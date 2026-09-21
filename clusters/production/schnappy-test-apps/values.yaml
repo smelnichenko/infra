@@ -136,8 +136,10 @@ masiService:
     requests: { cpu: 50m, memory: 384Mi }
     limits: { cpu: 1000m, memory: 1Gi }
   ai:
-    enabled: false
-    existingSecret: ""
+    # on since 2026-09-21: Vault schnappy-test/ai-masi is seeded (for now with the SHARED Anthropic key, see ops/.env).
+    # Nothing spends by itself: tuning.auto and analysis.auto stay off; a Prepare in the UI is what costs.
+    enabled: true
+    existingSecret: "schnappy-test-masi-ai"
     dailyBudgetUsd: "1"
     monthlyBudgetUsd: "10"
   tuning:
