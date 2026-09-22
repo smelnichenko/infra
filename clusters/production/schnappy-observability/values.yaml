@@ -46,6 +46,10 @@ prometheus:
     - https://hubble.pmon.dev/
     - https://reports.pmon.dev/
     - https://runbooks.pmon.dev/
+    # the services' API docs (schnappy-infra-mesh gateway-docs-lan-only, 2026-09-22): one per API root
+    - https://test.pmon.dev/api/masi/api-docs
+    - https://test.pmon.dev/api/swagger-ui/index.html
+    - https://test.pmon.dev/api/chess/api-docs
   scrapeNamespaces:
     - schnappy-production
     - schnappy-test
