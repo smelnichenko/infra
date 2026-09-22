@@ -143,13 +143,19 @@ masiService:
     limits: { cpu: 1000m, memory: 1Gi }
   ai:
     # on since 2026-09-21: Vault schnappy-test/ai-masi is seeded (for now with the SHARED Anthropic key, see ops/.env).
-    # Nothing spends by itself: tuning.auto and analysis.auto stay off; a Prepare in the UI is what costs.
+    # tuning.auto stays off: a Prepare in the UI is what costs a tune. analysis.auto (below) reads open postings with the
+    # cheap model so the Match column fills - about 0.003 USD a job, under the daily budget and the SCORE share.
     enabled: true
     existingSecret: "schnappy-test-masi-ai"
     dailyBudgetUsd: "1"
     monthlyBudgetUsd: "10"
   tuning:
     auto: false
+  analysis:
+    # on since 2026-09-22 (operator: "continue", after the first real run): ~246 open jobs at ~0.003 USD each, 10 per
+    # five-minute tick, so the whole backlog is read in about two hours and then only what is new
+    auto: true
+    perTick: 10
   mail:
     # the weekly digest to every enabled user with an active CV master (in test: the one test user). Figures and
     # company names only. One SMTP egress rule comes with it.
