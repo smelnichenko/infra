@@ -151,6 +151,9 @@ masiService:
     # of it reads ~250 postings a day. The month stays capped at 10 USD.
     dailyBudgetUsd: "2.30"
     monthlyBudgetUsd: "10"
+  apiDocs:
+    # Swagger for the operator's own testing of the API (2026-09-22); LAN/WireGuard only at the gateway; never in production
+    enabled: true
   tuning:
     auto: false
   analysis:
