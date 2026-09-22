@@ -147,7 +147,9 @@ masiService:
     # cheap model so the Match column fills - about 0.003 USD a job, under the daily budget and the SCORE share.
     enabled: true
     existingSecret: "schnappy-test-masi-ai"
-    dailyBudgetUsd: "1"
+    # operator 2026-09-22: "make daily limit 2 euro" - 2 EUR at ~1.15 USD/EUR; the analysis lane's SCORE share (20 %)
+    # of it reads ~250 postings a day. The month stays capped at 10 USD.
+    dailyBudgetUsd: "2.30"
     monthlyBudgetUsd: "10"
   tuning:
     auto: false
