@@ -31,6 +31,8 @@ s3gw:
     - mimir-blocks
     - tempo-traces
     - hyperfoil-reports
+  publicReadBuckets:        # the reports page reads it without credentials
+    - hyperfoil-reports
   storage:
     size: 30Gi
     storageClass: local-path
