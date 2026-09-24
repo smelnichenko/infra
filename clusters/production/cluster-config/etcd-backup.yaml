@@ -6,9 +6,11 @@
 #
 # Design: a kube-system CronJob (GitOps, reuses ESO/Vault — no host binaries or
 # cred files on `ten`). Two etcd-image initContainers take + verify the snapshot
-# (the etcd image has no shell, so each is a single etcdctl invocation), then an mc
+# (the etcd image has no shell, so each is a single etcdctl invocation), then an rclone
 # container uploads it to the Pi backup store's `etcd-backups` bucket with a timestamped name
-# and prunes >7d. hostNetwork is used to reach etcd on 127.0.0.1:2379; the snapshot
+# and prunes >7d. (rclone, not MinIO's mc: MinIO withdrew the mc images on 2026-09-24 —
+# quay.io/minio/mc 401, docker.io/minio/mc gone — and the store is versitygw anyway.)
+# hostNetwork is used to reach etcd on 127.0.0.1:2379; the snapshot
 # container runs as root only to read the root-owned etcd server key (read-only).
 #
 # Restore (manual, host-level): copy the .db to `ten`, `etcdctl snapshot restore`,
@@ -107,12 +109,9 @@ spec:
                 - { name: backup, mountPath: /backup }
             - name: prepare
               # etcdctl writes the snapshot 0600 root; make it readable so the
-              # non-root verify/upload containers can access it. Reuses the mc image
-              # (already pulled) to avoid an extra image just for chmod.
-              image: quay.io/minio/mc:latest
-              # quay.io/minio/mc went private (401) and docker.io/minio/mc is gone (2026-09-24): ":latest"
-              # implies Always, and every run hung on the pull until its deadline. Use the copy ten has.
-              imagePullPolicy: IfNotPresent
+              # non-root verify/upload containers can access it. Reuses the rclone image
+              # (pulled for the upload anyway) to avoid an extra image just for chmod.
+              image: rclone/rclone:1.75.1@sha256:45401ad7410db1d67ffdb58e19059ad20b0d8e0285a60e38bbec55cc1019c7a5
               command: ["/bin/sh", "-ec"]
               args: ["chmod 0644 /backup/etcd.db; ls -l /backup/etcd.db"]
               securityContext:
@@ -143,23 +142,26 @@ spec:
                 - { name: backup, mountPath: /backup, readOnly: true }
           containers:
             - name: upload
-              image: quay.io/minio/mc:latest
-              imagePullPolicy: IfNotPresent   # see prepare: the registry no longer serves it
+              image: rclone/rclone:1.75.1@sha256:45401ad7410db1d67ffdb58e19059ad20b0d8e0285a60e38bbec55cc1019c7a5
               command: ["/bin/sh", "-ec"]
               args:
                 - |
                   TS=$(date +%Y%m%d-%H%M%S)
-                  mc alias set pi "http://192.168.11.5:9000" "$ACCESS_KEY" "$SECRET_KEY"
-                  mc mb --ignore-existing pi/etcd-backups
-                  mc cp /backup/etcd.db "pi/etcd-backups/etcd-${TS}.db"
-                  mc rm --recursive --force --older-than 7d pi/etcd-backups/ || true
+                  rclone mkdir pi:etcd-backups
+                  rclone copyto /backup/etcd.db "pi:etcd-backups/etcd-${TS}.db"
+                  # age is the object's modtime: a fresh snapshot is now; an mc-era upload, its upload time
+                  rclone delete --min-age 7d pi:etcd-backups || true
                   echo "etcd-backup OK: etcd-${TS}.db uploaded; current backups:"
-                  mc ls pi/etcd-backups/ | tail -5
+                  rclone lsl pi:etcd-backups | sort -k2,3 | tail -5
               env:
-                - { name: ACCESS_KEY, valueFrom: { secretKeyRef: { name: etcd-backup-store, key: ACCESS_KEY } } }
-                - { name: SECRET_KEY, valueFrom: { secretKeyRef: { name: etcd-backup-store, key: SECRET_KEY } } }
+                # the remote "pi" is configured by environment alone: no config file on the read-only root
+                - { name: RCLONE_CONFIG, value: "" }
+                - { name: RCLONE_CONFIG_PI_TYPE, value: s3 }
+                - { name: RCLONE_CONFIG_PI_PROVIDER, value: Other }
+                - { name: RCLONE_CONFIG_PI_ENDPOINT, value: "http://192.168.11.5:9000" }
+                - { name: RCLONE_CONFIG_PI_ACCESS_KEY_ID, valueFrom: { secretKeyRef: { name: etcd-backup-store, key: ACCESS_KEY } } }
+                - { name: RCLONE_CONFIG_PI_SECRET_ACCESS_KEY, valueFrom: { secretKeyRef: { name: etcd-backup-store, key: SECRET_KEY } } }
                 - { name: HOME, value: /tmp }
-                - { name: MC_CONFIG_DIR, value: /tmp/.mc }
               securityContext:
                 runAsNonRoot: true
                 runAsUser: 65534
