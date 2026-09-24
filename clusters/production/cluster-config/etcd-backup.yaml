@@ -110,6 +110,9 @@ spec:
               # non-root verify/upload containers can access it. Reuses the mc image
               # (already pulled) to avoid an extra image just for chmod.
               image: quay.io/minio/mc:latest
+              # quay.io/minio/mc went private (401) and docker.io/minio/mc is gone (2026-09-24): ":latest"
+              # implies Always, and every run hung on the pull until its deadline. Use the copy ten has.
+              imagePullPolicy: IfNotPresent
               command: ["/bin/sh", "-ec"]
               args: ["chmod 0644 /backup/etcd.db; ls -l /backup/etcd.db"]
               securityContext:
@@ -141,6 +144,7 @@ spec:
           containers:
             - name: upload
               image: quay.io/minio/mc:latest
+              imagePullPolicy: IfNotPresent   # see prepare: the registry no longer serves it
               command: ["/bin/sh", "-ec"]
               args:
                 - |
