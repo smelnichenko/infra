@@ -161,6 +161,11 @@ masiService:
     # five-minute tick, so the whole backlog is read in about two hours and then only what is new
     auto: true
     perTick: 10
+    # the AI match on since 2026-09-24 (operator: "we need AI matching!"; evaluated first on 187 hand labels: 97 %
+    # agreement, 98 % of its METs right). About 0.008 USD a posting under the MATCH share (0.25 of the 2.30 USD day,
+    # ~70 a day): the ~536 open postings take about eight days, then only what is new
+    matchAuto: true
+    matchPerTick: 10
   mail:
     # the weekly digest to every enabled user with an active CV master (in test: the one test user). Figures and
     # company names only. One SMTP egress rule comes with it.
