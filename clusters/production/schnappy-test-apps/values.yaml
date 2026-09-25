@@ -137,7 +137,10 @@ masiService:
     pullPolicy: IfNotPresent
     tag: "e061dc4"  # masi
   replicas: 1
-  javaOpts: -Xmx512m -XX:+UseZGC
+  # two carriers for virtual threads on one CPU: a request thread is never left waiting behind one busy virtual thread
+  # (2026-09-26: two collectors parsing on the only carrier starved the health endpoint; collectors now have platform
+  # threads, masi #65 — this covers the next CPU-heavy task put on a virtual thread)
+  javaOpts: -Xmx512m -XX:+UseZGC -Djdk.virtualThreadScheduler.parallelism=2
   resources:
     requests: { cpu: 50m, memory: 384Mi }
     limits: { cpu: 1000m, memory: 1Gi }
