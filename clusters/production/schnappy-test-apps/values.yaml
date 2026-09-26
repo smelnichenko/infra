@@ -135,7 +135,7 @@ masiService:
   image:
     repository: git.pmon.dev/schnappy/masi
     pullPolicy: IfNotPresent
-    tag: "e061dc4"  # masi
+    tag: "c857a43"  # masi
   replicas: 1
   # two carriers for virtual threads on one CPU: a request thread is never left waiting behind one busy virtual thread
   # (2026-09-26: two collectors parsing on the only carrier starved the health endpoint; collectors now have platform
