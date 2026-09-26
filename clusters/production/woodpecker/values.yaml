@@ -26,6 +26,11 @@ server:
     # the setting stored against them and must be changed per repo (Settings -> Cancel previous
     # pipelines) or through the API.
     WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS: "pull_request"
+    # The whole config fetch (the .woodpecker listing, then each file) must finish within this, or no pipeline is
+    # created and nothing says so on the commit. Forgejo on the Pi walks history for each file's last commit to
+    # answer the listing: masi's whole fetch took 6.9 s on 2026-09-26 against the 5 s default, and every push after
+    # that went without CI. Checked against `woodpecker-server --help` on v3.18.1.
+    WOODPECKER_FORGE_TIMEOUT: "30s"
     WOODPECKER_METRICS_SERVER_ADDR: ":9001"
   extraSecretNamesForEnvFrom:
     - woodpecker-forgejo-secret
