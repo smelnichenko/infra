@@ -141,8 +141,10 @@ masiService:
   # (2026-09-26: two collectors parsing on the only carrier starved the health endpoint; collectors now have platform
   # threads, masi #65 — this covers the next CPU-heavy task put on a virtual thread)
   javaOpts: -Xmx512m -XX:+UseZGC -Djdk.virtualThreadScheduler.parallelism=2
+  # 500m: at 50m a busy node gave the JVM so little CPU that startup (context 62 s, 7 s unloaded) overran the 300 s
+  # startup probe four times on 2026-09-26 before the fifth start made it
   resources:
-    requests: { cpu: 50m, memory: 384Mi }
+    requests: { cpu: 500m, memory: 384Mi }
     limits: { cpu: 1000m, memory: 1Gi }
   ai:
     # on since 2026-09-21: Vault schnappy-test/ai-masi is seeded (for now with the SHARED Anthropic key, see ops/.env).
