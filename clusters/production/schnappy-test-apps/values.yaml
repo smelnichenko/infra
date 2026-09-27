@@ -171,6 +171,10 @@ masiService:
     # ~70 a day): the ~536 open postings take about eight days, then only what is new
     matchAuto: true
     matchPerTick: 10
+  enrich:
+    # on since 2026-09-27 (operator: "enable and continue"): hiring companies' own sites visited in the background —
+    # 5 every ten minutes, most open jobs first, at most 10 public-HTTPS requests a visit, robots.txt honoured
+    enabled: true
   mail:
     # the weekly digest to every enabled user with an active CV master (in test: the one test user). Figures and
     # company names only. One SMTP egress rule comes with it.
