@@ -18,9 +18,8 @@ podAnnotations:
 
 # OFF since 2026-10-01 (operator): the agents have been at 0 since 2026-09-21 and nothing else here does any work
 # without them, so the controller, UI, tools, grafana-mcp and oauth2-proxy run 0 replicas too (their replica keys
-# below). The chart hardcodes the bundled Postgres at 1 replica: it is scaled to 0 on the cluster and the Application
-# ignores its replica count (argocd/apps/kagent.yaml). Its PVC and data stay. The way back: these replicas to 1,
-# `kubectl -n kagent scale deploy/kagent-postgresql --replicas=1`, then the steps in the agents' note (own API key first).
+# below). The bundled Postgres still RUNS, 1 replica: the chart has no replica key for it. The way back: these
+# replicas to 1, then the steps for the agents (a key of kagent's own with a spend limit first).
 
 providers:
   default: anthropic

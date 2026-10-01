@@ -78,13 +78,3 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
-      - RespectIgnoreDifferences=true
-  # kagent is off (clusters/production/kagent/values.yaml): the chart hardcodes the bundled Postgres at 1 replica, so it
-  # is scaled to 0 on the cluster and its replica count is left alone here.
-  ignoreDifferences:
-    - group: apps
-      kind: Deployment
-      name: kagent-postgresql
-      namespace: kagent
-      jsonPointers:
-        - /spec/replicas
