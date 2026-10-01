@@ -44,9 +44,11 @@ spec:
       ignoreDifferences:
         - group: scylla.scylladb.com
           kind: ScyllaCluster
+          # No rack path here: with RespectIgnoreDifferences, a path inside racks[] made Argo copy the WHOLE live rack
+          # into what it applied, so no change to a rack (its CPU requests on 2026-10-01) could ever land. The rack
+          # storage git renders equals the live one; changing it is refused by the API (immutable) and shows as an error.
           jqPathExpressions:
             - .spec.agentRepository
-            - .spec.datacenter.racks[].storage
           managedFieldsManagers:
             - manager
         - group: postgresql.cnpg.io
