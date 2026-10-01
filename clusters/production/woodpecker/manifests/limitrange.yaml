@@ -1,0 +1,18 @@
+# CI may take four CPUs of ten at most. Woodpecker runs one pipeline at a time (one agent, one workflow); this caps
+# each of its containers at 4 CPUs, and gives every container that states no limit 1 CPU (a request of 100m) — a step
+# or service a pipeline file leaves unbounded would otherwise take any idle CPU on the node. The pipelines that run
+# several containers at once (a test step beside its services) size them to add up to 4 themselves.
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: ci-cpu
+  namespace: woodpecker
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: "1"
+      defaultRequest:
+        cpu: 100m
+      max:
+        cpu: "4"
