@@ -50,6 +50,9 @@ server:
     size: 1Gi
     storageClass: local-path
 agent:
+  # one agent, one workflow: one CI job at a time on ten, so a pipeline never competes with another for the CPU its
+  # steps reserve (masi's test step reserves 3 CPUs)
+  replicaCount: 1
   image:
     tag: v3.18.1
   env:

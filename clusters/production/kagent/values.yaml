@@ -11,6 +11,11 @@
 # claude-haiku in resources/modelconfigs.yaml), so the chart-generated default
 # ModelConfig also points at Anthropic and reads the key from our ESO-synced
 # Secret rather than an inline apiKey.
+# The controller's and the UI's pods (the chart's top-level key feeds both): their istio sidecars request 10m, not the
+# default 100m — kagent is idle (disabled 2026-09-21) and ten's reservable CPU goes to masi's CI step instead.
+podAnnotations:
+  sidecar.istio.io/proxyCPU: "10m"
+
 providers:
   default: anthropic
   anthropic:
@@ -147,13 +152,17 @@ ui:
 # ---------------------------------------------------------------------------
 kagent-tools:
   enabled: true
-  resources:
-    requests:
-      cpu: 50m
-      memory: 128Mi
-    limits:
-      memory: 256Mi
+  # the sidecar's CPU request is the istio default (100m) unless said: 10m frees reservable CPU on ten (masi's CI step)
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "10m"
   tools:
+    # the chart reads tools.resources (a kagent-tools.resources here never applied: the pod requested the chart's 100m)
+    resources:
+      requests:
+        cpu: 25m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
     # App-layer guard rail, paired with the read-only RBAC below.
     args:
       - "--read-only"
@@ -303,6 +312,8 @@ grafana-mcp:
 # ---------------------------------------------------------------------------
 oauth2-proxy:
   enabled: true
+  podAnnotations:
+    sidecar.istio.io/proxyCPU: "10m"
   # The public entry point — give it a request floor + memory bound rather than
   # scheduling BestEffort (every sibling pod carries a request).
   resources:
