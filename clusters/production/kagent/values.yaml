@@ -16,6 +16,12 @@
 podAnnotations:
   sidecar.istio.io/proxyCPU: "10m"
 
+# OFF since 2026-10-01 (operator): the agents have been at 0 since 2026-09-21 and nothing else here does any work
+# without them, so the controller, UI, tools, grafana-mcp and oauth2-proxy run 0 replicas too (their replica keys
+# below). The chart hardcodes the bundled Postgres at 1 replica: it is scaled to 0 on the cluster and the Application
+# ignores its replica count (argocd/apps/kagent.yaml). Its PVC and data stay. The way back: these replicas to 1,
+# `kubectl -n kagent scale deploy/kagent-postgresql --replicas=1`, then the steps in the agents' note (own API key first).
+
 providers:
   default: anthropic
   anthropic:
@@ -74,7 +80,7 @@ database:
 # front of the UI; the controller trusts the proxy-set JWT (trusted-proxy mode).
 # ---------------------------------------------------------------------------
 controller:
-  replicas: 1
+  replicas: 0   # off since 2026-10-01, see the top
   auth:
     mode: trusted-proxy
   # The controller-runtime manager's cache sync can take >60s on a busy API server,
@@ -115,7 +121,7 @@ controller:
 # UI — Next.js console. Reached only via oauth2-proxy (the HTTPRoute targets the
 # proxy, not the UI directly), so it is never exposed unauthenticated.
 ui:
-  replicas: 1
+  replicas: 0   # off since 2026-10-01, see the top
   resources:
     requests:
       cpu: 25m
@@ -152,6 +158,7 @@ ui:
 # ---------------------------------------------------------------------------
 kagent-tools:
   enabled: true
+  replicaCount: 0   # off since 2026-10-01, see the top
   # the sidecar's CPU request is the istio default (100m) unless said: 10m frees reservable CPU on ten (masi's CI step)
   podAnnotations:
     sidecar.istio.io/proxyCPU: "10m"
@@ -287,6 +294,7 @@ kmcp:
 # schnappy-observability chart allows kagent->grafana:3000; kagent egress already does.
 grafana-mcp:
   enabled: true
+  replicas: 0   # off since 2026-10-01, see the top
   grafana:
     # Base URL WITH scheme and NO /api suffix — mcp-grafana appends /api/... itself,
     # and a scheme-less value yields "https:///api/..." (no host). http:// because
@@ -312,6 +320,7 @@ grafana-mcp:
 # ---------------------------------------------------------------------------
 oauth2-proxy:
   enabled: true
+  replicaCount: 0   # off since 2026-10-01, see the top
   podAnnotations:
     sidecar.istio.io/proxyCPU: "10m"
   # The public entry point — give it a request floor + memory bound rather than

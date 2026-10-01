@@ -13,9 +13,10 @@ spec:
   groups:
     - name: kagent
       rules:
+        # The down alerts fire only while a replica is wanted: kagent is scaled to 0 on purpose (values.yaml).
         # UI / oauth2-proxy down — the only public entry point to the console.
         - alert: KagentUIDown
-          expr: kube_deployment_status_replicas_available{namespace="kagent", deployment="kagent-ui"} == 0
+          expr: kube_deployment_status_replicas_available{namespace="kagent", deployment="kagent-ui"} == 0 and on(namespace, deployment) kube_deployment_spec_replicas{namespace="kagent", deployment="kagent-ui"} > 0
           for: 10m
           labels:
             severity: warning
@@ -24,7 +25,7 @@ spec:
             summary: "kagent UI has no available replicas"
             description: "The kagent-ui Deployment has 0 available replicas for 10m; the console is unreachable."
         - alert: KagentOAuthProxyDown
-          expr: kube_deployment_status_replicas_available{namespace="kagent", deployment="kagent-oauth2-proxy"} == 0
+          expr: kube_deployment_status_replicas_available{namespace="kagent", deployment="kagent-oauth2-proxy"} == 0 and on(namespace, deployment) kube_deployment_spec_replicas{namespace="kagent", deployment="kagent-oauth2-proxy"} > 0
           for: 10m
           labels:
             severity: warning
@@ -34,7 +35,7 @@ spec:
             description: "The kagent-oauth2-proxy Deployment has 0 available replicas for 10m; SSO login to the console is broken."
         # Controller down — no agent reconciliation / API.
         - alert: KagentControllerDown
-          expr: kube_deployment_status_replicas_available{namespace="kagent", deployment="kagent-controller"} == 0
+          expr: kube_deployment_status_replicas_available{namespace="kagent", deployment="kagent-controller"} == 0 and on(namespace, deployment) kube_deployment_spec_replicas{namespace="kagent", deployment="kagent-controller"} > 0
           for: 10m
           labels:
             severity: critical
