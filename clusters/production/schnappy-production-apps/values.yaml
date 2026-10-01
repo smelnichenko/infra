@@ -21,10 +21,11 @@ app:
     maxLifetime: 1200000
   resources:
     # CPU request sized from the load test: monitor peaks ~4.4 cores under a
-    # 1000 req/s stress run, so 1500m is a sane guaranteed floor while the 6000m
-    # limit absorbs the burst. The single-node rolling-update wedge is handled
+    # 1000 req/s stress run; 750m is the guaranteed floor (1500m until the
+    # cluster-wide halving of requests on 2026-10-01) while the 6000m limit
+    # absorbs the burst. The single-node rolling-update wedge is handled
     # by maxSurge:0 on the Deployment, not by starving this request.
-    requests: { cpu: 1500m, memory: 3Gi, ephemeral-storage: 256Mi }
+    requests: { cpu: 750m, memory: 3Gi, ephemeral-storage: 256Mi }
     limits: { cpu: 6000m, memory: 4Gi, ephemeral-storage: 1Gi }
 
 site:
@@ -36,7 +37,7 @@ site:
     repository: git.pmon.dev/schnappy/site
     tag: "ded0b29"  # site
   resources:
-    requests: { cpu: 100m, memory: 64Mi }
+    requests: { cpu: 50m, memory: 64Mi }
     limits: { cpu: 2000m, memory: 256Mi }
 
 games:
@@ -117,7 +118,7 @@ admin:
   replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
-    requests: { cpu: 100m, memory: 512Mi }
+    requests: { cpu: 50m, memory: 512Mi }
     limits: { cpu: 2000m, memory: 2Gi }
 
 chatService:
@@ -129,7 +130,7 @@ chatService:
   replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
-    requests: { cpu: 1000m, memory: 1536Mi }
+    requests: { cpu: 500m, memory: 1536Mi }
     limits: { cpu: 3000m, memory: 2Gi }
 
 chessService:
@@ -141,7 +142,7 @@ chessService:
   replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
-    requests: { cpu: 1000m, memory: 1536Mi }
+    requests: { cpu: 500m, memory: 1536Mi }
     limits: { cpu: 3000m, memory: 2Gi }
 
 # masi — disabled in production until the UI ships (plan 094 PR9); the tag line is kept so

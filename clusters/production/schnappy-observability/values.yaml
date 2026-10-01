@@ -9,7 +9,7 @@ clickhouse:
   existingSecret: schnappy-clickhouse
   image: clickhouse/clickhouse-server:24.8-alpine
   resources:
-    requests: { cpu: "100m", memory: "512Mi" }
+    requests: { cpu: "50m", memory: "512Mi" }
     limits:   { cpu: "2",    memory: "8Gi" }
   storage:
     size: 20Gi
@@ -21,7 +21,7 @@ fluentbit:
   enabled: true
   image: cr.fluentbit.io/fluent/fluent-bit:4.2.3.1
   resources:
-    requests: { cpu: "100m", memory: "128Mi" }
+    requests: { cpu: "50m", memory: "128Mi" }
     limits:   { cpu: "1000m", memory: "512Mi" }
 
 # OpenObserve was retired; logs are queried via Grafana's
@@ -80,7 +80,7 @@ mimir:
   storage: 5Gi
   storageClassName: local-path
   resources:
-    requests: { cpu: 200m, memory: 512Mi }
+    requests: { cpu: 100m, memory: 512Mi }
     limits: { cpu: 2000m, memory: 2Gi }
 
 tempo:
@@ -94,7 +94,7 @@ tempo:
   storage: 2Gi
   storageClassName: local-path
   resources:
-    requests: { cpu: 100m, memory: 512Mi }
+    requests: { cpu: 50m, memory: 512Mi }
     limits: { cpu: 1000m, memory: 2Gi }
 
 grafana:
@@ -119,7 +119,7 @@ grafana:
     size: 5Gi
     storageClass: local-path
   resources:
-    requests: { cpu: 100m, memory: 256Mi }
+    requests: { cpu: 50m, memory: 256Mi }
     limits: { cpu: 1000m, memory: 1Gi }
 
 alertmanager:

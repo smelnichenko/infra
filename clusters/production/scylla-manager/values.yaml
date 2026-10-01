@@ -1,6 +1,6 @@
 resources:
   requests:
-    cpu: 50m
+    cpu: 25m
     memory: 128Mi
   limits:
     cpu: 500m
@@ -17,9 +17,14 @@ scylla:
         storageClassName: local-path
       resources:
         requests:
-          cpu: 100m
+          cpu: 50m
           memory: 256Mi
         limits:
           cpu: 500m
           memory: 512Mi
+      # the operator's default for the agent is 50m (memory 10M, no limit); only the CPU is halved
+      agentResources:
+        requests:
+          cpu: 25m
+          memory: 10M
       placement: {}

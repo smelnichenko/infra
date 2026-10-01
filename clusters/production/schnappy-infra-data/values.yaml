@@ -37,7 +37,7 @@ s3gw:
     size: 30Gi
     storageClass: local-path
   resources:
-    requests: { cpu: 100m, memory: 256Mi }
+    requests: { cpu: 50m, memory: 256Mi }
     limits: { cpu: "1", memory: 1Gi }
 
 strimzi:

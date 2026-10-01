@@ -17,7 +17,7 @@ spec:
           - --kubelet-insecure-tls
       parameters:
         - name: resources.requests.cpu
-          value: "50m"
+          value: "25m"
         - name: resources.requests.memory
           value: "64Mi"
         - name: resources.limits.cpu

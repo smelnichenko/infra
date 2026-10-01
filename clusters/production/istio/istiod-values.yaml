@@ -1,5 +1,11 @@
 global:
   priorityClassName: system-cluster-critical
+  # every injected sidecar's CPU request (the chart's default is 100m); a pod's
+  # sidecar.istio.io/proxyCPU annotation still overrides it. Memory and limits keep the chart's defaults.
+  proxy:
+    resources:
+      requests:
+        cpu: 50m
 
 cni:
   enabled: true
@@ -19,7 +25,7 @@ pilot:
     ENABLE_NATIVE_SIDECARS: "false"
   resources:
     requests:
-      cpu: 100m
+      cpu: 50m
       memory: 512Mi
     limits:
       cpu: 1000m

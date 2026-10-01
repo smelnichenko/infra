@@ -90,7 +90,7 @@ controller:
     failureThreshold: 30
   resources:
     requests:
-      cpu: 50m
+      cpu: 25m
       memory: 128Mi
     # Watches all namespaces (caches cluster-wide objects), so 512Mi OOMs (exit 137);
     # 1Gi gives the controller-runtime cache headroom on first sync.

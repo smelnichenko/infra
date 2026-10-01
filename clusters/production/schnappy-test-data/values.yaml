@@ -7,6 +7,10 @@ networkPolicies:
 
 postgres:
   enabled: false
+  # the CNPG cluster's instance (cnpg.enabled below) takes these; half the chart's 100m default since 2026-10-01
+  resources:
+    requests: { memory: "512Mi", cpu: "50m" }
+    limits: { memory: "2Gi", cpu: "1000m" }
   databases:
     - name: monitor
     - name: admin
@@ -26,7 +30,7 @@ kafka:
   enabled: false
   existingSecret: schnappy-test-kafka
   resources:
-    requests: { cpu: 50m, memory: 512Mi }
+    requests: { cpu: 25m, memory: 512Mi }
     limits: { cpu: 1000m, memory: 1536Mi }
   retention:
     hours: 24
@@ -41,7 +45,7 @@ scylla:
 scylla:
   enabled: false
   resources:
-    requests: { cpu: 50m, memory: 256Mi }
+    requests: { cpu: 25m, memory: 256Mi }
     limits: { cpu: 1000m, memory: 512Mi }
 
 scyllaOperator:
