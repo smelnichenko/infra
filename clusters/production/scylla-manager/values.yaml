@@ -22,4 +22,10 @@ scylla:
         limits:
           cpu: 500m
           memory: 512Mi
+      # the operator's webhook fills this default in on every apply; stated here so Argo's server-side apply does not
+      # predict its removal and loop OutOfSync (the drift 808c943 once hid by ignoring the whole .spec)
+      agentResources:
+        requests:
+          cpu: 50m
+          memory: 10M
       placement: {}
