@@ -12,7 +12,7 @@ spec:
   source:
     repoURL: https://blob.istio.io/istio-release/charts
     chart: base
-    targetRevision: 1.27.9
+    targetRevision: 1.28.10
     helm:
       releaseName: istio-base
   destination:
