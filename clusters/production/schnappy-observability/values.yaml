@@ -105,7 +105,7 @@ tempo:
 grafana:
   enabled: true
   existingSecret: schnappy-grafana
-  image: grafana/grafana:12.4.12
+  image: grafana/grafana:13.2.3
   host: grafana.pmon.dev
   # kagent's grafana-mcp reaches the Grafana API with a read-only Viewer SA.
   extraIngressNamespaces:
