@@ -19,7 +19,7 @@ clickhouse:
 
 fluentbit:
   enabled: true
-  image: cr.fluentbit.io/fluent/fluent-bit:4.2.8
+  image: cr.fluentbit.io/fluent/fluent-bit:5.1.3
   resources:
     requests: { cpu: "50m", memory: "128Mi" }
     limits:   { cpu: "1000m", memory: "512Mi" }
