@@ -1,6 +1,7 @@
 priorityClassName: infra-critical
-# CRDs as regular templates (not Helm hooks) so Argo CD ServerSideApply works
-installCRDs: false
+# The chart's CRDs, applied by Argo CD (server-side: they are too large for a client-side apply's annotation).
+# Off until 2026-10, the CRDs were whatever the first Helm install (2026-04-05) left and were never upgraded.
+installCRDs: true
 crds:
   createClusterExternalSecret: true
   createClusterSecretStore: true
