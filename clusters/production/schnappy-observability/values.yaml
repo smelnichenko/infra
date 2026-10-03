@@ -7,7 +7,7 @@ networkPolicies:
 clickhouse:
   enabled: true
   existingSecret: schnappy-clickhouse
-  image: clickhouse/clickhouse-server:24.8-alpine
+  image: clickhouse/clickhouse-server:25.8.33.6-alpine
   resources:
     requests: { cpu: "50m", memory: "512Mi" }
     limits:   { cpu: "2",    memory: "8Gi" }
