@@ -12,7 +12,7 @@ spec:
   sources:
     - repoURL: https://blob.istio.io/istio-release/charts
       chart: cni
-      targetRevision: 1.25.2
+      targetRevision: 1.26.8
       helm:
         releaseName: istio-cni
         valueFiles:
