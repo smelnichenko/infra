@@ -14,7 +14,7 @@ gateway:
 sonarqube:
   enabled: true
   existingSecret: schnappy-sonarqube
-  image: sonarqube:26.3.0.120487-community
+  image: sonarqube:26.9.0.129388-community
   javaOpts: -Xms1g -Xmx1g
   ingress:
     enabled: false
