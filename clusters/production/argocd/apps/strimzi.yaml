@@ -23,9 +23,8 @@ spec:
     server: https://kubernetes.default.svc
     namespace: strimzi
   syncPolicy:
-    automated:
-      selfHeal: true
-      prune: true
+    # No automated sync while the Strimzi resources and CRDs move to the v1 API (ops strimzi-v1-conversion.yml):
+    # the 0.51 chart's CRDs store v1beta2 and a self-heal would put that back. Restored with the 1.x chart.
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
