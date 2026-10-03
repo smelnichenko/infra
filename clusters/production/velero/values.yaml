@@ -1,6 +1,9 @@
+# Velero's newest patch release; chart 12.2.0 ships v1.18.2. Drop this when the chart's default catches up.
+image:
+  tag: v1.18.4
 initContainers:
   - name: velero-plugin-for-aws
-    image: velero/velero-plugin-for-aws:v1.11.1
+    image: velero/velero-plugin-for-aws:v1.14.4
     volumeMounts:
       - name: plugins
         mountPath: /target
