@@ -76,7 +76,7 @@ gateway:
 
 mimir:
   enabled: true
-  image: grafana/mimir:3.1.6
+  image: grafana/mimir:3.2.1
   retention: 90d
   minioSecret: schnappy-infra-s3
   accessKeyName: ACCESS_KEY
