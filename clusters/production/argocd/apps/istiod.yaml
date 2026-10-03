@@ -12,7 +12,7 @@ spec:
   sources:
     - repoURL: https://blob.istio.io/istio-release/charts
       chart: istiod
-      targetRevision: 1.28.10
+      targetRevision: 1.29.8
       helm:
         releaseName: istiod
         valueFiles:
