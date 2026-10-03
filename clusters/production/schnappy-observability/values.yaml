@@ -90,7 +90,7 @@ mimir:
 
 tempo:
   enabled: true
-  image: grafana/tempo:2.7.2
+  image: grafana/tempo:3.1.0
   retention: 336h
   minioSecret: schnappy-infra-s3
   accessKeyName: ACCESS_KEY
