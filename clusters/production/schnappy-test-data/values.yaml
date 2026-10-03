@@ -50,7 +50,7 @@ scylla:
 scyllaOperator:
   enabled: true
   version: "2025.1.16"
-  agentVersion: "3.9.0"
+  agentVersion: "3.10.1"
   developerMode: true
 
 strimzi:
