@@ -12,7 +12,7 @@ spec:
   sources:
     - repoURL: https://strimzi.io/charts/
       chart: strimzi-kafka-operator
-      targetRevision: 0.51.0
+      targetRevision: 1.2.0
       helm:
         valueFiles:
           - $values/clusters/production/strimzi/values.yaml
@@ -23,8 +23,9 @@ spec:
     server: https://kubernetes.default.svc
     namespace: strimzi
   syncPolicy:
-    # No automated sync while the Strimzi resources and CRDs move to the v1 API (ops strimzi-v1-conversion.yml):
-    # the 0.51 chart's CRDs store v1beta2 and a self-heal would put that back. Restored with the 1.x chart.
+    automated:
+      selfHeal: true
+      prune: true
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
