@@ -12,7 +12,7 @@ spec:
   sources:
     - repoURL: https://scylla-operator-charts.storage.googleapis.com/stable
       chart: scylla-manager
-      targetRevision: v1.20.2
+      targetRevision: v1.20.3
       helm:
         valueFiles:
           - $values/clusters/production/scylla-manager/values.yaml
