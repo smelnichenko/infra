@@ -3,6 +3,10 @@ priorityClassName: infra-critical
 # Off until 2026-10, the CRDs were whatever the first Helm install (2026-04-05) left and were never upgraded.
 installCRDs: true
 crds:
+  # Argo CD never deletes them: a revert of this change, an app deleted or a prune would delete every ExternalSecret
+  # and SecretStore with its CRD, and the Secrets they own with them
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
   createClusterExternalSecret: true
   createClusterSecretStore: true
   createSecretStore: true
