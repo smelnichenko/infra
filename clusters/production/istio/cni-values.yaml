@@ -1,3 +1,6 @@
+global:
+  # the image from Docker Hub, as istiod's (istiod-values.yaml)
+  hub: docker.io/istio
 cni:
   cniConfDir: /etc/cni/net.d
   cniBinDir: /opt/cni/bin

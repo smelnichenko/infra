@@ -1,4 +1,7 @@
 global:
+  # the images from Docker Hub, as every Istio release before 1.30 (whose charts default to registry.istio.io, with
+  # announced unavailability windows) and after it
+  hub: docker.io/istio
   priorityClassName: system-cluster-critical
   # every injected sidecar's CPU request (the chart's default is 100m); a pod's
   # sidecar.istio.io/proxyCPU annotation still overrides it. Memory and limits keep the chart's defaults.
