@@ -3,7 +3,7 @@ kind: Application
 metadata:
   name: schnappy-observability
   annotations:
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "5"
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io

@@ -2,6 +2,8 @@ apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
   name: schnappy-data-envs
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
   namespace: argocd
 spec:
   goTemplate: true
