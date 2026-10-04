@@ -36,3 +36,12 @@ spec:
     syncOptions:
       - ServerSideApply=false
       - RespectIgnoreDifferences=true
+    # Retries with a capped back-off, not Argo CD's default (5): on a cold start the first wave's operators are
+    # Degraded for a while, each wave's health wait fails, and after 5 the later waves are never created - auto-sync
+    # does not retry that revision (Vagrant 2026-10-04: 14 apps of the copy's 23, a fresh install's state).
+    retry:
+      limit: 20
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
