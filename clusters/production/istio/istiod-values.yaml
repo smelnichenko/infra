@@ -26,6 +26,9 @@ meshConfig:
 pilot:
   env:
     ENABLE_NATIVE_SIDECARS: "false"
+    # Istio 1.31 sends unhealthy endpoints to the proxies by default; with one replica an unready pod then gets the
+    # traffic (Envoy's panic mode) instead of the caller a fast "no healthy upstream". The behaviour of 1.25-1.30 kept.
+    PILOT_AUTO_SEND_UNHEALTHY_ENDPOINTS: "false"
   resources:
     requests:
       cpu: 50m
