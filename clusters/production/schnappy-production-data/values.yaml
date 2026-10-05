@@ -134,6 +134,9 @@ cnpg:
   # PostgreSQL 18 archives under its own name: pg_upgrade starts the new major at timeline 1, and the 17 history
   # (timeline 3) stays where it is - the undo recovers from it
   backupServerName: schnappy-production-postgres-pg18
+  # a disaster recovery (recovery: true) reads PostgreSQL 18's archive - without this it reads the cluster's own name,
+  # 17's. The recovered cluster then needs a new backupServerName: CNPG archives only into an empty one
+  recoveryServerName: schnappy-production-postgres-pg18
   backupSecret: schnappy-production-backup-store
   backupAccessKeyName: ACCESS_KEY
   backupSecretKeyName: SECRET_KEY
