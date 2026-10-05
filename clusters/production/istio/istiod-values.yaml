@@ -23,6 +23,14 @@ meshConfig:
         address: schnappy-tempo.schnappy-infra.svc:9411
       sampling: 1.0
 
+sidecarInjectorWebhook:
+  # never a proxy in the Scylla operator's cleanup Jobs: their pods take the ScyllaCluster's labels but not its
+  # sidecar.istio.io/inject annotation, and a proxy keeps a Job whose own container has finished Running for good -
+  # the operator runs one when the token ring changes (a node joins: a rebuild, a replacement)
+  neverInjectSelector:
+    - matchLabels:
+        scylla-operator.scylladb.com/pod-type: cleanup-job
+
 pilot:
   env:
     ENABLE_NATIVE_SIDECARS: "false"
