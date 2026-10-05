@@ -41,16 +41,13 @@ kafka:
 
 scylla:
   enabled: false
-
-scylla:
-  enabled: false
   resources:
     requests: { cpu: 25m, memory: 256Mi }
     limits: { cpu: 1000m, memory: 512Mi }
 
 scyllaOperator:
   enabled: true
-  version: "6.2.3"
+  version: "2025.1.16"
   agentVersion: "3.9.0"
   developerMode: true
 
