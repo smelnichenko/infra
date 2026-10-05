@@ -78,7 +78,7 @@ kafka:
 
 scylla:
   enabled: false
-  image: scylladb/scylla:6.2
+  image: scylladb/scylla:2026.1.14
   replicas: 1
   datacenter: datacenter1
   args:
@@ -94,7 +94,7 @@ scylla:
 
 scyllaOperator:
   enabled: true
-  version: "2025.1.16"
+  version: "2026.1.14"
   agentVersion: "3.10.1"
   developerMode: true
   backupEndpoint: http://192.168.11.5:9000
