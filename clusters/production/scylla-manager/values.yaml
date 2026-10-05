@@ -11,6 +11,9 @@ resources:
     memory: 512Mi
 
 scylla:
+  # the backend cluster's agent with the Manager, 3.12.1 (the chart ships 3.12.0) - by digest as the chart pins its own
+  agentImage:
+    tag: 3.12.1@sha256:f47697d38da94a1e367286d232783199abb7477db026febfd125ee3b2aded7b0
   developerMode: true
   datacenter: manager-dc
   racks:
