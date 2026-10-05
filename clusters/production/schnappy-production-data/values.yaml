@@ -36,7 +36,7 @@ postgres:
 valkey:
   enabled: true
   existingSecret: schnappy-production-valkey
-  image: valkey/valkey:8.1-alpine
+  image: valkey/valkey:9.1.2-alpine
   resources:
     requests: { cpu: 50m, memory: 64Mi, ephemeral-storage: 64Mi }
     limits: { cpu: 1000m, memory: 512Mi, ephemeral-storage: 256Mi }
