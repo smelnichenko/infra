@@ -55,6 +55,7 @@ scyllaOperator:
 
 strimzi:
   enabled: true
+  kafkaVersion: 4.3.1
 
 cnpg:
   enabled: true
