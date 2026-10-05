@@ -128,8 +128,12 @@ cnpg:
   instances: 2   # primary + 1 streaming replica — pod-level HA; CNPG manages PDB/failover
   import: false
   recovery: false
+  imageName: ghcr.io/cloudnative-pg/postgresql:18.6-system-bullseye@sha256:899d3ed526b659d77935dde0e6bf2d69dbbf17d3d8c6486ca8cfd04bd3c18533
   backup: true
   backupEndpoint: http://192.168.11.5:9000
+  # PostgreSQL 18 archives under its own name: pg_upgrade starts the new major at timeline 1, and the 17 history
+  # (timeline 3) stays where it is - the undo recovers from it
+  backupServerName: schnappy-production-postgres-pg18
   backupSecret: schnappy-production-backup-store
   backupAccessKeyName: ACCESS_KEY
   backupSecretKeyName: SECRET_KEY
