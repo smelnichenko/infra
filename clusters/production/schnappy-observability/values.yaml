@@ -106,6 +106,9 @@ grafana:
   enabled: true
   existingSecret: schnappy-grafana
   image: grafana/grafana:13.2.3
+  # Grafana 13's update of its preinstalled plugins at start fails on the read-only root and leaves the Mimir
+  # datasource unregistered - off: the image's own plugin versions (platform's grafana-deployment.yaml says why)
+  pluginsPreinstallAutoUpdate: false
   host: grafana.pmon.dev
   # kagent's grafana-mcp reaches the Grafana API with a read-only Viewer SA.
   extraIngressNamespaces:
