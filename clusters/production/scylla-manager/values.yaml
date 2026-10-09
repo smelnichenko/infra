@@ -29,3 +29,8 @@ scylla:
           cpu: 50m
           memory: 10M
       placement: {}
+
+# Scylla Manager's own metrics scraped: its scheduler's last success and runs per task (the backup and repair alerts
+# read them). Prometheus reaches it through schnappy-infra's default-deny (its scylla-manager egress rule).
+serviceMonitor:
+  create: true

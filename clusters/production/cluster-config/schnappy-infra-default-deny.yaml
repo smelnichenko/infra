@@ -86,6 +86,16 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: woodpecker
+    # Prometheus scrape egress to Scylla Manager's metrics alone (its backup and repair tasks' runs)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: scylla-manager
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: scylla-manager
+      ports:
+        - { protocol: TCP, port: 5090 }
     # Prometheus scrape egress to external-secrets, velero
     - to:
         - namespaceSelector:
