@@ -28,6 +28,9 @@ fluentbit:
   # a chunk waits for ClickHouse however long it is down (a restart on an upgrade), the buffer bounded on disk
   retryLimit: no_limits
   bufferLimit: 512M
+  # a file new while it was down (a container started, a log rotated) from its start - the positions on ten's disk
+  # since the step that put them there keep every other file where it was
+  readFromHead: true
 
 # OpenObserve was retired; logs are queried via Grafana's
 # ClickHouse-Logs datasource. The chart no longer ships the
