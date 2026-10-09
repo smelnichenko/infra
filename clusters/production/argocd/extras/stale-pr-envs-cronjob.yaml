@@ -9,18 +9,10 @@
 #      (calls the Vault metadata DELETE API for full purge — same as
 #      `task deploy:delete-environment`).
 #
-# Vault is read verified against its CA - the Secret vault-pi-ca in argocd, the CA External Secrets trusts
-# (`bootstrap.sh vault-eso` puts it there) - never with curl -k. Its token: a scoped periodic token (NOT the root
-# token) at secret/argocd/vault-cleanup-token { token: <hvs.…> }, issued by setup-vault-cleanup-policy.yml under a
-# policy with `list` on `secret/metadata/` and `list` + `delete` on `secret/metadata/schnappy-pr-*` only. ESO syncs
-# it into Secret `vault-cleanup-token` in argocd ns. A periodic token lives only while it is renewed within its period
-# (30 days): every run renews it first. If the Secret is absent, the Vault GC step logs a warning and skips — the Argo
-# CD prune step still runs.
-#
-# Any failure fails the run (the Job Failed: KubeJobFailed), never a quiet "nothing to do": a Vault listing it could
-# not read (its pods could not even reach Vault - its NetworkPolicy below) looked like one with nothing to purge, a
-# failed read of the live apps would have purged every preview's secrets, and the token died unnoticed. Times are read by jq: this image's busybox `date` reads no RFC 3339 time - it
-# took every app for deployed in 1970 and pruned it at its first sweep. Tests: tests/stale-pr-envs-sweeper/run.sh.
+# Vault: read against its CA (argocd/vault-pi-ca, from `bootstrap.sh vault-eso`) with a scoped periodic token
+# (setup-vault-cleanup-policy.yml, synced by ESO into vault-cleanup-token), renewed at every run. No token: the GC is
+# skipped. Any failure fails the Job. Times are read by jq (busybox date reads no RFC 3339).
+# Tests: tests/stale-pr-envs-sweeper/run.sh.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -70,8 +62,7 @@ spec:
         key: argocd/vault-cleanup-token
         property: token
 ---
-# its pods reach Vault: argocd's own policy (ops setup-argocd.yml, argocd-controllers) lets them out to the Pis on
-# Forgejo's ports alone - without this the Vault GC never connected
+# its pods reach Vault (argocd's own policy allows the Pis on Forgejo's ports only)
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
