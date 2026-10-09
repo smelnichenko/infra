@@ -273,6 +273,18 @@ check "Vault's CA: the Secret vault-pi-ca (not optional), mounted read-only" \
 $(cj "$pod.containers[0].volumeMounts[] | select(.name == \"${ca_vol:-none}\") | .readOnly")" "false true"
 check "a Job that cannot start (its CA Secret missing) ends Failed: a deadline" \
   "$(cj '.spec.jobTemplate.spec.activeDeadlineSeconds // 0' | awk '{print ($1 > 0)}')" 1
+# its pods reach Vault: argocd's own policy (setup-argocd.yml's argocd-controllers) lets them out to the Pis on
+# Forgejo's ports alone - the sweeper's own policy, selecting its pods by their template's labels, adds Vault's
+# address and port (VAULT_ADDR's), and nothing else
+vhost=${VAULT_ADDR#https://}; vport=${vhost##*:}; vhost=${vhost%%:*}
+check "a NetworkPolicy lets the sweeper's pods out to Vault ($vhost:$vport) alone" \
+  "$(yq -o=json -I=0 'select(.kind == "NetworkPolicy")' "$M" | jq -sc \
+      --argjson l "$(yq -o=json -I=0 'select(.kind == "CronJob") | .spec.jobTemplate.spec.template.metadata.labels // {}' "$M")" '
+      [.[] | select(.metadata.namespace == "argocd")
+        | select((.spec.podSelector.matchLabels // {}) as $m
+                 | ($m | length) > 0 and ($m | to_entries | all(. as $e | $l[$e.key] == $e.value)))
+        | select(.spec.policyTypes == ["Egress"]) | .spec.egress]')" \
+  "$(jq -nc --arg c "$vhost/32" --argjson p "$vport" '[[{to: [{ipBlock: {cidr: $c}}], ports: [{protocol: "TCP", port: $p}]}]]')"
 check "CI runs this in the CronJob's own image" \
   "$(yq '.steps[] | select(.name == "stale-pr-envs-sweeper") | .image' .woodpecker/ci.yaml)" "$(cj "$pod.containers[0].image")"
 

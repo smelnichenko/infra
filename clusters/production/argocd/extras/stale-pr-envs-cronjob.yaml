@@ -18,8 +18,8 @@
 # CD prune step still runs.
 #
 # Any failure fails the run (the Job Failed: KubeJobFailed), never a quiet "nothing to do": a Vault listing it could
-# not read looked like one with nothing to purge, a failed read of the live apps would have purged every preview's
-# secrets, and the token died unnoticed. Times are read by jq: this image's busybox `date` reads no RFC 3339 time - it
+# not read (its pods could not even reach Vault - its NetworkPolicy below) looked like one with nothing to purge, a
+# failed read of the live apps would have purged every preview's secrets, and the token died unnoticed. Times are read by jq: this image's busybox `date` reads no RFC 3339 time - it
 # took every app for deployed in 1970 and pruned it at its first sweep. Tests: tests/stale-pr-envs-sweeper/run.sh.
 apiVersion: v1
 kind: ServiceAccount
@@ -70,6 +70,24 @@ spec:
         key: argocd/vault-cleanup-token
         property: token
 ---
+# its pods reach Vault: argocd's own policy (ops setup-argocd.yml, argocd-controllers) lets them out to the Pis on
+# Forgejo's ports alone - without this the Vault GC never connected
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: stale-pr-envs-sweeper
+  namespace: argocd
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: stale-pr-envs-sweeper
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - ipBlock: { cidr: 192.168.11.5/32 }
+      ports:
+        - { protocol: TCP, port: 8200 }
+---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -89,6 +107,7 @@ spec:
       template:
         metadata:
           labels:
+            app.kubernetes.io/name: stale-pr-envs-sweeper
             # out of Velero's backups: a run ending while the weekly backup reads its emptyDir fails that backup
             velero.io/exclude-from-backup: "true"
         spec:
