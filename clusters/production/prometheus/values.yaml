@@ -1,6 +1,10 @@
 fullnameOverride: schnappy
 
 prometheus:
+  # No token Secret for Prometheus' service account: chart 91 creates one (a token that never expires) for the
+  # control-plane ServiceMonitors alone, and the only one enabled here, the API server's, is off (kubeApiServer below)
+  serviceAccount:
+    createTokenSecret: false
   prometheusSpec:
     # No sidecar — scrape merged metrics on port 15020 (plaintext, bypasses mTLS)
     podMetadata:
@@ -80,9 +84,16 @@ coreDns:
   enabled: false
 kubelet:
   enabled: false
+# The API server's own metrics: no rule, alert or dashboard reads them, and chart 91 scrapes them with the token
+# Secret above
+kubeApiServer:
+  enabled: false
 
 prometheusOperator:
   enabled: true
+  # chart 91's default no longer excludes service-account tokens - for the control-plane monitors' Secret, not used
+  # here; the operator keeps watching no token Secret of any namespace
+  secretFieldSelector: "type!=kubernetes.io/dockercfg,type!=kubernetes.io/service-account-token,type!=helm.sh/release.v1"
   fullnameOverride: schnappy-prometheus-operator
   admissionWebhooks:
     enabled: false
