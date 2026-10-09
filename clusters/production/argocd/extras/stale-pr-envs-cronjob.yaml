@@ -9,13 +9,18 @@
 #      (calls the Vault metadata DELETE API for full purge — same as
 #      `task deploy:delete-environment`).
 #
-# Vault token requirements: a scoped token (NOT the root token) at
-# secret/argocd/vault-cleanup-token { token: <hvs.…> }, issued once
-# under a policy with `list` on `secret/metadata/` and `delete` on
-# `secret/metadata/schnappy-pr-*` only. ESO syncs into Secret
-# `vault-cleanup-token` in argocd ns. If the Secret is absent, the
-# Vault GC step logs a warning and skips — the Argo CD prune step
-# still runs.
+# Vault is read verified against its CA - the Secret vault-pi-ca in argocd, the CA External Secrets trusts
+# (`bootstrap.sh vault-eso` puts it there) - never with curl -k. Its token: a scoped periodic token (NOT the root
+# token) at secret/argocd/vault-cleanup-token { token: <hvs.…> }, issued by setup-vault-cleanup-policy.yml under a
+# policy with `list` on `secret/metadata/` and `list` + `delete` on `secret/metadata/schnappy-pr-*` only. ESO syncs
+# it into Secret `vault-cleanup-token` in argocd ns. A periodic token lives only while it is renewed within its period
+# (30 days): every run renews it first. If the Secret is absent, the Vault GC step logs a warning and skips — the Argo
+# CD prune step still runs.
+#
+# Any failure fails the run (the Job Failed: KubeJobFailed), never a quiet "nothing to do": a Vault listing it could
+# not read looked like one with nothing to purge, a failed read of the live apps would have purged every preview's
+# secrets, and the token died unnoticed. Times are read by jq: this image's busybox `date` reads no RFC 3339 time - it
+# took every app for deployed in 1970 and pruned it at its first sweep. Tests: tests/stale-pr-envs-sweeper/run.sh.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -78,6 +83,8 @@ spec:
   jobTemplate:
     spec:
       backoffLimit: 1
+      # a pod that cannot start (its CA Secret missing) ends the Job Failed instead of holding the next runs off
+      activeDeadlineSeconds: 1800
       ttlSecondsAfterFinished: 86400
       template:
         metadata:
@@ -121,24 +128,53 @@ spec:
                 - -c
                 - |
                   set -eu
+                  set -o pipefail
                   now_epoch=$(date -u +%s)
                   closed_grace=$(( CLOSED_GRACE_HOURS * 3600 ))
                   stale_secs=$(( STALE_DAYS * 86400 ))
+                  work=$(mktemp -d)
+                  failed=0
+                  # an RFC 3339 time (Argo CD's "...Z", Forgejo's "...+03:00") as epoch seconds; "bad" for any other
+                  epoch='def epoch: if . == null or . == "" then null else
+                    (capture("^(?<t>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2})(\\.[0-9]+)?(?<z>Z|(?<s>[+-])(?<h>[0-9]{2}):?(?<m>[0-9]{2}))$") // {t: null}) as $c
+                    | if $c.t == null then "bad" else ($c.t + "Z" | fromdateiso8601)
+                        - (if $c.z == "Z" then 0 else ($c.s + "1" | tonumber) * (($c.h | tonumber) * 3600 + ($c.m | tonumber) * 60) end) end
+                    end;'
+
+                  # forgejo <path>: the API's answer; the token to curl on its stdin (-H @-), never on an argv
+                  forgejo() {
+                    printf 'Authorization: token %s\n' "$FORGEJO_TOKEN" \
+                      | curl -fsS --connect-timeout 10 --max-time 30 -H @- "$FORGEJO_API/$1"
+                  }
+                  # preview_apps: "<name>|<pr>|<repo>|<last deploy, or creation, as epoch>" per preview Application
+                  # with a PR number, none on its way out
+                  preview_apps() {
+                    kubectl get application -n argocd -l preview-env=true -o json > "$work/apps.json"
+                    jq -r "$epoch"' .items[] | select(.metadata.deletionTimestamp == null)
+                      | select((.metadata.labels."pr-number" // "") != "")
+                      | [.metadata.name, .metadata.labels."pr-number", .metadata.labels."source-repo" // "",
+                         ((.status.history[-1].deployedAt // .metadata.creationTimestamp) | epoch // "none")]
+                      | map(tostring) | join("|")' "$work/apps.json"
+                  }
 
                   # ── 1. Argo CD Application prune ─────────────────────
-                  kubectl get application -n argocd -l preview-env=true \
-                    -o json | jq -r '.items[] | [.metadata.name, .metadata.labels."pr-number", .metadata.labels."source-repo", .status.history[-1].deployedAt] | @tsv' | \
-                  while IFS=$'\t' read -r app pr repo deployed; do
-                    [ -z "$pr" ] && continue
-                    deployed_epoch=$(date -u -d "$deployed" +%s 2>/dev/null || echo 0)
-                    pr_state=$(curl -fsS -H "Authorization: token $FORGEJO_TOKEN" \
-                      "$FORGEJO_API/repos/schnappy/$repo/issues/$pr" \
-                      | jq -r '.state // "unknown"')
-                    pr_closed_at=$(curl -fsS -H "Authorization: token $FORGEJO_TOKEN" \
-                      "$FORGEJO_API/repos/schnappy/$repo/issues/$pr" \
-                      | jq -r '.closed_at // ""')
-                    if [ "$pr_state" = "closed" ] && [ -n "$pr_closed_at" ]; then
-                      closed_epoch=$(date -u -d "$pr_closed_at" +%s)
+                  preview_apps > "$work/apps"
+                  while IFS='|' read -r app pr repo deployed_epoch; do
+                    case $deployed_epoch in
+                      ''|*[!0-9]*) echo "[prune-app] $app: its deploy time unreadable ($deployed_epoch) - left" >&2
+                        failed=1; continue ;;
+                    esac
+                    if ! issue=$(forgejo "repos/schnappy/$repo/issues/$pr"); then
+                      echo "[prune-app] $app: PR $repo#$pr not read from Forgejo - left" >&2
+                      failed=1; continue
+                    fi
+                    pr_state=$(printf '%s' "$issue" | jq -r '.state // "unknown"')
+                    if [ "$pr_state" = "closed" ]; then
+                      closed_epoch=$(printf '%s' "$issue" | jq -r "$epoch"' .closed_at | epoch // "none"')
+                      case $closed_epoch in
+                        *[!0-9]*) echo "[prune-app] $app: PR $repo#$pr closed at a time unreadable ($closed_epoch) - left" >&2
+                          failed=1; continue ;;
+                      esac
                       if [ $((now_epoch - closed_epoch)) -gt $closed_grace ]; then
                         echo "[prune-app] $app — PR closed > ${CLOSED_GRACE_HOURS}h ago"
                         kubectl delete application -n argocd "$app"
@@ -149,38 +185,58 @@ spec:
                       echo "[prune-app] $app — head SHA stale > ${STALE_DAYS}d"
                       kubectl delete application -n argocd "$app"
                     fi
-                  done
+                  done < "$work/apps"
 
                   # ── 2. Vault prefix GC ───────────────────────────────
                   if [ -z "${VAULT_TOKEN:-}" ]; then
                     echo "[vault-gc] VAULT_TOKEN not set — skipping (provision secret/argocd/vault-cleanup-token to enable)"
-                    exit 0
+                    exit $failed
                   fi
-
-                  # Snapshot live PR-env apps so we know what to keep.
-                  live_apps=$(kubectl get application -n argocd -l preview-env=true \
-                    -o jsonpath='{.items[*].metadata.labels.pr-number}' || echo "")
-
-                  prefixes=$(curl -sf -X LIST -H "X-Vault-Token: $VAULT_TOKEN" \
-                    "$VAULT_ADDR/v1/secret/metadata/" \
-                    | jq -r '.data.keys[]?' \
-                    | grep -E '^schnappy-pr-[0-9]+/$' || true)
-
-                  for prefix in $prefixes; do
-                    pr_num=$(echo "$prefix" | sed -E 's|^schnappy-pr-([0-9]+)/$|\1|')
-                    if echo " $live_apps " | grep -q " $pr_num "; then
-                      continue   # still in use; skip
-                    fi
-                    # Live App is gone — purge every key under the prefix.
-                    keys=$(curl -sfk -X LIST -H "X-Vault-Token: $VAULT_TOKEN" \
-                      "$VAULT_ADDR/v1/secret/metadata/${prefix%/}" \
-                      | jq -r '.data.keys[]?' || true)
-                    for k in $keys; do
-                      echo "[vault-gc] purge secret/${prefix}${k}"
-                      curl -sfk -X DELETE -H "X-Vault-Token: $VAULT_TOKEN" \
-                        "$VAULT_ADDR/v1/secret/metadata/${prefix}${k}" >/dev/null
+                  # vault <method> <path>: Vault's answer in $work/vault.json, verified against its CA; the token to
+                  # curl on its stdin. A LIST of nothing is Vault's 404 - an empty answer; any other failure said, and
+                  # the run fails
+                  vault() {
+                    rm -f "$work/vault.json"
+                    code=$(printf 'X-Vault-Token: %s\n' "$VAULT_TOKEN" \
+                      | curl -sS --cacert /vault-ca/ca.crt --connect-timeout 10 --max-time 30 -H @- \
+                          -o "$work/vault.json" -w '%{http_code}' -X "$1" "$VAULT_ADDR/v1/$2") || code="no answer ($code)"
+                    case $code in
+                      2??) return 0 ;;
+                      404) if [ "$1" = LIST ]; then echo '{}' > "$work/vault.json"; return 0; fi ;;
+                    esac
+                    echo "[vault-gc] $1 $2: $code $(head -c 300 "$work/vault.json" 2> /dev/null)" >&2
+                    return 1
+                  }
+                  # purge <path/>: every key under it, a folder's too (a metadata DELETE removes a key, every version)
+                  purge() {
+                    vault LIST "secret/metadata/$1"
+                    for k in $(jq -r '.data.keys[]?' "$work/vault.json"); do
+                      case $k in
+                        */) purge "$1$k" ;;
+                        *) echo "[vault-gc] purge secret/$1$k"
+                           vault DELETE "secret/metadata/$1$k" ;;
+                      esac
                     done
+                  }
+
+                  vault POST auth/token/renew-self
+                  echo "[vault-gc] token renewed for $(jq -r '.auth.lease_duration' "$work/vault.json") s"
+                  # the PRs whose apps are left after the prune: their secrets stay
+                  preview_apps > "$work/live"
+                  live=" $(cut -d'|' -f2 "$work/live" | tr '\n' ' ') "
+                  vault LIST secret/metadata/
+                  prefixes=$(jq -r '.data.keys[]?' "$work/vault.json" | { grep -E '^schnappy-pr-[0-9]+/$' || true; })
+                  echo "[vault-gc] preview prefixes in Vault: ${prefixes:-none}; live PRs:${live% }" | tr '\n' ' '
+                  echo
+                  for prefix in $prefixes; do
+                    pr_num=${prefix#schnappy-pr-}
+                    pr_num=${pr_num%/}
+                    case $live in
+                      *" $pr_num "*) continue ;;   # still in use; skip
+                    esac
+                    purge "$prefix"
                   done
+                  exit $failed
               securityContext:
                 allowPrivilegeEscalation: false
                 capabilities:
@@ -188,5 +244,8 @@ spec:
                 readOnlyRootFilesystem: true
               volumeMounts:
                 - { name: tmp, mountPath: /tmp }
+                - { name: vault-ca, mountPath: /vault-ca, readOnly: true }
           volumes:
             - { name: tmp, emptyDir: {} }
+            # Vault's CA (bootstrap.sh vault-eso): not optional - without it no run reads Vault verified
+            - { name: vault-ca, secret: { secretName: vault-pi-ca } }
