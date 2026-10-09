@@ -42,7 +42,7 @@ kafka:
 scylla:
   enabled: false
   # the schema Job's cqlsh, the cluster's own version
-  image: scylladb/scylla:2025.1.16
+  image: scylladb/scylla:2026.1.14
   resources:
     requests: { cpu: 25m, memory: 256Mi }
     limits: { cpu: 1000m, memory: 512Mi }
