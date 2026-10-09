@@ -1,0 +1,15 @@
+# External Secrets' account may review tokens: the Pi Vault (no reviewer token of its own) reviews the short-lived
+# token External Secrets logs in with by that same token. `bootstrap.sh vault-eso` (ops) applies the same binding on a
+# new cluster before Argo CD exists; here it is in git, where a rebuild and a review see it.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: vault-token-reviewer
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+  - kind: ServiceAccount
+    name: external-secrets
+    namespace: external-secrets
