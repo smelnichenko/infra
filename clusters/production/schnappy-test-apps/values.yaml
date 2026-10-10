@@ -108,7 +108,7 @@ chatService:
   image:
     repository: git.pmon.dev/schnappy/chat
     pullPolicy: IfNotPresent
-    tag: "33c22c5"  # chat
+    tag: "b2b2c77"  # chat
   replicas: 1
   javaOpts: -Xmx512m -XX:+UseZGC
   resources:
