@@ -23,12 +23,13 @@ spec:
     server: https://kubernetes.default.svc
     namespace: scylla-manager
   # the chart's ServiceMonitor relabeling names no action; the CRD defaults it to replace, which a server-side apply's
-  # diff reports as drift for ever - the app OutOfSync after every sync (Vagrant full run 14, step 18)
+  # diff reports as drift for ever - the app OutOfSync after every sync. Only that default ignored: another action set
+  # live (one that silences the Manager's metrics) is still drift
   ignoreDifferences:
     - group: monitoring.coreos.com
       kind: ServiceMonitor
       jqPathExpressions:
-        - .spec.endpoints[].metricRelabelings[]?.action
+        - .spec.endpoints[].metricRelabelings[]? | select(.action == "replace") | .action
   syncPolicy:
     automated:
       selfHeal: true
