@@ -68,6 +68,9 @@ spec:
         metadata:
           labels:
             app: etcd-backup
+            # out of Velero's backups: a run ending while the weekly backup reads its emptyDirs made that backup
+            # PartiallyFailed (2026-09-20, 2026-10-04); the pod holds nothing to restore
+            velero.io/exclude-from-backup: "true"
         spec:
           restartPolicy: Never
           hostNetwork: true         # reach etcd on 127.0.0.1:2379
