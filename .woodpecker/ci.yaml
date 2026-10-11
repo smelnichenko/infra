@@ -38,3 +38,8 @@ steps:
         clusters/production/cluster-config
         clusters/production/argocd
         clusters/production/kagent
+  # every Job's and CronJob's pods out of Velero's backups (the script says why)
+  - name: velero-exclude
+    image: ghcr.io/yannh/kubeconform:v0.7.0-alpine
+    commands:
+      - sh .woodpecker/velero-exclude-check.sh
