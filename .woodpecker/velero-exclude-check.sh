@@ -23,6 +23,11 @@ for f in $(find clusters -name '*.yaml' ! -name 'values*.yaml'); do
     bad=1
   fi
 done
+# the weekly backup (every namespace) leaves Velero's own out: its maintenance Jobs' pods carry no label (Velero
+# makes them), so only the namespace keeps them from failing it
+awk '/^  full-weekly:/ {w=1; next} w && /^  [a-z]/ {w=0} w && /excludedNamespaces:/ {x=1; next}
+  x && /^ *- *velero *$/ {ok=1} x && !/^ *- / {x=0} END {exit !ok}' clusters/production/velero/values.yaml \
+  || { echo "FAIL: the full-weekly schedule does not exclude the velero namespace" >&2; bad=1; }
 # a scan that reads nothing is no pass: the manifests hold two CronJobs (etcd-backup, the stale-PR sweeper) today
 [ "$seen" -ge 2 ] || { echo "FAIL: the scan saw $seen Job/CronJob(s) under clusters/ - it reads nothing" >&2; bad=1; }
 [ "$bad" = 0 ] && echo "velero exclude check: OK"

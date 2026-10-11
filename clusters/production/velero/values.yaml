@@ -46,8 +46,9 @@ schedules:
       ttl: 720h
       includedNamespaces:
         - "*"
-      # Velero's own namespace: no data (no PVC), everything there Argo's or Velero's to recreate - and its hourly
-      # repository maintenance Jobs' pods, ending while this backup reads their volumes, made it PartiallyFailed
+      # Velero's own namespace: no data (no PVC), everything there Argo's or Velero's to recreate. Its hourly
+      # repository maintenance Jobs' pods (unlabelled: Velero makes them) would fail this backup the way hyperfoil's
+      # and etcd-backup's pods did, ending while it reads their volumes - none has yet; this keeps it so
       excludedNamespaces:
         - velero
       defaultVolumesToFsBackup: true
