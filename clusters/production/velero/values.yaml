@@ -46,6 +46,10 @@ schedules:
       ttl: 720h
       includedNamespaces:
         - "*"
+      # Velero's own namespace: no data (no PVC), everything there Argo's or Velero's to recreate - and its hourly
+      # repository maintenance Jobs' pods, ending while this backup reads their volumes, made it PartiallyFailed
+      excludedNamespaces:
+        - velero
       defaultVolumesToFsBackup: true
 upgradeCRDs: false
 kubectl:

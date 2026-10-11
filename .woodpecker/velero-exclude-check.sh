@@ -5,6 +5,7 @@
 # chart-render-checks reads the charts.
 set -eu
 bad=0
+seen=0
 for f in $(find clusters -name '*.yaml' ! -name 'values*.yaml'); do
   got=$(awk '/^---/ {injob = 0; st = 0; next} /^ *$/ {next} {ind = match($0, /[^ ]/) - 1}
     /^kind: / {injob = 0} /^kind: (Job|CronJob) *$/ {jobs++; injob = 1}
@@ -16,10 +17,13 @@ for f in $(find clusters -name '*.yaml' ! -name 'values*.yaml'); do
     END {print jobs + 0, marks + 0}' "$f")
   jobs=${got% *}
   marks=${got#* }
+  seen=$((seen + jobs))
   if [ "$jobs" -gt "$marks" ]; then
     echo "FAIL: $f: $jobs Job/CronJob(s), $marks pod template(s) with velero.io/exclude-from-backup" >&2
     bad=1
   fi
 done
+# a scan that reads nothing is no pass: the manifests hold two CronJobs (etcd-backup, the stale-PR sweeper) today
+[ "$seen" -ge 2 ] || { echo "FAIL: the scan saw $seen Job/CronJob(s) under clusters/ - it reads nothing" >&2; bad=1; }
 [ "$bad" = 0 ] && echo "velero exclude check: OK"
 exit "$bad"
