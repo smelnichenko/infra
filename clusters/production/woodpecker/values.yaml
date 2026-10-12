@@ -54,8 +54,8 @@ server:
     size: 1Gi
     storageClass: local-path
 agent:
-  # one agent, one workflow: one CI job at a time on ten, so a pipeline never competes with another for the CPU its
-  # steps reserve (masi's test step reserves 3 CPUs)
+  # one agent, one workflow: one CI job at a time on ten, so a pipeline never competes with another for CPU (each
+  # container gets the woodpecker namespace's LimitRange: 2 CPUs; no pipeline sets one)
   replicaCount: 1
   image:
     tag: v3.19.0
