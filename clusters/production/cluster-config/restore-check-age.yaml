@@ -4,7 +4,10 @@
 # the Pis is scraped, so the check runs here: either Pi's last-success older than 50 h (two of its turns, and a
 # margin for the timer's randomized delay), ahead of the clock, missing or unreadable fails this Job, and
 # KubeJobFailed fires. The next check after both are fresh passes and clears it. The Job's log shows each Pi's
-# last-report (which part failed).
+# last-report (which part failed) and, when it fails, the store's own error.
+#
+# Lands after ops' deploy:pi-backups and deploy:pi-restore-check, once both Pis have a last-success: before, it
+# fails every run.
 #
 # The store's key is the etcd job's (etcd-backup-store: the store's one root key, secret/schnappy/velero).
 apiVersion: batch/v1
@@ -47,11 +50,14 @@ spec:
                   for pi in pi1 pi2; do
                     # the report first, whatever the age: which part failed
                     echo "== $pi's last report:"
-                    rclone cat "pi:restore-checks/$pi/last-report" 2> /dev/null | head -20 || true
-                    ts=$(rclone cat "pi:restore-checks/$pi/last-success" 2> /dev/null) || ts=""
+                    rclone cat "pi:restore-checks/$pi/last-report" 2> /tmp/report.err | head -20
+                    # the store's own words when it fails - a missing object, refused credentials, the VIP down
+                    ts=$(rclone cat "pi:restore-checks/$pi/last-success" 2> /tmp/success.err) || ts=""
                     case "$ts" in
                       [0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]T[0-9][0-9][0-9][0-9][0-9][0-9]Z) ;;
-                      *) echo "restore-check-age: $pi's last-success missing or unreadable: '$ts'"; stale="$stale $pi"; continue ;;
+                      *) echo "restore-check-age: $pi's last-success missing or unreadable: '$ts'"
+                         tail -3 /tmp/report.err /tmp/success.err 2> /dev/null
+                         stale="$stale $pi"; continue ;;
                     esac
                     then=$(date -u -d "$(echo "$ts" | sed -E 's/^(....)(..)(..)T(..)(..)(..)Z$/\1-\2-\3 \4:\5:\6/')" +%s)
                     age=$(( $(date -u +%s) - then ))

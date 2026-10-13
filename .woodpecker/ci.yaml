@@ -52,3 +52,12 @@ steps:
     image: alpine/k8s:1.35.9
     commands:
       - bash tests/stale-pr-envs-sweeper/run.sh
+
+  # the restore check's age check run as its CronJob runs it - in its image (the test checks it is the CronJob's), busybox
+  # sh - against a stub rclone
+  - name: restore-check-age
+    image: rclone/rclone:1.75.1@sha256:45401ad7410db1d67ffdb58e19059ad20b0d8e0285a60e38bbec55cc1019c7a5
+    environment:
+      CI_STEP_IMAGE_CHECK: rclone/rclone:1.75.1@sha256:45401ad7410db1d67ffdb58e19059ad20b0d8e0285a60e38bbec55cc1019c7a5
+    commands:
+      - sh tests/restore-check-age/run.sh
