@@ -88,9 +88,13 @@ scylla:
   storage:
     size: 20Gi
     storageClass: local-path
+  # the operator runs one shard per core of the CPU limit (--smp) and ScyllaDB sizes itself to the memory limit:
+  # two shards of 1 GiB each, the memory request the same as the limit - the memory it plans with is promised (with the
+  # request under the limit a pressed node takes it back as an OOM kill). Was 4 shards on 4Gi, 2Gi of it promised;
+  # the first restart on two shards reshards the data
   resources:
     requests: { cpu: 100m, memory: 2Gi, ephemeral-storage: 256Mi }
-    limits: { cpu: 4000m, memory: 4Gi, ephemeral-storage: 1Gi }
+    limits: { cpu: 2000m, memory: 2Gi, ephemeral-storage: 1Gi }
 
 scyllaOperator:
   enabled: true
