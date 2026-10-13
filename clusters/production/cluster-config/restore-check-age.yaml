@@ -1,0 +1,91 @@
+# Whether the Pis still restore the backups. Each Pi restores them on its own days, in turn (ops
+# setup-pi-restore-check.yml: production's Postgres from its base backup and WAL, ten's etcd snapshot, the Pis' tier-0
+# backup), and writes `restore-checks/<pi>/last-success` in the Pi backup store when every part restored. Nothing on
+# the Pis is scraped, so the check runs here: either Pi's last-success older than 50 h (two of its turns, and a
+# margin for the timer's randomized delay), ahead of the clock, missing or unreadable fails this Job, and
+# KubeJobFailed fires. The next check after both are fresh passes and clears it. The Job's log shows each Pi's
+# last-report (which part failed).
+#
+# The store's key is the etcd job's (etcd-backup-store: the store's one root key, secret/schnappy/velero).
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: restore-check-age
+  namespace: kube-system
+  labels:
+    app: restore-check-age
+spec:
+  schedule: "50 */3 * * *"         # every 3 h: a Pi that missed its turn is reported the same day
+  # stated, so a suspend by hand (to quiet the alert) shows as drift and selfHeal undoes it
+  suspend: false
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0                # a stale restore does not freshen on a retry
+      activeDeadlineSeconds: 300
+      template:
+        metadata:
+          labels:
+            app: restore-check-age
+            velero.io/exclude-from-backup: "true"
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: check
+              image: rclone/rclone:1.75.1@sha256:45401ad7410db1d67ffdb58e19059ad20b0d8e0285a60e38bbec55cc1019c7a5
+              command: ["/bin/sh", "-ec"]
+              args:
+                - |
+                  max_age_h=50
+                  stale=""
+                  for pi in pi1 pi2; do
+                    # the report first, whatever the age: which part failed
+                    echo "== $pi's last report:"
+                    rclone cat "pi:restore-checks/$pi/last-report" 2> /dev/null | head -20 || true
+                    ts=$(rclone cat "pi:restore-checks/$pi/last-success" 2> /dev/null) || ts=""
+                    case "$ts" in
+                      [0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]T[0-9][0-9][0-9][0-9][0-9][0-9]Z) ;;
+                      *) echo "restore-check-age: $pi's last-success missing or unreadable: '$ts'"; stale="$stale $pi"; continue ;;
+                    esac
+                    then=$(date -u -d "$(echo "$ts" | sed -E 's/^(....)(..)(..)T(..)(..)(..)Z$/\1-\2-\3 \4:\5:\6/')" +%s)
+                    age=$(( $(date -u +%s) - then ))
+                    echo "restore-check-age: $pi restored last $ts, $(( age / 3600 )) h ago (limit ${max_age_h} h)"
+                    if [ "$age" -gt $(( max_age_h * 3600 )) ]; then
+                      echo "restore-check-age: $pi STALE"; stale="$stale $pi"
+                    elif [ "$age" -lt -3600 ]; then
+                      # a time ahead of this clock (by more than an hour) proves nothing about the last restore
+                      echo "restore-check-age: $pi's last-success is in the future"; stale="$stale $pi"
+                    fi
+                  done
+                  [ -z "$stale" ] || { echo "restore-check-age: FAILED:$stale"; exit 1; }
+                  echo "restore-check-age: both Pis restored within ${max_age_h} h"
+              env:
+                # the remote "pi" is configured by environment alone: no config file on the read-only root
+                - { name: RCLONE_CONFIG, value: "" }
+                - { name: RCLONE_CONFIG_PI_TYPE, value: s3 }
+                - { name: RCLONE_CONFIG_PI_PROVIDER, value: Other }
+                - { name: RCLONE_CONFIG_PI_ENDPOINT, value: "http://192.168.11.5:9000" }
+                - { name: RCLONE_CONFIG_PI_ACCESS_KEY_ID, valueFrom: { secretKeyRef: { name: etcd-backup-store, key: ACCESS_KEY } } }
+                - { name: RCLONE_CONFIG_PI_SECRET_ACCESS_KEY, valueFrom: { secretKeyRef: { name: etcd-backup-store, key: SECRET_KEY } } }
+                - { name: HOME, value: /tmp }
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 65534
+                readOnlyRootFilesystem: true
+                allowPrivilegeEscalation: false
+                capabilities: { drop: ["ALL"] }
+              resources:
+                requests: { cpu: 10m, memory: 32Mi, ephemeral-storage: 16Mi }
+                limits: { memory: 64Mi, ephemeral-storage: 64Mi }
+              volumeMounts:
+                - { name: tmp, mountPath: /tmp }
+          volumes:
+            - name: tmp
+              emptyDir:
+                sizeLimit: 16Mi
