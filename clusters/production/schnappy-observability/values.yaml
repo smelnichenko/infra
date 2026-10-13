@@ -169,3 +169,9 @@ smartctl:
   enabled: true
   host: "192.168.11.2"
   port: 9633
+
+# ten's own node_exporter (ops setup-host-hardening.yml): its filesystems, and the disk alerts on them
+nodeExporter:
+  enabled: true
+  host: "192.168.11.2"
+  port: 9100
