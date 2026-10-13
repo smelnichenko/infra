@@ -50,7 +50,8 @@ spec:
                   for pi in pi1 pi2; do
                     # the report first, whatever the age: which part failed
                     echo "== $pi's last report:"
-                    rclone cat "pi:restore-checks/$pi/last-report" 2> /tmp/report.err | head -20
+                    # whole: a failed part's lines come after the parts before it (a report runs to some 70 lines)
+                    rclone cat "pi:restore-checks/$pi/last-report" 2> /tmp/report.err | head -100
                     # the store's own words when it fails - a missing object, refused credentials, the VIP down
                     ts=$(rclone cat "pi:restore-checks/$pi/last-success" 2> /tmp/success.err) || ts=""
                     case "$ts" in
