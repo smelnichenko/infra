@@ -43,9 +43,14 @@ scylla:
   enabled: false
   # the schema Job's cqlsh, the cluster's own version
   image: scylladb/scylla:2026.1.14
+  # ScyllaDB sizes itself to its memory limit (one shard here, --smp=1): under Seastar's reserve (1.5 GiB) plus 500 MB
+  # it takes a flat 500 MB (its log's max_repair_memory, 10 % of a shard: 49.9 MB on 2026-10-14) - at 512Mi that left
+  # 36 MiB outside the shard; 1 GiB leaves ~500 MiB. Its request the same - the memory it plans with is then the memory
+  # it is promised (with the request under the limit a pressed node takes it back as an OOM kill). The test namespace's
+  # quota (16Gi of requests, 48Gi of limits; 5.2Gi and 23.6Gi used on 2026-10-14) holds it
   resources:
-    requests: { cpu: 25m, memory: 256Mi }
-    limits: { cpu: 1000m, memory: 512Mi }
+    requests: { cpu: 100m, memory: 1Gi }
+    limits: { cpu: 1000m, memory: 1Gi }
 
 scyllaOperator:
   enabled: true
