@@ -88,10 +88,12 @@ scylla:
   storage:
     size: 20Gi
     storageClass: local-path
-  # the operator runs one shard per core of the CPU limit (--smp) and ScyllaDB sizes itself to the memory limit:
-  # two shards of 1 GiB each, the memory request the same as the limit - the memory it plans with is promised (with the
-  # request under the limit a pressed node takes it back as an OOM kill). Was 4 shards on 4Gi, 2Gi of it promised;
-  # the first restart on two shards reshards the data
+  # the operator runs one shard per core of the CPU limit (--smp) and ScyllaDB sizes itself to the memory limit less
+  # Seastar's reserve - by default max(1.5 GiB, 7 %): 2 GiB would leave two shards 256 MiB each. With the reserve at
+  # 512M (scyllaOperator.scyllaArgs) the two shards get ~768 MiB each (4 shards of ~600 MB on 4Gi until 2026-10 - each
+  # shard's max_repair_memory, 10 % of it, in ScyllaDB's log). The memory request the same as the limit - the memory it
+  # plans with is promised (with the request under the limit a pressed node takes it back as an OOM kill). The first
+  # restart on two shards reshards the data
   resources:
     requests: { cpu: 100m, memory: 2Gi, ephemeral-storage: 256Mi }
     limits: { cpu: 2000m, memory: 2Gi, ephemeral-storage: 1Gi }
@@ -101,6 +103,8 @@ scyllaOperator:
   version: "2026.1.14"
   agentVersion: "3.12.1"
   developerMode: true
+  # Seastar's reserve outside the shards (see scylla.resources)
+  scyllaArgs: "--reserve-memory 512M"
   backupEndpoint: http://192.168.11.5:9000
   # Legacy `backups[]` removed — superseded by scyllaManager.backup
   # (which uses the ScyllaDBManagerTask CRD). Both blocks were active
