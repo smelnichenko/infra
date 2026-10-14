@@ -2,8 +2,8 @@
 # clusters/production/cluster-config/restore-check-age.yaml's script, run as the CronJob runs it - the script from the
 # manifest, its image's busybox sh and date - with rclone stubbed: what `rclone cat pi:restore-checks/<pi>/last-success`
 # returns for each Pi decides.
-#   passes  both fresh; one 49 h old; one 30 min ahead of the clock
-#   fails   either 51 h old (STALE, the other fine), either 2 h ahead, garbage, missing, the store unreachable (its own
+#   passes  both fresh; one 59 h old (a turn retried late); one 30 min ahead of the clock
+#   fails   either 61 h old (STALE, the other fine), either 2 h ahead, garbage, missing, the store unreachable (its own
 #           error shown)
 # Each Pi's last-report is shown whatever the verdict.
 #
@@ -51,16 +51,18 @@ case_() { # name, want (0 pass / 1 fail), pi1's last-success, pi2's, [rclone's e
 }
 at() { date -u -d "@$(( $(date -u +%s) + $1 ))" +%Y%m%dT%H%M%SZ; }
 F=$(at -72000)
-case_ "both fresh" 0 "$(at -7200)" "$F" 0 "both Pis restored within 50 h"
+case_ "both fresh" 0 "$(at -7200)" "$F" 0 "both Pis restored within 60 h"
 case_ "  each Pi's last report shown" 0 "$(at -7200)" "$F" 0 "REPORT pi:restore-checks/pi2/last-report"
-case_ "pi1 49 h old" 0 "$(at -176400)" "$F"
-case_ "pi1 51 h old (missed its turn), pi2 fresh" 1 "$(at -183600)" "$F" 0 "FAILED: pi1"
-case_ "pi2 51 h old, pi1 fresh" 1 "$F" "$(at -183600)" 0 "FAILED: pi2"
+case_ "pi1 59 h old (its turn retried late)" 0 "$(at -212400)" "$F"
+case_ "pi1 61 h old (missed its turn), pi2 fresh" 1 "$(at -219600)" "$F" 0 "FAILED: pi1"
+case_ "pi2 61 h old, pi1 fresh" 1 "$F" "$(at -219600)" 0 "FAILED: pi2"
 case_ "30 min ahead of the clock" 0 "$(at 1800)" "$F"
 case_ "2 h ahead of the clock" 1 "$F" "$(at 7200)" 0 "in the future"
 case_ "garbage" 1 "not-a-time" "$F" 0 "missing or unreadable"
 case_ "missing (rclone prints nothing)" 1 "$F" "" 0 "pi2's last-success missing or unreadable"
 case_ "the store unreachable" 1 "" "" 1 "FAILED: pi1 pi2"
 case_ "  the store's own error shown" 1 "" "" 1 "SignatureDoesNotMatch"
+# "could not ask" is not "fresh": rclone failing after it printed a value
+case_ "rclone fails after printing fresh values" 1 "$F" "$F" 1 "FAILED: pi1 pi2"
 echo "restore-check-age: $([ $fails = 0 ] && echo ALL-PASS || echo "$fails FAILED")"
 [ $fails = 0 ]

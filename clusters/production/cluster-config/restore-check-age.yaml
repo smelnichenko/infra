@@ -1,8 +1,9 @@
 # Whether the Pis still restore the backups. Each Pi restores them on its own days, in turn (ops
 # setup-pi-restore-check.yml: production's Postgres from its base backup and WAL, ten's etcd snapshot, the Pis' tier-0
 # backup), and writes `restore-checks/<pi>/last-success` in the Pi backup store when every part restored. Nothing on
-# the Pis is scraped, so the check runs here: either Pi's last-success older than 50 h (two of its turns, and a
-# margin for the timer's randomized delay), ahead of the clock, missing or unreadable fails this Job, and
+# the Pis is scraped, so the check runs here: either Pi's last-success older than 60 h - its last turn's 48 h, and
+# the window that turn may take (05:30 and up to 5 min of delay, then up to three tries of at most 3 h, 20 min apart:
+# a blip retried late must not page) - ahead of the clock, missing or unreadable fails this Job, and
 # KubeJobFailed fires. The next check after both are fresh passes and clears it. The Job's log shows each Pi's
 # last-report (which part failed) and, when it fails, the store's own error.
 #
@@ -45,7 +46,7 @@ spec:
               command: ["/bin/sh", "-ec"]
               args:
                 - |
-                  max_age_h=50
+                  max_age_h=60
                   stale=""
                   for pi in pi1 pi2; do
                     # the report first, whatever the age: which part failed
