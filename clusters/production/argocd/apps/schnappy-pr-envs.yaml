@@ -97,7 +97,6 @@ spec:
         namespace: 'schnappy-pr-{{ .number }}'
       syncPolicy:
         automated:
-          prune: true
           selfHeal: true
         syncOptions:
           - CreateNamespace=true

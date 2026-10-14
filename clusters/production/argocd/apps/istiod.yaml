@@ -26,7 +26,6 @@ spec:
   syncPolicy:
     automated:
       selfHeal: true
-      prune: true
     syncOptions:
       # CSA (default, no ServerSideApply) — Argo's compare uses the
       # kubectl last-applied-configuration annotation as desired state,
