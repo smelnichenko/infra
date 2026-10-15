@@ -32,9 +32,10 @@ spec:
       jsonPointers:
         - /spec/versions/0/schema/openAPIV3Schema/properties/status/properties/clusterSecurity/properties
   syncPolicy:
+    # no automated prune (as every app here): a resource the chart stops rendering stays until a person deletes it - a
+    # prune would have deleted what Strimzi's CRDs and the Kafka clusters hang on
     automated:
       selfHeal: true
-      prune: true
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
