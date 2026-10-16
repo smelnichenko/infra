@@ -25,11 +25,18 @@ image=$(sed -n 's/.*\(sha256:[0-9a-f]*\).*/\1/p' <<EOF_IMG
 $want
 EOF_IMG
 )
+# the CI step's image as .woodpecker/ci.yaml names it (the step's own image:, not a copy of it), and the one this runs in
+step=$(awk '/^  - name: restore-check-age$/ { s = 1; next } s && /^  - name:/ { exit } s && /^    image:/ { print $2; exit }' \
+  .woodpecker/ci.yaml)
+if [ "$step" != "$want" ]; then
+  echo "FAIL the CI step's image ($step, .woodpecker/ci.yaml) is not the CronJob's ($want)"; fails=$((fails + 1))
+fi
 if [ -n "${CI_STEP_IMAGE_CHECK:-}" ] && [ "$CI_STEP_IMAGE_CHECK" != "$want" ]; then
   echo "FAIL the CI step's image ($CI_STEP_IMAGE_CHECK) is not the CronJob's ($want)"; fails=$((fails + 1))
 fi
 [ -n "$image" ] || { echo "FAIL the CronJob's image is not pinned by digest: $want"; fails=$((fails + 1)); }
-# the stub: last-success prints $PI1 / $PI2 and exits $RC (its error on stderr); last-report "REPORT <path>"
+# the stub: last-success prints $PI1 / $PI2 and exits $RC (its error on stderr); last-report "REPORT <path>", then 149
+# lines as long as a real one (each part's steps and checks) - the failed part's line the 90th
 mkdir "$W/bin"
 cat > "$W/bin/rclone" <<'STUB'
 #!/bin/sh
@@ -37,7 +44,8 @@ cat > "$W/bin/rclone" <<'STUB'
 case "$2" in
   pi:restore-checks/pi1/last-success) [ -n "$PI1" ] && echo "$PI1" ;;
   pi:restore-checks/pi2/last-success) [ -n "$PI2" ] && echo "$PI2" ;;
-  pi:restore-checks/*/last-report) echo "REPORT $2" ;;
+  pi:restore-checks/*/last-report) echo "REPORT $2"; i=2; while [ $i -le 150 ]; do
+      if [ $i = 90 ]; then echo "TIER0 FAILED: line 90 of $2"; else echo "line $i"; fi; i=$((i + 1)); done ;;
   *) exit 3 ;;
 esac
 [ "${RC:-0}" = 0 ] || echo "Failed to cat: SignatureDoesNotMatch: the signature does not match" >&2
@@ -53,6 +61,7 @@ at() { date -u -d "@$(( $(date -u +%s) + $1 ))" +%Y%m%dT%H%M%SZ; }
 F=$(at -72000)
 case_ "both fresh" 0 "$(at -7200)" "$F" 0 "both Pis restored within 60 h"
 case_ "  each Pi's last report shown" 0 "$(at -7200)" "$F" 0 "REPORT pi:restore-checks/pi2/last-report"
+case_ "  as far as a long report's failed part (its 90th line)" 1 "$(at -219600)" "$F" 0 "TIER0 FAILED: line 90 of pi:restore-checks/pi1/last-report"
 case_ "pi1 59 h old (its turn retried late)" 0 "$(at -212400)" "$F"
 case_ "pi1 61 h old (missed its turn), pi2 fresh" 1 "$(at -219600)" "$F" 0 "FAILED: pi1"
 case_ "pi2 61 h old, pi1 fresh" 1 "$F" "$(at -219600)" 0 "FAILED: pi2"

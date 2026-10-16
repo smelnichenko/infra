@@ -45,6 +45,8 @@ steps:
       - sh .woodpecker/velero-exclude-check.sh
       # Woodpecker's server and agent on one release (the script says why)
       - sh .woodpecker/woodpecker-tags-check.sh
+      # no Argo CD application prunes (the script says why)
+      - sh .woodpecker/no-prune-check.sh
 
   # the stale PR env sweeper's script run as its CronJob runs it - in its image (the test checks it is the CronJob's),
   # busybox sh - against stub kubectl and curl
