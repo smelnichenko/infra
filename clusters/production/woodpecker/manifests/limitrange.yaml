@@ -1,8 +1,9 @@
-# CI's CPU, decided here alone (operator 2026-10-10): every container in the woodpecker namespace gets 2 CPUs by default
-# and at most 2, in every repo, today's and future ones, whatever its pipeline file asks (one asking more is refused);
-# no pipeline states a CPU. Woodpecker runs one pipeline at a time (one agent, one workflow), but this caps each
-# container, not a pipeline: its parallel steps and services each take up to 2 (ops' four parallel checks up to 8). A
-# namespace quota would cap the sum, but a step whose pod it refuses fails rather than waits.
+# CI's CPU, decided here alone (operator 2026-10-10; 4 since 2026-10-17): every container in the woodpecker
+# namespace gets 4 CPUs by default and at most 4, in every repo, today's and future ones, whatever its pipeline file
+# asks (one asking more is refused); no pipeline states a CPU. Woodpecker runs one pipeline at a time (one agent, one
+# workflow), but this caps each container, not a pipeline: its parallel steps and services each take up to 4 (ops'
+# four parallel checks up to 16). A namespace quota would cap the sum, but a step whose pod it refuses fails rather
+# than waits.
 apiVersion: v1
 kind: LimitRange
 metadata:
@@ -12,8 +13,8 @@ spec:
   limits:
     - type: Container
       default:
-        cpu: "2"
+        cpu: "4"
       defaultRequest:
         cpu: 100m
       max:
-        cpu: "2"
+        cpu: "4"
