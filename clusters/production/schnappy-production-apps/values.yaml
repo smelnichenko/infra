@@ -39,7 +39,7 @@ site:
   image:
     pullPolicy: IfNotPresent
     repository: git.pmon.dev/schnappy/site
-    tag: "dcbf2e2"  # site
+    tag: "15b63c0"  # site
   resources:
     requests: { cpu: 50m, memory: 64Mi }
     limits: { cpu: 2000m, memory: 256Mi }
@@ -164,7 +164,7 @@ masiService:
   image:
     repository: git.pmon.dev/schnappy/masi
     pullPolicy: IfNotPresent
-    tag: "b31a91c"  # masi
+    tag: "2cfe94e"  # masi
   replicas: 1
   # more heap than test's 512m for production's data; two virtual-thread carriers kept even if the limit drops to one CPU
   javaOpts: -Xmx768m -XX:+UseZGC -Djdk.virtualThreadScheduler.parallelism=2
