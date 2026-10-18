@@ -5,7 +5,10 @@ alerts:
   enabled: true
 
 app:
-  replicas: 1
+  # two: with one replica and maxSurge 0 every deploy took pmon.dev down; now a deploy rolls one at a time. Each scheduled
+  # check runs once across both (a claim row per slot, monitor f5c59ab; proven on test 2026-10-18) (operator: "give it 2
+  # replicas!")
+  replicas: 2
   javaOpts: -Xmx2g -XX:+UseZGC -XX:+UseStringDeduplication
   image:
     pullPolicy: IfNotPresent
