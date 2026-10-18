@@ -146,10 +146,12 @@ chessService:
     limits: { cpu: 3000m, memory: 2Gi }
 
 # masi — job registry with reviewed CV tuning (/api/masi). On in production since 2026-10-18 (operator: "Deploy masi to
-# prod"), the settings test proved: masi's AI on its own Vault path schnappy/ai-masi (the same key as test, operator
-# 2026-10-18 - one Anthropic key, see the shared-key decision), budgets as test's, tuning.auto off (a Prepare in the UI
-# is what costs a tune), the background analysis, AI match and company visits on. The partner API stays off (operator
-# 2026-10-18): it answers only partners that exist, and none is seeded. One replica until masi runs as equal pods.
+# prod"). AI on its own Vault path schnappy/ai-masi holding the same key as test (ops/.env MASI_ANTHROPIC_API_KEY =
+# ANTHROPIC_API_KEY, operator 2026-10-18): each namespace has its own 2.30 USD/day ledger, so the key can spend up to
+# 4.60 USD a day while test and production both run. tuning.auto off (a Prepare in the UI is what costs a tune); the
+# background analysis, AI match and company visits run once sources are switched on (a fresh database has all off).
+# The partner API is off (masi.partner.enabled defaults to false; operator 2026-10-18: until further notice).
+# One replica until masi runs as equal pods.
 masiService:
   enabled: true
   image:
@@ -157,10 +159,12 @@ masiService:
     pullPolicy: IfNotPresent
     tag: "c87ed98"  # masi
   replicas: 1
-  # two carriers for virtual threads on one CPU: a request thread is never left waiting behind one busy virtual thread
+  # more heap than test's 512m for production's data; two virtual-thread carriers kept even if the limit drops to one CPU
   javaOpts: -Xmx768m -XX:+UseZGC -Djdk.virtualThreadScheduler.parallelism=2
   resources:
-    requests: { cpu: 250m, memory: 512Mi }
+    # 250m as test: at 50m a busy node made startup overrun the 300 s startup probe (test, 2026-09-26). Memory at the
+    # measured working set (test's container: 827Mi on a 512m heap; more heap here), not below it
+    requests: { cpu: 250m, memory: 1Gi }
     limits: { cpu: 2000m, memory: 1536Mi }
   ai:
     enabled: true
@@ -177,8 +181,9 @@ masiService:
   enrich:
     enabled: true
   mail:
-    # nothing is mailed on a schedule (weeklyAuto stays false): a digest leaves when its reader asks for it
+    # nothing is mailed on a schedule: a digest leaves when its reader asks for it
     enabled: true
+    weeklyAuto: false
     siteUrl: https://pmon.dev
   browser:
     enabled: true
