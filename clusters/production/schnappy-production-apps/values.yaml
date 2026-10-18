@@ -145,27 +145,47 @@ chessService:
     requests: { cpu: 500m, memory: 1536Mi }
     limits: { cpu: 3000m, memory: 2Gi }
 
-# masi — disabled in production until the UI ships (plan 094 PR9); the tag line is kept so
-# `promote:prod` can carry the test tag forward.
+# masi — job registry with reviewed CV tuning (/api/masi). On in production since 2026-10-18 (operator: "Deploy masi to
+# prod"), the settings test proved: masi's AI on its own Vault path schnappy/ai-masi (the same key as test, operator
+# 2026-10-18 - one Anthropic key, see the shared-key decision), budgets as test's, tuning.auto off (a Prepare in the UI
+# is what costs a tune), the background analysis, AI match and company visits on. The partner API stays off (operator
+# 2026-10-18): it answers only partners that exist, and none is seeded. One replica until masi runs as equal pods.
 masiService:
-  enabled: false
+  enabled: true
   image:
     repository: git.pmon.dev/schnappy/masi
     pullPolicy: IfNotPresent
-    tag: "8b0a5cf"  # masi
+    tag: "c87ed98"  # masi
   replicas: 1
-  javaOpts: -Xmx768m -XX:+UseZGC
+  # two carriers for virtual threads on one CPU: a request thread is never left waiting behind one busy virtual thread
+  javaOpts: -Xmx768m -XX:+UseZGC -Djdk.virtualThreadScheduler.parallelism=2
   resources:
-    requests: { cpu: 200m, memory: 512Mi }
+    requests: { cpu: 250m, memory: 512Mi }
     limits: { cpu: 2000m, memory: 1536Mi }
   ai:
-    enabled: false
-    existingSecret: ""
+    enabled: true
+    existingSecret: "schnappy-production-masi-ai"
+    dailyBudgetUsd: "2.30"
+    monthlyBudgetUsd: "10"
   tuning:
     auto: false
+  analysis:
+    auto: true
+    perTick: 10
+    matchAuto: true
+    matchPerTick: 10
+  enrich:
+    enabled: true
+  mail:
+    # nothing is mailed on a schedule (weeklyAuto stays false): a digest leaves when its reader asks for it
+    enabled: true
+    siteUrl: https://pmon.dev
   browser:
-    enabled: false
+    enabled: true
     existingSecret: schnappy-production-masi-browser
+    resources:
+      requests: { cpu: 25m, memory: 512Mi }
+      limits: { cpu: 1000m, memory: 1536Mi, ephemeral-storage: 2Gi }
 
 tracing:
   enabled: true
