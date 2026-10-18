@@ -30,7 +30,8 @@ app:
 
 site:
   enabled: true
-  replicas: 1
+  # two: a deploy rolls one at a time (the default rolling update), so the site never goes dark (operator 2026-10-18)
+  replicas: 2
   dnsResolver: "10.43.0.10"
   image:
     pullPolicy: IfNotPresent
