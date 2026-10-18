@@ -36,7 +36,7 @@ site:
   image:
     pullPolicy: IfNotPresent
     repository: git.pmon.dev/schnappy/site
-    tag: "c107cfa"  # site
+    tag: "dcbf2e2"  # site
   resources:
     requests: { cpu: 50m, memory: 64Mi }
     limits: { cpu: 2000m, memory: 256Mi }
