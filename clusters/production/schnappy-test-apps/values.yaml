@@ -3,7 +3,9 @@ vault:
   secretPathPrefix: "secret/data/schnappy-test"
 
 app:
-  replicas: 1
+  # two: a deploy rolls one at a time, so the API never goes dark; each scheduled check runs once across both (a claim
+  # row per slot, monitor f5c59ab) (operator 2026-10-18: "give it 2 replicas!")
+  replicas: 2
   javaOpts: -Xmx1g -XX:+UseZGC
   image:
     pullPolicy: IfNotPresent
