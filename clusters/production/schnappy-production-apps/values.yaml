@@ -153,6 +153,9 @@ chessService:
 # background analysis, AI match and company visits run once sources are switched on (a fresh database has all off).
 # The partner API is off (masi.partner.enabled defaults to false; operator 2026-10-18: until further notice).
 # One replica until masi runs as equal pods.
+# To stop it: replicas: 0 and ai.enabled: false, keeping enabled: true - enabled: false only stops RENDERING masi, and
+# this app syncs without prune, so its Deployment would keep running (AI and collectors on) with its alerts gone.
+# Removing it for good is deleting its resources by name with the operator's OK, never a prune.
 masiService:
   enabled: true
   image:
