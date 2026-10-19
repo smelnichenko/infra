@@ -165,12 +165,6 @@ masiService:
     repository: git.pmon.dev/schnappy/masi
     pullPolicy: IfNotPresent
     tag: "962ad4a"  # masi
-  http:
-    # any public host (plan 104 PR 1, masi #124; operator 2026-10-19 of the exact-name list: "fuck that guard...
-    # idiocy"): a new source needs no host entry. Internal addresses stay refused by masi's UrlValidator and by the
-    # pod's network policy. Pushed only with an image that understands "*" (e0dc51a+): an older one reads it as a
-    # literal host and refuses every source.
-    allowedHosts: ["*"]
   # two equal pods (plan 099; operator 2026-10-19: "1 pod again?" / one pod "better suits test env"): every pod runs every
   # lane, claims per slot and per package in the database; the chart halves the browser's sessions per pod and adds a
   # disruption budget. Test stays at one.
