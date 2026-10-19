@@ -40,6 +40,9 @@ server:
     - woodpecker-forgejo-secret
     - woodpecker-default-agent-secret
     - woodpecker-ci-secrets
+    # WOODPECKER_GRPC_SECRET: the key agents' tokens are signed with, the same across restarts (unset, every start made
+    # a new one - a restart left the agent's token invalid and killed the running pipeline, 2026-10-19 06:03)
+    - woodpecker-grpc-secret
   ingress:
     enabled: false
   resources:
