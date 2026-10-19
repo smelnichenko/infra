@@ -165,7 +165,10 @@ masiService:
     repository: git.pmon.dev/schnappy/masi
     pullPolicy: IfNotPresent
     tag: "962ad4a"  # masi
-  replicas: 1
+  # two equal pods (plan 099; operator 2026-10-19: "1 pod again?" / one pod "better suits test env"): every pod runs every
+  # lane, claims per slot and per package in the database; the chart halves the browser's sessions per pod and adds a
+  # disruption budget. Test stays at one.
+  replicas: 2
   # more heap than test's 512m for production's data; two virtual-thread carriers kept even if the limit drops to one CPU
   javaOpts: -Xmx768m -XX:+UseZGC -Djdk.virtualThreadScheduler.parallelism=2
   resources:
