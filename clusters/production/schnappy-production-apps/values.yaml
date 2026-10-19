@@ -164,7 +164,7 @@ masiService:
   image:
     repository: git.pmon.dev/schnappy/masi
     pullPolicy: IfNotPresent
-    tag: "152ad09"  # masi
+    tag: "88aa668"  # masi
   replicas: 1
   # more heap than test's 512m for production's data; two virtual-thread carriers kept even if the limit drops to one CPU
   javaOpts: -Xmx768m -XX:+UseZGC -Djdk.virtualThreadScheduler.parallelism=2
