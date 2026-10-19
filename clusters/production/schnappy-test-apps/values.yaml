@@ -149,11 +149,14 @@ masiService:
   resources:
     requests: { cpu: 250m, memory: 384Mi }
     limits: { cpu: 1000m, memory: 1Gi }
+  # TEST IS THE SMOKE ENVIRONMENT ONLY (operator, 2026-10-19: "test is for smoke test", "stop collecting updating data in
+  # test"): it proves a deploy starts and nothing more - its sources are off, and AI, scoring, matching and enrichment
+  # below are off; masi is verified in production. The history of each switch is kept for when it was on.
   ai:
     # on since 2026-09-21: Vault schnappy-test/ai-masi is seeded (for now with the SHARED Anthropic key, see ops/.env).
     # tuning.auto stays off: a Prepare in the UI is what costs a tune. analysis.auto (below) reads open postings with the
     # cheap model so the Match column fills - about 0.003 USD a job, under the daily budget and the SCORE share.
-    enabled: true
+    enabled: false
     existingSecret: "schnappy-test-masi-ai"
     # operator 2026-09-22: "make daily limit 2 euro" - 2 EUR at ~1.15 USD/EUR; the analysis lane's SCORE share (20 %)
     # of it reads ~250 postings a day. The month stays capped at 10 USD.
@@ -167,17 +170,17 @@ masiService:
   analysis:
     # on since 2026-09-22 (operator: "continue", after the first real run): ~246 open jobs at ~0.003 USD each, 10 per
     # five-minute tick, so the whole backlog is read in about two hours and then only what is new
-    auto: true
+    auto: false
     perTick: 10
     # the AI match on since 2026-09-24 (operator: "we need AI matching!"; evaluated first on 187 hand labels: 97 %
     # agreement, 98 % of its METs right). About 0.008 USD a posting under the MATCH share (0.25 of the 2.30 USD day,
     # ~70 a day): the ~536 open postings take about eight days, then only what is new
-    matchAuto: true
+    matchAuto: false
     matchPerTick: 10
   enrich:
     # on since 2026-09-27 (operator: "enable and continue"): hiring companies' own sites visited in the background —
     # 5 every ten minutes, most open jobs first, at most 10 public-HTTPS requests a visit, robots.txt honoured
-    enabled: true
+    enabled: false
   mail:
     # the weekly digest to every enabled user with an active CV master (in test: the one test user). Figures and
     # company names only. One SMTP egress rule comes with it.
