@@ -192,6 +192,17 @@ masiService:
     enabled: true
     weeklyAuto: false
     siteUrl: https://pmon.dev
+  apply:
+    # Send on the operator's click (plan 103; operator 2026-10-19: "Send on my click", "deploy masi to prod as soon as
+    # it is ready"): a REVIEWED package mailed to the contact its own posting names, one press = one mail, never on a
+    # schedule. Production is the environment that mails real recruiters ("production is the main/mail environment");
+    # the Vagrant copy's overlay switches this off. Resend signs pmon.dev only, so the sender is a pmon.dev address and
+    # a recruiter's answer reaches the operator through Reply-To; the Bcc is the operator's copy of what was sent.
+    enabled: true
+    production: true
+    from: "Sergei Melnichenko <apply@pmon.dev>"
+    replyTo: sergei.melnichenko@gmail.com
+    bcc: sergei.melnichenko@gmail.com
   browser:
     enabled: true
     existingSecret: schnappy-production-masi-browser
