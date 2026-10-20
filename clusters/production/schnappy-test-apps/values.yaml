@@ -10,7 +10,7 @@ app:
   image:
     pullPolicy: IfNotPresent
     repository: git.pmon.dev/schnappy/monitor
-    tag: "83018a8"  # monitor
+    tag: "b0b5d34"  # monitor
   ingress:
     enabled: false
   resources:
