@@ -198,6 +198,7 @@ masiService:
     contactPictures:
       enabled: true
       maxRequestsPerDay: 100
+      linkedin: true
   mail:
     # nothing is mailed on a schedule: a digest leaves when its reader asks for it
     enabled: true
