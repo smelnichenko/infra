@@ -185,7 +185,7 @@ masiService:
     enabled: true
     existingSecret: "schnappy-production-masi-ai"
     workspaceId: ""
-    tuningModel: "claude-haiku-4-5-20251001"
+    tuningModel: "claude-sonnet-5"
     extractModel: "claude-haiku-4-5-20251001"
     matchModel: "claude-haiku-4-5-20251001"
     dailyBudgetUsd: "2.30"
