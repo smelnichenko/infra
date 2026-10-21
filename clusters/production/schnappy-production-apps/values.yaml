@@ -195,6 +195,8 @@ masiService:
     matchPerTick: 10
   enrich:
     enabled: true
+    contactPictures:
+      enabled: true
   mail:
     # nothing is mailed on a schedule: a digest leaves when its reader asks for it
     enabled: true
