@@ -205,6 +205,11 @@ masiService:
     enabled: true
     weeklyAuto: false
     siteUrl: https://pmon.dev
+  alerts:
+    # the operator's instant e-mail alerts: pipeline failures, new registry rows, matches above the score
+    enabled: true
+    to: sergei.melnichenko@gmail.com
+    matchScore: 0.8
   apply:
     # Send on the operator's click (plan 103; operator 2026-10-19: "Send on my click", "deploy masi to prod as soon as
     # it is ready"): a REVIEWED package mailed to the contact its own posting names, one press = one mail, never on a
