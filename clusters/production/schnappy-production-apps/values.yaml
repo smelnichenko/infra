@@ -164,7 +164,7 @@ masiService:
   image:
     repository: git.pmon.dev/schnappy/masi
     pullPolicy: IfNotPresent
-    tag: "ca3bce4"  # masi
+    tag: "7360207"  # masi
   http:
     # any public host (plan 104 PR 1, masi #124; operator 2026-10-19 of the exact-name list: "fuck that guard...
     # idiocy"): a new source needs no host entry. Internal addresses stay refused by masi's UrlValidator and by the
