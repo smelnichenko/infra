@@ -184,6 +184,7 @@ masiService:
   ai:
     enabled: true
     existingSecret: "schnappy-production-masi-ai"
+    workspaceId: "wrkspc_01Cqje7b2DntiKhyufD7ou3M"
     dailyBudgetUsd: "2.30"
     monthlyBudgetUsd: "10"
   tuning:
