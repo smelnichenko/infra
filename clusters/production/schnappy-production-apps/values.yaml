@@ -212,6 +212,8 @@ masiService:
   collector:
     # the operator's GitHub PAT (public read only) — pasted here when he makes one; empty = anonymous 60/hour
     githubToken: ""
+    # the operator's LinkedIn session cookie (li_at): with it the wildcard reads the company pages themselves
+    linkedinLiAt: "AQEDARAqWlQFyFPrAAABoH_z0fQAAAGhfSc5UU0Akz3scrAz2LSxtB5QHvreaI3_dYzAO4HU6xBROMyEyW69jbiNFw30g3nGBlantoCZpa38_FLsrqY1XAU8Pqg9Uxcere2rls2LNOS8UwJHkUh8xAXo"
   alerts:
     # the operator's instant e-mail alerts: pipeline failures, new registry rows, matches above the score
     enabled: true
