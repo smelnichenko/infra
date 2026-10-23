@@ -209,6 +209,9 @@ masiService:
     enabled: true
     weeklyAuto: false
     siteUrl: https://pmon.dev
+  collector:
+    # the operator's GitHub PAT (public read only) — pasted here when he makes one; empty = anonymous 60/hour
+    githubToken: ""
   alerts:
     # the operator's instant e-mail alerts: pipeline failures, new registry rows, matches above the score
     enabled: true
