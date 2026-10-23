@@ -180,7 +180,7 @@ masiService:
     # 250m as test: at 50m a busy node made startup overrun the 300 s startup probe (test, 2026-09-26). Memory at the
     # measured working set (test's container: 827Mi on a 512m heap; more heap here), not below it
     requests: { cpu: 250m, memory: 1Gi }
-    limits: { cpu: 2000m, memory: 1536Mi }
+    limits: { cpu: 2000m, memory: 2048Mi }
   ai:
     enabled: true
     existingSecret: "schnappy-production-masi-ai"
