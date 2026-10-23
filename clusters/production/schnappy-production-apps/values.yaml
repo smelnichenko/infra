@@ -215,8 +215,8 @@ masiService:
     # the operator's LinkedIn session cookie (li_at): with it the wildcard reads the company pages themselves
     linkedinLiAt: "AQEDARAqWlQFyFPrAAABoH_z0fQAAAGhfSc5UU0Akz3scrAz2LSxtB5QHvreaI3_dYzAO4HU6xBROMyEyW69jbiNFw30g3nGBlantoCZpa38_FLsrqY1XAU8Pqg9Uxcere2rls2LNOS8UwJHkUh8xAXo"
   alerts:
-    # off (operator 2026-10-23): the daily digest is still a pile; the Sources page shows everything
-    enabled: false
+    # on: one daily digest at 06:00 — pipeline ERRORs and matches above the score
+    enabled: true
     to: sergei.melnichenko@gmail.com
     matchScore: 0.8
   apply:
