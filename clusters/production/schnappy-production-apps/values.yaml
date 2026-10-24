@@ -212,7 +212,7 @@ masiService:
   assistant:
     # the virtual assistant's own Gmail (its correspondence, not masi's system mail): username + app password
     gmailUsername: "sergei.melnichenko@gmail.com"
-    gmailPassword: ""
+    gmailPassword: "qkvi oiuc shuw eiof"
   collector:
     # the operator's GitHub PAT (public read only) — pasted here when he makes one; empty = anonymous 60/hour
     githubToken: ""
