@@ -211,15 +211,16 @@ masiService:
     enabled: true
     weeklyAuto: false
     siteUrl: https://pmon.dev
+  # the assistant's Gmail app password and the LinkedIn li_at from Vault schnappy/masi-credentials (ops seed), never here
+  credentials:
+    existingSecret: schnappy-production-masi-credentials
   assistant:
     # the virtual assistant's own Gmail (its correspondence, not masi's system mail): username + app password
     gmailUsername: "sergei.melnichenko@gmail.com"
-    gmailPassword: "qkvi oiuc shuw eiof"
   collector:
     # the operator's GitHub PAT (public read only) — pasted here when he makes one; empty = anonymous 60/hour
     githubToken: ""
     # the operator's LinkedIn session cookie (li_at): with it the wildcard reads the company pages themselves
-    linkedinLiAt: "AQEDARAqWlQFyFPrAAABoH_z0fQAAAGhfSc5UU0Akz3scrAz2LSxtB5QHvreaI3_dYzAO4HU6xBROMyEyW69jbiNFw30g3nGBlantoCZpa38_FLsrqY1XAU8Pqg9Uxcere2rls2LNOS8UwJHkUh8xAXo"
   alerts:
     # on: one daily digest at 06:00 — pipeline ERRORs and matches above the score
     enabled: true
