@@ -16,7 +16,10 @@ postgres:
     - name: admin
     - name: chat
     - name: chess
+    # pgvector for masi's face embeddings: a superuser's to create, so CNPG keeps it (schnappy-data cnpg-databases)
     - name: masi
+      owner: masi
+      extensions: [vector]
   sharedBuffers: 512MB
   effectiveCacheSize: 2GB
   workMem: 32MB
