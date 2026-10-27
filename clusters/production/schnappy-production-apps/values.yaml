@@ -204,6 +204,8 @@ masiService:
       maxRequestsPerDay: 100
       linkedin: true
       nameSearch: true
+      # off until its distances hold: different people matched at 0.05-0.40 (10-23..27)
+      face: false
   mail:
     # nothing is mailed on a schedule: a digest leaves when its reader asks for it
     enabled: true
