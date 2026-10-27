@@ -174,7 +174,8 @@ spec:
                       ''|*[!0-9]*) echo "[prune-app] $app: its deploy time unreadable ($deployed_epoch) - left" >&2
                         failed=1; continue ;;
                     esac
-                    if ! issue=$(forgejo "repos/schnappy/$repo/issues/$pr"); then
+                    # the pull request itself (state, closed_at): read:repository reads it - an issue needs read:issue
+                    if ! issue=$(forgejo "repos/schnappy/$repo/pulls/$pr"); then
                       echo "[prune-app] $app: PR $repo#$pr not read from Forgejo - left" >&2
                       failed=1; continue
                     fi

@@ -84,7 +84,7 @@ answer() {  # answer <code> <body>: as curl gives it - -f fails on >= 400 with n
 }
 unreached() { echo "curl: ($1) $2" >&2; [ -z "$fmt" ] || printf 000; exit "$1"; }
 case $url in
-  "$FORGEJO_API"/repos/schnappy/*/issues/*)
+  "$FORGEJO_API"/repos/schnappy/*/pulls/*)
     [ -z "${FORGEJO_DOWN:-}" ] || unreached 7 "Failed to connect to git.pmon.dev port 443 after 3 ms: Could not connect to server"
     [ "$(header Authorization)" = "token $FORGEJO_TOKEN" ] || answer 401 '{"message":"token is required"}'
     r=${url#"$FORGEJO_API"/repos/schnappy/}

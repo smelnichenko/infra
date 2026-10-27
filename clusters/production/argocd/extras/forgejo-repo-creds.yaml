@@ -1,0 +1,31 @@
+# Argo CD's repository credentials for Forgejo (repo-creds https://git.pmon.dev) - the non-admin argocd-reader account
+# and its read:repository token (ops setup-argocd-reader.yml: code read on what the Applications clone, pull requests
+# read on what the PR generator lists), from Vault argocd/forgejo-readonly. It held forgejo_admin and a token minted on
+# the admin (read on every repository).
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: forgejo-repo-creds-es
+  namespace: argocd
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: vault-backend
+    kind: ClusterSecretStore
+  target:
+    name: forgejo-repo-creds
+    # the Secret (its url, type and repo-creds label) is setup-argocd's - on a first install with these credentials
+    # already, from Vault (Argo CD installs External Secrets: it must clone infra before this runs); this keeps them
+    creationPolicy: Merge
+    # never the Secret's owner nor its remover: deleting this (a rollback, a prune) leaves Argo CD's credentials as they
+    # are - Owner would garbage-collect the Secret with it and Argo CD could clone nothing, infra's revert included
+    deletionPolicy: Retain
+  data:
+    - secretKey: username
+      remoteRef:
+        key: argocd/forgejo-readonly
+        property: username
+    - secretKey: password
+      remoteRef:
+        key: argocd/forgejo-readonly
+        property: token

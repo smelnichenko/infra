@@ -1,6 +1,7 @@
 # Forgejo readonly token consumed by the schnappy-pr-envs ApplicationSet
-# (PullRequest generator). Vault path:
-#   secret/argocd/forgejo-readonly { token: <forgejo PAT, public PR scope only> }
+# (PullRequest generator) and the stale-PR sweeper. Vault path:
+#   secret/argocd/forgejo-readonly { token: <argocd-reader's read:repository token>, username: argocd-reader }
+# (ops setup-argocd-reader.yml; the same token is forgejo-repo-creds.yaml's repo-creds password)
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
