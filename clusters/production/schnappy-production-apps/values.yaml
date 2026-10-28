@@ -39,7 +39,7 @@ site:
   image:
     pullPolicy: IfNotPresent
     repository: git.pmon.dev/schnappy/site
-    tag: 35ccb90  # site
+    tag: 54fd467  # site
   resources:
     requests: { cpu: 50m, memory: 64Mi }
     limits: { cpu: 2000m, memory: 256Mi }
@@ -164,7 +164,7 @@ masiService:
   image:
     repository: git.pmon.dev/schnappy/masi
     pullPolicy: IfNotPresent
-    tag: "cb480ae"  # masi
+    tag: "3d05ab5"  # masi
   http:
     # any public host (plan 104 PR 1, masi #124; operator 2026-10-19 of the exact-name list: "fuck that guard...
     # idiocy"): a new source needs no host entry. Internal addresses stay refused by masi's UrlValidator and by the
