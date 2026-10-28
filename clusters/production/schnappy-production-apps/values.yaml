@@ -189,7 +189,7 @@ masiService:
     extractModel: "claude-haiku-4-5-20251001"
     matchModel: "claude-haiku-4-5-20251001"
     dailyBudgetUsd: "2.30"
-    monthlyBudgetUsd: "10"
+    monthlyBudgetUsd: "25"
   tuning:
     auto: false
   analysis:
