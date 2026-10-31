@@ -161,6 +161,10 @@ chessService:
 # Removing it for good is deleting its resources by name with the operator's OK, never a prune.
 masiService:
   enabled: true
+  # The GitHub source asks for deadlineSeconds 7200 and was silently held to 900 by the code. Two hours is what its
+  # cursor sweep needs; every other source keeps its own much shorter deadline and is unaffected.
+  collect:
+    maxDeadline: "7200s"
   image:
     repository: git.pmon.dev/schnappy/masi
     pullPolicy: IfNotPresent
