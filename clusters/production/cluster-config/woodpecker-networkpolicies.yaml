@@ -234,8 +234,7 @@ spec:
     - Ingress
     - Egress
   ingress:
-    # The server and its pipelines, and the instance itself (the operator's health checks come over the API, but a
-    # replica would talk to the primary directly).
+    # The server, and the instance talking to itself.
     - from:
         - podSelector:
             matchLabels:
@@ -246,6 +245,18 @@ spec:
       ports:
         - protocol: TCP
           port: 5432
+    # The operator, on the instance manager's port. Without this the instance is up and ready by its own account while
+    # the Cluster never learns its system ID - "Instances are present, but none have reported a system ID" - because
+    # the operator cannot reach it at all. The working cluster in schnappy-production allows exactly these two ports.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cnpg-system
+      ports:
+        - protocol: TCP
+          port: 5432
+        - protocol: TCP
+          port: 8000
   egress:
     # Kubernetes API: initdb, and the operator's own instance manager.
     - ports:
