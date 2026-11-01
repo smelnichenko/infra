@@ -3,13 +3,13 @@ server:
   # Chart 3.7.3 (latest) pins appVersion v3.18.0; the image tag is overridden to
   # the latest Woodpecker release. Keep server and agent on the same tag. v3.18
   # migrated the log storage table on first start, v3.19 stores workflow/step
-  # dependencies (back up the SQLite file before a major/minor bump - the
-  # pre-v3.19.0 copy is beside it; allow a few minutes of downtime). v3.19.0
+  # dependencies (pg_dump the woodpecker database before a major/minor bump -
+  # ops/backups/woodpecker/, not in git; allow a few minutes of downtime). v3.19.0
   # waits for its pod informer's sync before judging a step's pod gone (#7158):
   # on v3.18.1 a service that stopped within moments of its delete was never
   # seen to finish and hung its pipeline until the repo timeout (masi CD 525).
   image:
-    tag: v3.19.0
+    tag: v3.20.1
   env:
     # SQLite was a file on one node's volume, locked for writes: two webhooks arriving together lost one of them, and
     # nothing said so. Measured 2026-11-01: two commits pushed a second apart, one pipeline created, the other silently
@@ -79,7 +79,7 @@ agent:
   # container gets the woodpecker namespace's LimitRange: 4 CPUs; no pipeline sets one)
   replicaCount: 1
   image:
-    tag: v3.19.0
+    tag: v3.20.1
   env:
     WOODPECKER_SERVER: "woodpecker-server:9000"
     WOODPECKER_BACKEND: "kubernetes"
