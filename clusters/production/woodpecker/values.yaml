@@ -56,10 +56,12 @@ server:
   resources:
     requests:
       cpu: 50m
-      memory: 128Mi
+      memory: 256Mi
+    # 256Mi was enough for a SQLite file; the Postgres driver plus the migration of a 662 MB database is not, and the
+    # kernel killed the container before it printed a line (exit 137, six restarts, no log).
     limits:
       cpu: 500m
-      memory: 256Mi
+      memory: 1Gi
   persistentVolume:
     enabled: true
     size: 1Gi
