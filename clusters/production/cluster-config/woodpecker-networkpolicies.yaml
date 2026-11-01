@@ -63,6 +63,15 @@ spec:
       ports:
         - protocol: TCP
           port: 3000
+    # Its own database, since the SQLite file was replaced: without this the server reached out to
+    # woodpecker-postgres-rw:5432 and got "connect: connection timed out" on every start, retrying forever.
+    - to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: woodpecker-postgres
+      ports:
+        - protocol: TCP
+          port: 5432
     # DNS
     - ports:
         - protocol: UDP
