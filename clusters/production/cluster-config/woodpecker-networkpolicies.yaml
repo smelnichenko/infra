@@ -215,3 +215,47 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
+---
+# The Postgres cluster that replaced the SQLite file.
+#
+# default-deny covers this namespace, so without a policy the instance's initdb job could not reach the API server
+# (measured 2026-11-01: "dial tcp 10.43.0.1:443: i/o timeout", the job retried until it failed) and the server could
+# not connect to it once it started.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: woodpecker-postgres
+  namespace: woodpecker
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: woodpecker-postgres
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # The server and its pipelines, and the instance itself (the operator's health checks come over the API, but a
+    # replica would talk to the primary directly).
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: server
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: woodpecker-postgres
+      ports:
+        - protocol: TCP
+          port: 5432
+  egress:
+    # Kubernetes API: initdb, and the operator's own instance manager.
+    - ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 6443
+    # DNS
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
