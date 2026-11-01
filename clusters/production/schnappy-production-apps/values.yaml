@@ -205,7 +205,10 @@ masiService:
     enabled: true
     contactPictures:
       enabled: true
-      maxRequestsPerDay: 100
+      # 5 a tick at 10 minutes, capped at 100 a day: the cap ran out inside three hours and covered 100 of the 6417
+      # contacts that have one, so the people list was 98% faceless. 40 a tick fills the day's allowance in one pass.
+      perTick: 40
+      maxRequestsPerDay: 2000
       linkedin: true
       nameSearch: true
       # off until its distances hold: different people matched at 0.05-0.40 (10-23..27)
