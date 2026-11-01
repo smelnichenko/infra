@@ -62,6 +62,15 @@ server:
     limits:
       cpu: 500m
       memory: 1Gi
+  # The first start against an empty Postgres copies a 662 MB database across: the liveness probe gave it thirty
+  # seconds (3 x 10s) and killed it, so the container restarted six times without ever finishing (exit 137, no log).
+  # A startup probe holds liveness off for up to ten minutes - 60 x 10s - while that runs.
+  startupProbe:
+    httpGet:
+      path: /healthz
+      port: 8000
+    periodSeconds: 10
+    failureThreshold: 60
   persistentVolume:
     enabled: true
     size: 1Gi
