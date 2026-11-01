@@ -1,0 +1,39 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: woodpecker-postgres
+  namespace: woodpecker
+spec:
+  # One instance: CI is one agent on one node, and a second copy of a database this size buys nothing it needs. The
+  # volume is on local-path, which cannot follow a pod to another node anyway.
+  instances: 1
+  imageName: ghcr.io/cloudnative-pg/postgresql:18.6-system-bullseye@sha256:899d3ed526b659d77935dde0e6bf2d69dbbf17d3d8c6486ca8cfd04bd3c18533
+  storage:
+    size: 5Gi
+    storageClass: local-path
+  bootstrap:
+    initdb:
+      database: woodpecker
+      owner: woodpecker
+      secret:
+        name: woodpecker-db
+      encoding: UTF8
+      localeCType: C
+      localeCollate: C
+      postInitSQL:
+        - GRANT ALL ON SCHEMA public TO woodpecker;
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  # The default 30 s is short for a first start on this node: the init runs while the rest of the cluster is busy.
+  probes:
+    startup:
+      periodSeconds: 5
+      timeoutSeconds: 5
+      failureThreshold: 60
+  monitoring:
+    enablePodMonitor: false

@@ -11,6 +11,13 @@ server:
   image:
     tag: v3.19.0
   env:
+    # SQLite was a file on one node's volume, locked for writes: two webhooks arriving together lost one of them, and
+    # nothing said so. Measured 2026-11-01: two commits pushed a second apart, one pipeline created, the other silently
+    # gone. Postgres in this namespace replaces it; the old file stays on its volume untouched as the way back.
+    WOODPECKER_DATABASE_DRIVER: "postgres"
+    # The password comes from woodpecker-db, injected below as WOODPECKER_DB_PASSWORD; Kubernetes expands $(VAR)
+    # in an env value, and this is where it can do so.
+    WOODPECKER_DATABASE_DATASOURCE: "postgres://woodpecker:$(WOODPECKER_DB_PASSWORD)@woodpecker-postgres-rw:5432/woodpecker?sslmode=disable"
     WOODPECKER_HOST: "https://ci.pmon.dev"
     WOODPECKER_FORGEJO: "true"
     WOODPECKER_FORGEJO_URL: "https://git.pmon.dev"
@@ -37,6 +44,7 @@ server:
     WOODPECKER_FORGE_TIMEOUT: "30s"
     WOODPECKER_METRICS_SERVER_ADDR: ":9001"
   extraSecretNamesForEnvFrom:
+    - woodpecker-db
     - woodpecker-forgejo-secret
     - woodpecker-default-agent-secret
     - woodpecker-ci-secrets
