@@ -1,7 +1,4 @@
 server:
-  # Stopped for the SQLite->Postgres backup: with the server down the volume is free to mount elsewhere.
-  # Reverted in the very next commit; nothing here is meant to stay.
-  replicaCount: 0
   createAgentSecret: false
   # Chart 3.7.3 (latest) pins appVersion v3.18.0; the image tag is overridden to
   # the latest Woodpecker release. Keep server and agent on the same tag. v3.18
