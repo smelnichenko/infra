@@ -1,8 +1,4 @@
 server:
-  # Stopped only long enough to copy the SQLite file off the volume: with the server down nothing holds it
-  # open and a throwaway pod can mount it. Reverted in the very next commit.
-  statefulSet:
-    replicaCount: 0
   createAgentSecret: false
   # Chart 3.7.3 (latest) pins appVersion v3.18.0; the image tag is overridden to
   # the latest Woodpecker release. Keep server and agent on the same tag. v3.18
