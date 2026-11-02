@@ -209,7 +209,9 @@ masiService:
       # contacts that have one, so the people list was 98% faceless. 40 a tick fills the day's allowance in one pass.
       perTick: 40
       maxRequestsPerDay: 2000
-      linkedin: true
+      # off: LinkedIn renders a company page in a browser for 60 s a contact, and it is not a source the operator
+      # asked for. The e-mail sources (Gravatar, unavatar) and the company's own site are what collect here.
+      linkedin: false
       nameSearch: true
       # off until its distances hold: different people matched at 0.05-0.40 (10-23..27)
       face: false
