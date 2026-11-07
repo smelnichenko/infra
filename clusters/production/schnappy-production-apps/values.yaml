@@ -212,7 +212,10 @@ masiService:
       # off: LinkedIn renders a company page in a browser for 60 s a contact, and it is not a source the operator
       # asked for. The e-mail sources (Gravatar, unavatar) and the company's own site are what collect here.
       linkedin: false
-      nameSearch: true
+      # off: no image search answers the browser pod - DuckDuckGo serves its bot check (and the wait is Bing's a.iusc),
+      # Brave a captcha, Mojeek and Qwant no images (2026-11-07); none found since Bing went (10-21), 2000 runs a day
+      # of 30 s each for nothing
+      nameSearch: false
       # off until its distances hold: different people matched at 0.05-0.40 (10-23..27)
       face: false
   mail:
