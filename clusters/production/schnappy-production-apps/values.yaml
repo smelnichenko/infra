@@ -212,11 +212,9 @@ masiService:
       # off: LinkedIn renders a company page in a browser for 60 s a contact, and it is not a source the operator
       # asked for. The e-mail sources (Gravatar, unavatar) and the company's own site are what collect here.
       linkedin: false
-      # on again (2026-11-07): DuckDuckGo read by a regular browser on the pod's virtual screen (platform
-      # masiService.browser.headless: false) with the regular Chrome agent of its own version - headless, it served its
-      # bot check. masi fetches DuckDuckGo's proxy only, never Bing (refused by every fetcher and the browser), and tries
-      # at most three results whose title names the contact
-      nameSearch: true
+      # off again (2026-11-07 16:10) until the portrait check fails closed: the day's AI budget ran out at 15:11 and the
+      # check, failing open, kept ~200 name-search results unchecked. DuckDuckGo through the regular browser itself works
+      nameSearch: false
       # off until its distances hold: different people matched at 0.05-0.40 (10-23..27)
       face: false
   mail:
