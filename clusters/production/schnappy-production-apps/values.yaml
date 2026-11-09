@@ -223,7 +223,8 @@ masiService:
       # on (2026-11-09, the operator): a similar face only adds a "possible connection" on the person's page, nothing
       # merges. 0.6 from ops plan 111: over LFW's 29.6 M pairs of different people 1.4 false matches in 1,000,000, 99.0% of
       # same-person pairs kept; on production's 732 faces nothing lies between 0.322 and 0.661. 0.7 links strangers
-      face: true
+      # OFF again the same minute (2026-11-09 15:14): the backfill put a pod over its 2 GiB limit (OOMKilled)
+      face: false
       faceThreshold: "0.6"
   mail:
     # nothing is mailed on a schedule: a digest leaves when its reader asks for it
