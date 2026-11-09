@@ -184,7 +184,8 @@ masiService:
     # 250m as test: at 50m a busy node made startup overrun the 300 s startup probe (test, 2026-09-26). Memory at the
     # measured working set (test's container: 827Mi on a 512m heap; more heap here), not below it
     requests: { cpu: 250m, memory: 1Gi }
-    limits: { cpu: 2000m, memory: 2048Mi }
+    # 3 GiB for the face models (2026-11-09): about 1 GB without them, over 2 GiB in the first pass
+    limits: { cpu: 2000m, memory: 3072Mi }
   ai:
     enabled: true
     existingSecret: "schnappy-production-masi-ai"
@@ -223,8 +224,9 @@ masiService:
       # on (2026-11-09, the operator): a similar face only adds a "possible connection" on the person's page, nothing
       # merges. 0.6 from ops plan 111: over LFW's 29.6 M pairs of different people 1.4 false matches in 1,000,000, 99.0% of
       # same-person pairs kept; on production's 732 faces nothing lies between 0.322 and 0.661. 0.7 links strangers
-      # OFF again the same minute (2026-11-09 15:14): the backfill put a pod over its 2 GiB limit (OOMKilled)
-      face: false
+      # on (2026-11-09, the operator): a similar face only adds a "possible connection" on the person's page, nothing
+      # merges. 0.6 from ops plan 111; 0.7 links strangers. Needs the 3 GiB above: at 2 GiB the first pass was OOMKilled
+      face: true
       faceThreshold: "0.6"
   mail:
     # nothing is mailed on a schedule: a digest leaves when its reader asks for it
