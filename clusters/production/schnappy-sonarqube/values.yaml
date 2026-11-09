@@ -48,6 +48,11 @@ sonarqube:
       # pull requests analyse here, so schnappy-masi is written by main alone and always shows main (CE has no branch analysis)
       - key: schnappy-masi-pr
         name: Schnappy Masi (pull requests)
+      - key: schnappy-radio-scheduler
+        name: Schnappy Radio Scheduler
+      # pull requests analyse here, as masi's do
+      - key: schnappy-radio-scheduler-pr
+        name: Schnappy Radio Scheduler (pull requests)
       - key: schnappy-site
         name: Schnappy Site
         gate: Frontend
