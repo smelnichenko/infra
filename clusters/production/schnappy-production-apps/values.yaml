@@ -201,6 +201,10 @@ masiService:
     perTick: 10
     matchAuto: true
     matchPerTick: 10
+  census:
+    # on from 2026-11-09 (plan 109 PR 2b, approved "ok to all ... go"): the monthly board census - paced per vendor,
+    # Workable left out (its Cloudflare still banned production's address after the first census)
+    enabled: true
   enrich:
     enabled: true
     contactPictures:
