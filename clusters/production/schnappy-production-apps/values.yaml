@@ -178,8 +178,12 @@ masiService:
   # lane, claims per slot and per package in the database; the chart halves the browser's sessions per pod and adds a
   # disruption budget. Test stays at one.
   replicas: 2
-  # more heap than test's 512m for production's data; two virtual-thread carriers kept even if the limit drops to one CPU
-  javaOpts: -Xmx768m -XX:+UseZGC -Djdk.virtualThreadScheduler.parallelism=2
+  # more heap than test's 512m for production's data; two virtual-thread carriers kept even if the limit drops to one CPU.
+  # 1 GiB (2026-11-11): at 768m the contact-pictures lane ran out of heap 11-44 times an hour all day; the face models'
+  # native memory lives outside it, so the 3 GiB limit keeps its room. An OutOfMemoryError exits the JVM: one had left a
+  # pod an hour with its HTTP pool shut down, failing every run it took; the heap is dumped to /tmp (the pod's emptyDir,
+  # kept across a container restart) to find what filled it - copy it out with kubectl cp before the pod goes.
+  javaOpts: -Xmx1g -XX:+UseZGC -Djdk.virtualThreadScheduler.parallelism=2 -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp
   resources:
     # 250m as test: at 50m a busy node made startup overrun the 300 s startup probe (test, 2026-09-26). Memory at the
     # measured working set (test's container: 827Mi on a 512m heap; more heap here), not below it
