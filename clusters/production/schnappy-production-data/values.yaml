@@ -29,6 +29,11 @@ postgres:
   maxWorkerProcesses: 10
   effectiveIoConcurrency: 200
   randomPageCost: "1.1"
+  # per-statement statistics (pg_stat_statements in every database) and the CNPG exporter's metrics merged into what
+  # Prometheus scrapes: rehearsed on this Cluster in Vagrant 2026-11-11 (ops test:cnpg-stats: 12.1 s longest write gap;
+  # one instance kept its old sidecar config until a rolling restart of the Cluster - restartedAt - recreated it)
+  statStatements: true
+  exporterMetrics: true
   storage:
     size: 20Gi
     storageClass: local-path
