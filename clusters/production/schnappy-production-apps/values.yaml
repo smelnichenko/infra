@@ -183,7 +183,10 @@ masiService:
   # native memory lives outside it, so the 3 GiB limit keeps its room. An OutOfMemoryError exits the JVM: one had left a
   # pod an hour with its HTTP pool shut down, failing every run it took; the heap is dumped to /tmp (the pod's emptyDir,
   # kept across a container restart) to find what filled it - copy it out with kubectl cp before the pod goes.
-  javaOpts: -Xmx1g -XX:+UseZGC -Djdk.virtualThreadScheduler.parallelism=2 -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp
+  # 1.5 GiB (2026-11-12): the heap's 7-day peak was 948 MiB of the 1 GiB, and a places:ee run (EHAK's three layers, two
+  # million points simplified as one coverage) needs about 300 MB more at its peak - at 1 GiB it would exit the JVM on a
+  # busy pod. The pods' working sets were 1.25-1.8 GiB of the 3 GiB limit: ~2.3 GiB with the larger heap.
+  javaOpts: -Xmx1536m -XX:+UseZGC -Djdk.virtualThreadScheduler.parallelism=2 -XX:+ExitOnOutOfMemoryError -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp
   resources:
     # 250m as test: at 50m a busy node made startup overrun the 300 s startup probe (test, 2026-09-26). Memory at the
     # measured working set (test's container: 827Mi on a 512m heap; more heap here), not below it
