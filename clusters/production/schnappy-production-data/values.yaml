@@ -106,6 +106,14 @@ scylla:
     requests: { cpu: 100m, memory: 2Gi, ephemeral-storage: 256Mi }
     limits: { cpu: 2000m, memory: 2Gi, ephemeral-storage: 1Gi }
 
+# OpenSearch for matching addresses across sources (masi's places): one node; its index is built again from Postgres,
+# so its volume holds nothing that cannot be made again. The operator's yes, 2026-11-12, after the Vagrant rehearsal
+opensearch:
+  enabled: true
+  storage:
+    size: 10Gi
+    storageClass: local-path
+
 scyllaOperator:
   enabled: true
   version: "2026.1.14"
