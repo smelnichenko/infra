@@ -31,11 +31,15 @@ configuration:
         keepLatestMaintenanceJobs: 1
 deployNodeAgent: true
 snapshotsEnabled: false
-# Volumes that hold nothing to restore: a pod's emptyDirs (Istio's sockets and certs, tmp) and what is projected into
-# it from the API. defaultVolumesToFsBackup copied every emptyDir of every pod with kopia - 121 a night - and a pod
-# deleted while its volumes were read failed the whole backup: masi rolled out at 02:01 UTC 2026-11-13, one minute into
-# the daily run, and its two old pods' 12 emptyDirs made it PartiallyFailed (VeleroDailyBackupMissing). PVC data is
-# still copied.
+# Velero holds manifests only: production's PVs are all local-path hostPath, which Velero's file-system backup never
+# copies (none ever was, 2026-11-13: 121 of 121 volume backups were emptyDirs). The data has backups of its own - CNPG
+# to its object store, Scylla Manager, the Pis' tier-0 backup. So no volume is read at all: a pod's emptyDirs (Istio's
+# sockets and certs, tmp) and what is projected into it hold nothing to restore, and a pod deleted while they were read
+# failed the whole backup - masi rolled out at 02:01 UTC 2026-11-13, one minute into the daily run, and its two old
+# pods' 12 emptyDirs made it PartiallyFailed (VeleroDailyBackupMissing). hostPath and local skipped too: Velero would
+# skip them anyway, but only after opening the kopia repository. A PVC not bound (Pending, Lost - a pod waiting for its
+# node, a CI pipeline's) is skipped by phase: with any volume policy Velero resolves every PVC's PV, and one it cannot
+# find failed the backup where before the policy it was passed over.
 extraObjects:
   - apiVersion: v1
     kind: ConfigMap
@@ -47,7 +51,11 @@ extraObjects:
         version: v1
         volumePolicies:
           - conditions:
-              volumeTypes: [emptyDir, configMap, secret, projected, downwardAPI]
+              volumeTypes: [emptyDir, hostPath, local, configMap, secret, projected, downwardAPI]
+            action:
+              type: skip
+          - conditions:
+              pvcPhase: [Pending, Lost]
             action:
               type: skip
 schedules:
