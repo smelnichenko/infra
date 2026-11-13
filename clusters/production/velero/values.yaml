@@ -31,6 +31,25 @@ configuration:
         keepLatestMaintenanceJobs: 1
 deployNodeAgent: true
 snapshotsEnabled: false
+# Volumes that hold nothing to restore: a pod's emptyDirs (Istio's sockets and certs, tmp) and what is projected into
+# it from the API. defaultVolumesToFsBackup copied every emptyDir of every pod with kopia - 121 a night - and a pod
+# deleted while its volumes were read failed the whole backup: masi rolled out at 02:01 UTC 2026-11-13, one minute into
+# the daily run, and its two old pods' 12 emptyDirs made it PartiallyFailed (VeleroDailyBackupMissing). PVC data is
+# still copied.
+extraObjects:
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: velero-skip-ephemeral-volumes
+      namespace: velero
+    data:
+      policy.yaml: |
+        version: v1
+        volumePolicies:
+          - conditions:
+              volumeTypes: [emptyDir, configMap, secret, projected, downwardAPI]
+            action:
+              type: skip
 schedules:
   schnappy-daily:
     disabled: false
@@ -41,6 +60,9 @@ schedules:
       includedNamespaces:
         - schnappy-production
       defaultVolumesToFsBackup: true
+      resourcePolicy:
+        kind: configmap
+        name: velero-skip-ephemeral-volumes
   full-weekly:
     disabled: false
     schedule: "0 3 * * 0"
@@ -55,6 +77,9 @@ schedules:
       excludedNamespaces:
         - velero
       defaultVolumesToFsBackup: true
+      resourcePolicy:
+        kind: configmap
+        name: velero-skip-ephemeral-volumes
 upgradeCRDs: false
 kubectl:
   image:
