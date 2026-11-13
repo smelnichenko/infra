@@ -191,10 +191,13 @@ masiService:
     # 250m as test: at 50m a busy node made startup overrun the 300 s startup probe (test, 2026-09-26). Memory at the
     # measured working set (test's container: 827Mi on a 512m heap; more heap here), not below it
     requests: { cpu: 250m, memory: 2Gi }
-    # 3 GiB for the face models (2026-11-09): about 1 GB without them, over 2 GiB in the first pass. 5 GiB with the 3 GiB
-    # heap (2026-11-12): the heap, ~0.3 GiB beside it (metaspace, threads) and the face models' native memory; the request
-    # 2 GiB, as a pod far above its request is the first evicted when the node runs short (ten: 62 GiB, 37 in use)
-    limits: { cpu: 2000m, memory: 5Gi }
+    # 3 GiB for the face models (2026-11-09): about 1 GB without them, over 2 GiB in the first pass. With the 3 GiB heap
+    # 6.5 GiB (2026-11-13; 5 GiB the day before was too little - the kernel killed a pod at it 10 min after a deploy, in
+    # the boot's picture pass, and the other reached it too): the heap at its cap 3 GiB, ~0.25 GiB beside it (metaspace,
+    # code), ~1.9 GiB native (the face models, malloc, threads - anon less non-heap, measured) and ~1.1 GiB page cache (the
+    # models' files, the jars - reclaimable, but squeezed out the models page in again and again). The request 2 GiB, as
+    # a pod far above its request is the first evicted when the node runs short (ten: 62 GiB, 42 in use)
+    limits: { cpu: 2000m, memory: 6656Mi }
   ai:
     enabled: true
     existingSecret: "schnappy-production-masi-ai"
