@@ -31,33 +31,14 @@ configuration:
         keepLatestMaintenanceJobs: 1
 deployNodeAgent: true
 snapshotsEnabled: false
-# Velero holds manifests only: production's PVs are all local-path hostPath, which Velero's file-system backup never
-# copies (none ever was, 2026-11-13: 121 of 121 volume backups were emptyDirs). The data has backups of its own - CNPG
-# to its object store, Scylla Manager, the Pis' tier-0 backup. So no volume is read at all: a pod's emptyDirs (Istio's
-# sockets and certs, tmp) and what is projected into it hold nothing to restore, and a pod deleted while they were read
-# failed the whole backup - masi rolled out at 02:01 UTC 2026-11-13, one minute into the daily run, and its two old
-# pods' 12 emptyDirs made it PartiallyFailed (VeleroDailyBackupMissing). hostPath and local skipped too: Velero would
-# skip them anyway, but only after opening the kopia repository. A PVC not bound (Pending, Lost - a pod waiting for its
-# node, a CI pipeline's) is skipped by phase: with any volume policy Velero resolves every PVC's PV, and one it cannot
-# find failed the backup where before the policy it was passed over.
-extraObjects:
-  - apiVersion: v1
-    kind: ConfigMap
-    metadata:
-      name: velero-skip-ephemeral-volumes
-      namespace: velero
-    data:
-      policy.yaml: |
-        version: v1
-        volumePolicies:
-          - conditions:
-              volumeTypes: [emptyDir, hostPath, local, configMap, secret, projected, downwardAPI]
-            action:
-              type: skip
-          - conditions:
-              pvcPhase: [Pending, Lost]
-            action:
-              type: skip
+# Velero holds manifests only, and reads no volume: production's PVs are all local-path hostPath, which its file-system
+# backup never copies (121 of 121 volume backups of 2026-11-13 were emptyDirs - Istio's sockets and certs, tmp); the
+# data has backups of its own (CNPG to its object store, Scylla Manager, the Pis' tier-0 backup). Reading a pod's
+# emptyDirs failed whole backups: a pod replaced while they were read - masi rolled out at 02:01 UTC 2026-11-13, one
+# minute into the daily run, and its two old pods' 12 emptyDirs made it PartiallyFailed (VeleroDailyBackupMissing).
+# Pods are left out of both schedules: the volume backup runs only for a pod item, so none runs - no policy, no PV
+# looked up, no kopia repository opened - and on a restore every pod comes back from its Deployment, StatefulSet or
+# Job (production runs no bare pod, 2026-11-13). defaultVolumesToFsBackup off says the same, should pods come back.
 schedules:
   schnappy-daily:
     disabled: false
@@ -67,10 +48,9 @@ schedules:
       ttl: 168h
       includedNamespaces:
         - schnappy-production
-      defaultVolumesToFsBackup: true
-      resourcePolicy:
-        kind: configmap
-        name: velero-skip-ephemeral-volumes
+      excludedResources:
+        - pods
+      defaultVolumesToFsBackup: false
   full-weekly:
     disabled: false
     schedule: "0 3 * * 0"
@@ -82,12 +62,15 @@ schedules:
       # Velero's own namespace: no data (no PVC), everything there Argo's or Velero's to recreate. Its hourly
       # repository maintenance Jobs' pods (unlabelled: Velero makes them) would fail this backup the way hyperfoil's
       # and etcd-backup's pods did, ending while it reads their volumes - none has yet; this keeps it so
+      # and CI's and the preview environments': each pipeline's and each pull request's own, made and removed while a
+      # backup runs, nothing in them to restore (Argo recreates the rest)
       excludedNamespaces:
         - velero
-      defaultVolumesToFsBackup: true
-      resourcePolicy:
-        kind: configmap
-        name: velero-skip-ephemeral-volumes
+        - woodpecker
+        - "schnappy-pr-*"
+      excludedResources:
+        - pods
+      defaultVolumesToFsBackup: false
 upgradeCRDs: false
 kubectl:
   image:
