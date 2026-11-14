@@ -7,7 +7,7 @@ networkPolicies:
 clickhouse:
   enabled: true
   existingSecret: schnappy-clickhouse
-  image: clickhouse/clickhouse-server:26.8.15.10-alpine
+  image: clickhouse/clickhouse-server:26.8.34.13-alpine
   resources:
     requests: { cpu: "50m", memory: "512Mi" }
     limits:   { cpu: "2",    memory: "8Gi" }
@@ -79,7 +79,7 @@ gateway:
 
 mimir:
   enabled: true
-  image: grafana/mimir:3.2.1
+  image: grafana/mimir:3.2.5
   retention: 90d
   minioSecret: schnappy-infra-s3
   accessKeyName: ACCESS_KEY
@@ -93,7 +93,7 @@ mimir:
 
 tempo:
   enabled: true
-  image: grafana/tempo:3.1.0
+  image: grafana/tempo:3.1.1
   retention: 336h
   minioSecret: schnappy-infra-s3
   accessKeyName: ACCESS_KEY

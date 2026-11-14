@@ -1,4 +1,4 @@
-# Velero's newest patch release; chart 12.2.0 ships v1.18.2. Drop this when the chart's default catches up.
+# Velero's newest patch release; chart 12.2.5 ships v1.18.2. Drop this when the chart's default catches up.
 image:
   tag: v1.18.4
 initContainers:
