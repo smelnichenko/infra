@@ -20,7 +20,9 @@ configuration:
         s3ForcePathStyle: "true"
         s3Url: http://192.168.11.5:9000
   volumeSnapshotLocation: []
-  defaultVolumesToFsBackup: true
+  # no volume read by a backup that does not ask (an ad-hoc one, not from a schedule): the schedules below say the same
+  # for theirs; a backup that wants the file-system path sets it itself (the Vagrant copy's restore check does)
+  defaultVolumesToFsBackup: false
   features: ""
   # Keep only the most recent maintenance Job per repository (chart default is 3).
   # With 12 BackupRepositories that default leaves 36 completed maintenance pods
@@ -32,13 +34,18 @@ configuration:
 deployNodeAgent: true
 snapshotsEnabled: false
 # Velero holds manifests only, and reads no volume: production's PVs are all local-path hostPath, which its file-system
-# backup never copies (121 of 121 volume backups of 2026-11-13 were emptyDirs - Istio's sockets and certs, tmp); the
-# data has backups of its own (CNPG to its object store, Scylla Manager, the Pis' tier-0 backup). Reading a pod's
-# emptyDirs failed whole backups: a pod replaced while they were read - masi rolled out at 02:01 UTC 2026-11-13, one
-# minute into the daily run, and its two old pods' 12 emptyDirs made it PartiallyFailed (VeleroDailyBackupMissing).
-# Pods are left out of both schedules: the volume backup runs only for a pod item, so none runs - no policy, no PV
-# looked up, no kopia repository opened - and on a restore every pod comes back from its Deployment, StatefulSet or
-# Job (production runs no bare pod, 2026-11-13). defaultVolumesToFsBackup off says the same, should pods come back.
+# backup never copies (121 of 121 volume backups of 2026-11-13 were emptyDirs - Istio's sockets and certs, tmp).
+# Reading a pod's emptyDirs failed whole backups: a pod replaced while they were read - masi rolled out at 02:01 UTC
+# 2026-11-13, one minute into the daily run, and its two old pods' 12 emptyDirs made it PartiallyFailed
+# (VeleroDailyBackupMissing). Pods are left out of both schedules: the volume backup runs only for a pod item, so none
+# runs and no kopia repository is opened. A PVC is still backed up, with its PV object.
+# Data: backed up by its own store - Postgres (CNPG's base backups and WAL to the Pi store), ScyllaDB (Scylla
+# Manager), the Pis' tier-0 backup; by none - Kafka, ClickHouse, Grafana, Alertmanager, Mimir and Tempo (s3gw),
+# OpenSearch (rebuilt from Postgres), Valkey (a cache), woodpecker's Postgres (a CNPG cluster without a backup) - a
+# loss as before this change: Velero never held their volumes.
+# On a restore: the pods come back from their controllers (Deployments, StatefulSets, Jobs, CNPG's Clusters, Strimzi's
+# pod sets - production runs no bare pod, 2026-11-13), every data volume fresh and empty - each store's data from its
+# own backup.
 schedules:
   schnappy-daily:
     disabled: false
@@ -59,15 +66,17 @@ schedules:
       ttl: 720h
       includedNamespaces:
         - "*"
-      # Velero's own namespace: no data (no PVC), everything there Argo's or Velero's to recreate. Its hourly
-      # repository maintenance Jobs' pods (unlabelled: Velero makes them) would fail this backup the way hyperfoil's
-      # and etcd-backup's pods did, ending while it reads their volumes - none has yet; this keeps it so
-      # and CI's and the preview environments': each pipeline's and each pull request's own, made and removed while a
-      # backup runs, nothing in them to restore (Argo recreates the rest)
+      # Velero's own namespace (no PVC: Argo and Velero recreate everything there); CI's (its pipelines' namespaces
+      # and pods made and removed while a backup runs; its server's Postgres has no backup anywhere, see Data above);
+      # the preview environments' (each pull request's own, recreated from it)
       excludedNamespaces:
         - velero
         - woodpecker
         - "schnappy-pr-*"
+      # and the cluster's own resources: with any namespace excluded Velero leaves cluster-scoped kinds out unless
+      # asked (ClusterRoles and their bindings, StorageClasses, webhooks, ClusterIssuers, cluster-wide network
+      # policies, PriorityClasses) - the weekly held none of them since its first exclusion (2026-10-11)
+      includeClusterResources: true
       excludedResources:
         - pods
       defaultVolumesToFsBackup: false
