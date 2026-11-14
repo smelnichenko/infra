@@ -24,7 +24,7 @@ postgres:
 valkey:
   enabled: true
   existingSecret: schnappy-test-valkey
-  image: valkey/valkey:9.1.2-alpine
+  image: valkey/valkey:9.1.3-alpine
   resources:
     requests: { cpu: 10m, memory: 32Mi }
     limits: { cpu: 100m, memory: 128Mi }
@@ -45,7 +45,7 @@ kafka:
 scylla:
   enabled: false
   # the schema Job's cqlsh, the cluster's own version
-  image: scylladb/scylla:2026.1.14
+  image: scylladb/scylla:2026.1.15
   # ScyllaDB sizes itself to its memory limit (one shard here, --smp=1): under Seastar's reserve (1.5 GiB) plus 500 MB
   # it takes a flat 500 MB (its log's max_repair_memory, 10 % of a shard: 49.9 MB on 2026-10-14) - at 512Mi that left
   # 36 MiB outside the shard; 1 GiB leaves ~500 MiB. Its request the same - the memory it plans with is then the memory
@@ -57,7 +57,7 @@ scylla:
 
 scyllaOperator:
   enabled: true
-  version: "2026.1.14"
+  version: "2026.1.15"
   agentVersion: "3.12.1"
   developerMode: true
 
