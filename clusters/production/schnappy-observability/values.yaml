@@ -158,12 +158,12 @@ pushgateway:
 
 reports:
   enabled: true
-  image: nginx:1.27-alpine
+  image: nginx:1.31-alpine
   minioEndpoint: schnappy-infra-s3gw.schnappy-infra.svc:9000
 
 runbooks:
   enabled: true
-  image: nginx:1.27-alpine
+  image: nginx:1.31-alpine
 
 smartctl:
   enabled: true
