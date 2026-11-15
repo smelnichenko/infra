@@ -10,7 +10,7 @@ networkPolicies:
 postgres:
   enabled: false
   existingSecret: schnappy-production-postgres
-  image: postgres:17-alpine
+  image: postgres:18-alpine
   databases:
     - name: monitor
     - name: admin
