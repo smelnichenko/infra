@@ -37,12 +37,24 @@ sonarqube:
     projects:
       - key: schnappy-monitor
         name: Schnappy Monitor
+      # pull requests analyse here, as masi's do (2026-11-16)
+      - key: schnappy-monitor-pr
+        name: Schnappy Monitor (pull requests)
       - key: schnappy-admin
         name: Schnappy Admin
+      # pull requests analyse here, as masi's do (2026-11-16)
+      - key: schnappy-admin-pr
+        name: Schnappy Admin (pull requests)
       - key: schnappy-chat
         name: Schnappy Chat
+      # pull requests analyse here, as masi's do (2026-11-16)
+      - key: schnappy-chat-pr
+        name: Schnappy Chat (pull requests)
       - key: schnappy-chess
         name: Schnappy Chess
+      # pull requests analyse here, as masi's do (2026-11-16)
+      - key: schnappy-chess-pr
+        name: Schnappy Chess (pull requests)
       - key: schnappy-masi
         name: Schnappy Masi
       # pull requests analyse here, so schnappy-masi is written by main alone and always shows main (CE has no branch analysis)
@@ -56,7 +68,17 @@ sonarqube:
       - key: schnappy-site
         name: Schnappy Site
         gate: Frontend
+      # pull requests analyse here, as masi's do (2026-11-16)
+      - key: schnappy-site-pr
+        name: Schnappy Site (pull requests)
+        gate: Frontend
       - key: schnappy-platform
         name: Schnappy Platform
+      # pull requests analyse here, as masi's do (2026-11-16)
+      - key: schnappy-platform-pr
+        name: Schnappy Platform (pull requests)
       - key: schnappy-ops
         name: Schnappy Ops
+      # pull requests analyse here, as masi's do (2026-11-16)
+      - key: schnappy-ops-pr
+        name: Schnappy Ops (pull requests)
