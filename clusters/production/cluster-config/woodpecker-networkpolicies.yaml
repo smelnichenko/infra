@@ -273,6 +273,17 @@ spec:
           port: 443
         - protocol: TCP
           port: 6443
+    # The Pi backup store: base backups and WAL (postgres.yaml's spec.backup), as production's cluster's
+    - to:
+        - ipBlock:
+            cidr: 192.168.11.4/32
+        - ipBlock:
+            cidr: 192.168.11.5/32
+        - ipBlock:
+            cidr: 192.168.11.6/32
+      ports:
+        - protocol: TCP
+          port: 9000
     # DNS
     - ports:
         - protocol: UDP
