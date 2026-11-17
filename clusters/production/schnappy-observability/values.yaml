@@ -136,6 +136,17 @@ grafana:
   storage:
     size: 5Gi
     storageClass: local-path
+  # Grafana's database moving to its own CNPG cluster (platform's grafana-cnpg.yaml): stage 1 the cluster, backed up to
+  # the Pi store under its own name; stage 2 database: cnpg (a fresh database - every dashboard and datasource is
+  # provisioned). Its SQLite file had no backup.
+  cnpg:
+    enabled: true
+    storage:
+      size: 1Gi
+      storageClass: local-path
+    backup: true
+    backupEndpoint: http://192.168.11.5:9000
+    backupServerName: schnappy-grafana-pg18
   resources:
     requests: { cpu: 50m, memory: 256Mi }
     limits: { cpu: 1000m, memory: 1Gi }
