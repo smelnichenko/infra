@@ -116,6 +116,9 @@ opensearch:
 
 scyllaOperator:
   enabled: true
+  # the ScyllaCluster's version, scylla.image's too: one depName, Renovate moves both in one unit
+  # (.woodpecker/scylla-version-check.sh)
+  # renovate: datasource=docker depName=scylladb/scylla
   version: "2026.1.15"
   agentVersion: "3.12.1"
   developerMode: true
