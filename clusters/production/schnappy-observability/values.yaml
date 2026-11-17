@@ -16,6 +16,13 @@ clickhouse:
     storageClass: local-path
   retention:
     days: 30
+  # its logs backed up to the Pi store once a day (platform's clickhouse-backup.yaml): BACKUP DATABASE logs written by
+  # the server, the newest 7 complete backups kept; turning it on restarts ClickHouse once (its config and the store's
+  # keys)
+  backup:
+    enabled: true
+    endpoint: http://192.168.11.5:9000
+    storeIps: [192.168.11.4, 192.168.11.5, 192.168.11.6]
 
 fluentbit:
   enabled: true
