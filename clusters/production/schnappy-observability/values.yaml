@@ -147,6 +147,8 @@ grafana:
     backup: true
     backupEndpoint: http://192.168.11.5:9000
     backupServerName: schnappy-grafana-pg18
+  # stage 2: Grafana on its CNPG cluster (back: sqlite - its old file is still on the volume)
+  database: cnpg
   resources:
     requests: { cpu: 50m, memory: 256Mi }
     limits: { cpu: 1000m, memory: 1Gi }
