@@ -32,6 +32,9 @@ sonarqube:
   postgresResources:
     requests: { cpu: 50m, memory: 256Mi }
     limits: { cpu: 1000m, memory: 512Mi }
+  # SonarQube's database moving to CloudNativePG (ops docs/plans/121; operator, 2026-11-17: "a"). Stage 1a: SonarQube
+  # stopped - nothing running or written when stage 1b's import reads its database.
+  replicas: 0
   setup:
     enabled: true
     projects:
