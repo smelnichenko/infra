@@ -149,6 +149,13 @@ scyllaOperator:
 strimzi:
   enabled: true
   kafkaVersion: 4.3.1
+  # Kafka's topics dumped to the Pi store once a day (platform's kafka-backup.yaml): every partition's messages, the
+  # topics' descriptions, the consumer groups' offsets - the newest 7 complete dumps kept; restored with ops'
+  # deploy:kafka:restore. The store's keys from Vault's backup-store (an ExternalSecret of its own).
+  backup:
+    enabled: true
+    endpoint: http://192.168.11.5:9000
+    storeIps: [192.168.11.4, 192.168.11.5, 192.168.11.6]
 
 cnpg:
   enabled: true
