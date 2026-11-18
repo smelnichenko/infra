@@ -32,11 +32,9 @@ sonarqube:
   postgresResources:
     requests: { cpu: 50m, memory: 256Mi }
     limits: { cpu: 1000m, memory: 512Mi }
-  # SonarQube's database moving to CloudNativePG (ops docs/plans/121; operator, 2026-11-17: "a"). Stage 1a: SonarQube
-  # stopped - nothing running or written when the import reads. Stage 1b: its own CNPG cluster imports the sonarqube
-  # database from the StatefulSet above (read only) and backs up to the Pi store under its own name; SonarQube still on
-  # the StatefulSet. Stage 2: replicas back, database: cnpg. Stage 3: import off, the StatefulSet at 0 pods.
-  replicas: 0
+  # SonarQube's database on CloudNativePG (ops docs/plans/121; operator, 2026-11-17: "a"). Stage 1 (2026-11-18): its own
+  # CNPG cluster imported the sonarqube database from the StatefulSet above (every count equal) and backs up to the Pi
+  # store under its own name. Stage 2: SonarQube on it. Stage 3: import off, the StatefulSet at 0 pods.
   cnpg:
     enabled: true
     import: true
@@ -46,7 +44,7 @@ sonarqube:
     backup: true
     backupEndpoint: http://192.168.11.5:9000
     backupServerName: schnappy-sonarqube-pg18
-  database: statefulset
+  database: cnpg
   setup:
     enabled: true
     projects:
