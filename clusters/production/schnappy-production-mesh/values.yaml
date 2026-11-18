@@ -4,6 +4,8 @@ scyllaOperator:
 peerAuthentication:
   enabled: true
   mode: STRICT
+  # the observability stack runs in schnappy-infra alone: no Alertmanager or s3gw plaintext exception here
+  observability: false
 
 authorizationPolicies:
   enabled: true
