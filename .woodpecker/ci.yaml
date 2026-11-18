@@ -49,6 +49,8 @@ steps:
       - sh .woodpecker/no-prune-check.sh
       # each environment's mesh PeerAuthentication exceptions (the script says why)
       - sh .woodpecker/mesh-values-check.sh
+      # the apps with sync hooks retry a failed sync (a failed hook not left unrun)
+      - sh .woodpecker/hook-retry-check.sh
       # ScyllaDB's version said once in each data environment, and Renovate able to move it (the script says why)
       - sh .woodpecker/scylla-version-check.sh
 
