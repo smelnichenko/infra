@@ -120,7 +120,8 @@ grafana:
   # datasource unregistered - off: the image's own plugin versions (platform's grafana-deployment.yaml says why)
   pluginsPreinstallAutoUpdate: false
   host: grafana.pmon.dev
-  # kagent's grafana-mcp reaches the Grafana API with a read-only Viewer SA.
+  # kagent's grafana-mcp reaches the Grafana API with a read-only Viewer SA - its token (Vault's kagent-grafana) was minted
+  # against the SQLite database and is gone with stage 2's fresh one: mint a new Viewer SA token when kagent comes back.
   extraIngressNamespaces:
     - kagent
   ingress:
