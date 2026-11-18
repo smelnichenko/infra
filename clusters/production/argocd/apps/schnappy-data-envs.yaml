@@ -43,6 +43,15 @@ spec:
         syncOptions:
           - CreateNamespace=true
           - RespectIgnoreDifferences=true
+        # a sync that failed - one of its Sync hooks among it (the chart's hook-templates ConfigMap after them: the app
+        # stays OutOfSync) - tried again before it stays failed: auto-sync never retries a revision by itself. A hook
+        # failing all four times keeps its Job, and KubeJobFailed says so
+        retry:
+          limit: 3
+          backoff:
+            duration: 30s
+            factor: 2
+            maxDuration: 5m
       ignoreDifferences:
         - group: scylla.scylladb.com
           kind: ScyllaCluster

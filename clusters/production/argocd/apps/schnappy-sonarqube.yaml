@@ -28,3 +28,12 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+    # a sync that failed - one of its hooks among it (a PostSync hook runs after the chart's hook-templates ConfigMap
+    # is applied: the app reads Synced, the hook not run) - tried again before it stays failed: auto-sync never retries
+    # a revision by itself. A hook failing all four times keeps its Job, and KubeJobFailed says so
+    retry:
+      limit: 3
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m
