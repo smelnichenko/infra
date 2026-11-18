@@ -47,6 +47,8 @@ steps:
       - sh .woodpecker/woodpecker-tags-check.sh
       # no Argo CD application prunes (the script says why)
       - sh .woodpecker/no-prune-check.sh
+      # each environment's mesh PeerAuthentication exceptions (the script says why)
+      - sh .woodpecker/mesh-values-check.sh
       # ScyllaDB's version said once in each data environment, and Renovate able to move it (the script says why)
       - sh .woodpecker/scylla-version-check.sh
 
