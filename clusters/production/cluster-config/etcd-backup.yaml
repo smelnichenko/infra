@@ -87,7 +87,7 @@ spec:
               type: RuntimeDefault
           initContainers:
             - name: snapshot
-              image: registry.k8s.io/etcd:3.6.8-0
+              image: registry.k8s.io/etcd:3.6.16-0
               command: ["etcdctl"]
               args:
                 - "--endpoints=https://127.0.0.1:2379"
@@ -114,7 +114,7 @@ spec:
               # etcdctl writes the snapshot 0600 root; make it readable so the
               # non-root verify/upload containers can access it. Reuses the rclone image
               # (pulled for the upload anyway) to avoid an extra image just for chmod.
-              image: rclone/rclone:1.75.1@sha256:45401ad7410db1d67ffdb58e19059ad20b0d8e0285a60e38bbec55cc1019c7a5
+              image: rclone/rclone:1.75.2@sha256:2687085f718d3c628f7fdfb77c52a1d344332aed543110bb88088f2c70d43eb5
               command: ["/bin/sh", "-ec"]
               args: ["chmod 0644 /backup/etcd.db; ls -l /backup/etcd.db"]
               securityContext:
@@ -128,7 +128,7 @@ spec:
               volumeMounts:
                 - { name: backup, mountPath: /backup }
             - name: verify
-              image: registry.k8s.io/etcd:3.6.8-0
+              image: registry.k8s.io/etcd:3.6.16-0
               # snapshot status/restore moved from etcdctl to etcdutl in etcd 3.5+.
               command: ["etcdutl"]
               args: ["snapshot", "status", "/backup/etcd.db", "-w", "table"]
@@ -145,7 +145,7 @@ spec:
                 - { name: backup, mountPath: /backup, readOnly: true }
           containers:
             - name: upload
-              image: rclone/rclone:1.75.1@sha256:45401ad7410db1d67ffdb58e19059ad20b0d8e0285a60e38bbec55cc1019c7a5
+              image: rclone/rclone:1.75.2@sha256:2687085f718d3c628f7fdfb77c52a1d344332aed543110bb88088f2c70d43eb5
               command: ["/bin/sh", "-ec"]
               args:
                 - |

@@ -53,15 +53,15 @@ steps:
   # the stale PR env sweeper's script run as its CronJob runs it - in its image (the test checks it is the CronJob's),
   # busybox sh - against stub kubectl and curl
   - name: stale-pr-envs-sweeper
-    image: alpine/k8s:1.35.9
+    image: alpine/k8s:1.35.10
     commands:
       - bash tests/stale-pr-envs-sweeper/run.sh
 
   # the restore check's age check run as its CronJob runs it - in its image (the test checks it is the CronJob's), busybox
   # sh - against a stub rclone
   - name: restore-check-age
-    image: rclone/rclone:1.75.1@sha256:45401ad7410db1d67ffdb58e19059ad20b0d8e0285a60e38bbec55cc1019c7a5
+    image: rclone/rclone:1.75.2@sha256:2687085f718d3c628f7fdfb77c52a1d344332aed543110bb88088f2c70d43eb5
     environment:
-      CI_STEP_IMAGE_CHECK: rclone/rclone:1.75.1@sha256:45401ad7410db1d67ffdb58e19059ad20b0d8e0285a60e38bbec55cc1019c7a5
+      CI_STEP_IMAGE_CHECK: rclone/rclone:1.75.2@sha256:2687085f718d3c628f7fdfb77c52a1d344332aed543110bb88088f2c70d43eb5
     commands:
       - sh tests/restore-check-age/run.sh
