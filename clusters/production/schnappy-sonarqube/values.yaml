@@ -34,10 +34,13 @@ sonarqube:
     limits: { cpu: 1000m, memory: 512Mi }
   # SonarQube's database on CloudNativePG (ops docs/plans/121; operator, 2026-11-17: "a"). Stage 1 (2026-11-18): its own
   # CNPG cluster imported the sonarqube database from the StatefulSet above (every count equal) and backs up to the Pi
-  # store under its own name. Stage 2: SonarQube on it. Stage 3: import off, the StatefulSet at 0 pods.
+  # store under its own name. Stage 2 (03:00): SonarQube on it - a CI analysis green on it (platform pipeline 590). Stage
+  # 3: the import off (a re-created cluster would otherwise re-import the StatefulSet's stage-1 data - plan 121: only a
+  # recovery from its own backups re-creates it), the StatefulSet at 0 pods (its volume kept until its removal is decided).
+  postgresReplicas: 0
   cnpg:
     enabled: true
-    import: true
+    import: false
     storage:
       size: 5Gi
       storageClass: local-path
