@@ -33,7 +33,12 @@ sidecarInjectorWebhook:
 
 pilot:
   env:
-    ENABLE_NATIVE_SIDECARS: "false"
+    # the proxy an init container restarting Always (Istio's default since 1.27): a Job's proxy stops with it, init
+    # containers reach the mesh, the proxy outlives the app at shutdown. Off from 2026-04-05 (302ee1d7: "corrupt the
+    # Postgres authentication handshake" - no error kept, the evening injection began, five other Postgres and mesh
+    # changes that hour); it ships only proven on the copy - CNPG's Postgres, Strimzi's Kafka, the way back (ops plan 126).
+    # A change of it reaches the pods by ops' restart-mesh-workloads.yml (a pod of the other mode restarted)
+    ENABLE_NATIVE_SIDECARS: "true"
     # Istio 1.31 sends unhealthy endpoints to the proxies by default; with one replica an unready pod then gets the
     # traffic (Envoy's panic mode) instead of the caller a fast "no healthy upstream". The behaviour of 1.25-1.30 kept.
     PILOT_AUTO_SEND_UNHEALTHY_ENDPOINTS: "false"
