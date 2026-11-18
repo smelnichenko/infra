@@ -37,3 +37,26 @@ spec:
       failureThreshold: 60
   monitoring:
     enablePodMonitor: false
+  # Backed up to the Pi store as production's cluster is, under a name of its own there - empty when this landed (listed
+  # 2026-11-17). CNPG's empty-archive check does NOT guard it: archiving was on long before (a no-op without a store),
+  # so its check flag was gone - a name another cluster writes would be mixed with this one's WAL silently. A new
+  # generation (a recovery, a major) takes a new serverName. It had no backup at all: a failed PostgreSQL major left
+  # CI's history nothing to come back from, and the upgrade cycle blocked every Postgres major on it
+  # (scripts/upgrade-stores.json in ops).
+  backup:
+    retentionPolicy: "30d"
+    barmanObjectStore:
+      destinationPath: s3://postgres-backups/
+      endpointURL: http://192.168.11.5:9000
+      serverName: woodpecker-postgres-pg18
+      s3Credentials:
+        accessKeyId:
+          name: woodpecker-postgres-backup-store
+          key: ACCESS_KEY
+        secretAccessKey:
+          name: woodpecker-postgres-backup-store
+          key: SECRET_KEY
+      wal:
+        compression: gzip
+      data:
+        compression: gzip

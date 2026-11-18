@@ -16,6 +16,13 @@ clickhouse:
     storageClass: local-path
   retention:
     days: 30
+  # its logs backed up to the Pi store once a day (platform's clickhouse-backup.yaml): BACKUP DATABASE logs written by
+  # the server, the newest 7 complete backups kept; turning it on restarts ClickHouse once (its config and the store's
+  # keys)
+  backup:
+    enabled: true
+    endpoint: http://192.168.11.5:9000
+    storeIps: [192.168.11.4, 192.168.11.5, 192.168.11.6]
 
 fluentbit:
   enabled: true
@@ -113,7 +120,8 @@ grafana:
   # datasource unregistered - off: the image's own plugin versions (platform's grafana-deployment.yaml says why)
   pluginsPreinstallAutoUpdate: false
   host: grafana.pmon.dev
-  # kagent's grafana-mcp reaches the Grafana API with a read-only Viewer SA.
+  # kagent's grafana-mcp reaches the Grafana API with a read-only Viewer SA - its token (Vault's kagent-grafana) was minted
+  # against the SQLite database and is gone with stage 2's fresh one: mint a new Viewer SA token when kagent comes back.
   extraIngressNamespaces:
     - kagent
   ingress:
@@ -129,6 +137,19 @@ grafana:
   storage:
     size: 5Gi
     storageClass: local-path
+  # Grafana's database moving to its own CNPG cluster (platform's grafana-cnpg.yaml): stage 1 the cluster, backed up to
+  # the Pi store under its own name; stage 2 database: cnpg (a fresh database - every dashboard and datasource is
+  # provisioned). Its SQLite file had no backup.
+  cnpg:
+    enabled: true
+    storage:
+      size: 1Gi
+      storageClass: local-path
+    backup: true
+    backupEndpoint: http://192.168.11.5:9000
+    backupServerName: schnappy-grafana-pg18
+  # stage 2: Grafana on its CNPG cluster (back: sqlite - its old file is still on the volume)
+  database: cnpg
   resources:
     requests: { cpu: 50m, memory: 256Mi }
     limits: { cpu: 1000m, memory: 1Gi }
