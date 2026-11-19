@@ -71,7 +71,7 @@ kafka:
     - name: user.events
       partitions: 3
       replicationFactor: 1
-    # the apps' dead letters (ops plan 127) - one partition, as auto-create makes it; declared so a restore finds them
+    # the apps' dead letters (a record no wait cures, kept) - one partition, as auto-create makes it; declared so a restore finds them
     - name: user.events.DLT
       partitions: 1
       replicationFactor: 1
