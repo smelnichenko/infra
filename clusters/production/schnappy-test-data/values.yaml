@@ -45,7 +45,7 @@ kafka:
 scylla:
   enabled: false
   # the schema Job's cqlsh, the cluster's own version
-  image: scylladb/scylla:2026.1.15
+  image: scylladb/scylla:2026.1.16
   # ScyllaDB sizes itself to its memory limit (one shard here, --smp=1): under Seastar's reserve (1.5 GiB) plus 500 MB
   # it takes a flat 500 MB (its log's max_repair_memory, 10 % of a shard: 49.9 MB on 2026-10-14) - at 512Mi that left
   # 36 MiB outside the shard; 1 GiB leaves ~500 MiB. Its request the same - the memory it plans with is then the memory
@@ -60,7 +60,7 @@ scyllaOperator:
   # the ScyllaCluster's version, scylla.image's too: one depName, Renovate moves both in one unit
   # (.woodpecker/scylla-version-check.sh)
   # renovate: datasource=docker depName=scylladb/scylla
-  version: "2026.1.15"
+  version: "2026.1.16"
   agentVersion: "3.12.1"
   developerMode: true
 
