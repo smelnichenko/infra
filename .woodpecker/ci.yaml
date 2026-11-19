@@ -57,7 +57,7 @@ steps:
   # the stale PR env sweeper's script run as its CronJob runs it - in its image (the test checks it is the CronJob's),
   # busybox sh - against stub kubectl and curl
   - name: stale-pr-envs-sweeper
-    image: alpine/k8s:1.35.10
+    image: alpine/k8s:1.37.2
     commands:
       - bash tests/stale-pr-envs-sweeper/run.sh
 

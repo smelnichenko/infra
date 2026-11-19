@@ -110,7 +110,7 @@ spec:
             seccompProfile: { type: RuntimeDefault }
           containers:
             - name: sweeper
-              image: alpine/k8s:1.35.10
+              image: alpine/k8s:1.37.2
               env:
                 - name: FORGEJO_API
                   value: https://git.pmon.dev/api/v1
