@@ -1,11 +1,12 @@
 #!/bin/sh
-# The four apps whose charts carry sync hooks (schnappy-data-envs, schnappy-apps-envs, schnappy-observability,
-# schnappy-sonarqube) retry a failed sync: auto-sync never retries a revision by itself, and a PostSync hook that failed
+# The apps whose charts carry sync hooks and the Vagrant copy runs (schnappy-data-envs, schnappy-apps-envs,
+# schnappy-observability) retry a failed sync: auto-sync never retries a revision by itself, and a PostSync hook that failed
 # left its app Synced with the hook not run (platform's hook-templates ConfigMap applied before it). Each one's
 # syncPolicy holds retry - a sibling of automated, at its indentation (an ApplicationSet's template too) - with a limit
 # of 1 or more and a backoff. Fails closed: a file missing or unread fails it.
 fails=0
-for app in schnappy-data-envs schnappy-apps-envs schnappy-observability schnappy-sonarqube; do
+# (schnappy-sonarqube's retry waits: the copy runs no SonarQube - its change could not be proven there)
+for app in schnappy-data-envs schnappy-apps-envs schnappy-observability; do
   f=clusters/production/argocd/apps/$app.yaml
   [ -r "$f" ] || { echo "FAIL $f not read"; fails=$((fails + 1)); continue; }
   got=$(awk '
