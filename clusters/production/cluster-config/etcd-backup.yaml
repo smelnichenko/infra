@@ -114,7 +114,7 @@ spec:
               # etcdctl writes the snapshot 0600 root; make it readable so the
               # non-root verify/upload containers can access it. Reuses the rclone image
               # (pulled for the upload anyway) to avoid an extra image just for chmod.
-              image: rclone/rclone:1.75.2@sha256:2687085f718d3c628f7fdfb77c52a1d344332aed543110bb88088f2c70d43eb5
+              image: rclone/rclone:1.76.0@sha256:7cbeec24a44f206067597c0368be4de90ae19a64d5113c7d1938bd737a81e466
               command: ["/bin/sh", "-ec"]
               args: ["chmod 0644 /backup/etcd.db; ls -l /backup/etcd.db"]
               securityContext:
@@ -145,7 +145,7 @@ spec:
                 - { name: backup, mountPath: /backup, readOnly: true }
           containers:
             - name: upload
-              image: rclone/rclone:1.75.2@sha256:2687085f718d3c628f7fdfb77c52a1d344332aed543110bb88088f2c70d43eb5
+              image: rclone/rclone:1.76.0@sha256:7cbeec24a44f206067597c0368be4de90ae19a64d5113c7d1938bd737a81e466
               command: ["/bin/sh", "-ec"]
               args:
                 - |
