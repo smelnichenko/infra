@@ -71,6 +71,13 @@ kafka:
     - name: user.events
       partitions: 3
       replicationFactor: 1
+    # the apps' dead letters (ops plan 127) - one partition, as auto-create makes it; declared so a restore finds them
+    - name: user.events.DLT
+      partitions: 1
+      replicationFactor: 1
+    - name: chat.messages.DLT
+      partitions: 1
+      replicationFactor: 1
     # Realtime envelope topics — apps publish here; Centrifugo (Kafka
     # async-consumer) fans out to subscribers, ClickHouse Kafka engine
     # archives for analytics.
