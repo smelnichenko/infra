@@ -93,7 +93,7 @@ kafka:
 
 scylla:
   enabled: false
-  image: scylladb/scylla:2026.1.16
+  image: scylladb/scylla:2026.2.10
   replicas: 1
   datacenter: datacenter1
   args:
@@ -126,7 +126,7 @@ scyllaOperator:
   # the ScyllaCluster's version, scylla.image's too: one depName, Renovate moves both in one unit
   # (.woodpecker/scylla-version-check.sh)
   # renovate: datasource=docker depName=scylladb/scylla
-  version: "2026.1.16"
+  version: "2026.2.10"
   agentVersion: "3.12.1"
   developerMode: true
   # Seastar's reserve outside the shards (see scylla.resources)
