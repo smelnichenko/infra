@@ -71,6 +71,13 @@ kafka:
     - name: user.events
       partitions: 3
       replicationFactor: 1
+    # the apps' dead letters (a record no wait cures, kept) - one partition, as auto-create makes it; declared so a restore finds them
+    - name: user.events.DLT
+      partitions: 1
+      replicationFactor: 1
+    - name: chat.messages.DLT
+      partitions: 1
+      replicationFactor: 1
     # Realtime envelope topics — apps publish here; Centrifugo (Kafka
     # async-consumer) fans out to subscribers, ClickHouse Kafka engine
     # archives for analytics.
@@ -86,7 +93,7 @@ kafka:
 
 scylla:
   enabled: false
-  image: scylladb/scylla:2026.1.15
+  image: scylladb/scylla:2026.1.16
   replicas: 1
   datacenter: datacenter1
   args:
@@ -119,7 +126,7 @@ scyllaOperator:
   # the ScyllaCluster's version, scylla.image's too: one depName, Renovate moves both in one unit
   # (.woodpecker/scylla-version-check.sh)
   # renovate: datasource=docker depName=scylladb/scylla
-  version: "2026.1.15"
+  version: "2026.1.16"
   agentVersion: "3.12.1"
   developerMode: true
   # Seastar's reserve outside the shards (see scylla.resources)
