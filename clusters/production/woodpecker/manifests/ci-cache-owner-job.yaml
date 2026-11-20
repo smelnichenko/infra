@@ -1,0 +1,41 @@
+# The CI cache handed to the uid every CI step runs as since 2026-11-20 (1000). The volume held what root steps wrote:
+# gradle/ - 51 GB, a full Gradle home per pull request per app (radar's 40 left behind when it stopped building with
+# Gradle) - and models/ and npm/. The Java apps now share one Gradle home (gradle/shared: with one workflow at a time,
+# per-PR copies bought nothing), so gradle/ is emptied (operator 2026-11-20: "ok"), gradle/shared made, and the volume
+# given to uid 1000. Run once by Argo and left Completed as the record - no TTL: deleted, Argo's self-heal would run it
+# again and empty the shared home (one re-download, ~1,300 requests an app - under Nexus' daily limit).
+# Root because chown needs it; every capability dropped but the three it uses (Pod Security baseline allows them).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ci-cache-owner-uid1000
+  namespace: woodpecker
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: ci-cache-owner
+        velero.io/exclude-from-backup: "true"
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: chown
+          image: busybox:stable-musl
+          command: ["sh", "-c", "rm -rf /cache/gradle/* && mkdir -p /cache/gradle/shared && chown -R 1000:1000 /cache && du -sh /cache/* && ls -ldn /cache /cache/* /cache/gradle/*"]
+          securityContext:
+            runAsUser: 0
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+              add: [CHOWN, DAC_OVERRIDE, FOWNER]
+          resources:
+            requests: { cpu: 50m, memory: 32Mi }
+            limits: { memory: 128Mi }
+          volumeMounts:
+            - name: cache
+              mountPath: /cache
+      volumes:
+        - name: cache
+          persistentVolumeClaim:
+            claimName: ci-cache
