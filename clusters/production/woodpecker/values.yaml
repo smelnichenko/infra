@@ -96,6 +96,10 @@ agent:
     WOODPECKER_CONNECT_RETRY_COUNT: "30"
     WOODPECKER_LOG_LEVEL: "warn"
     WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES: "forgejo-registry"
+    # every CI pod in a user namespace of its own (hostUsers: false; operator 2026-11-20 "use user namespaces
+    # for all CI pods"): a container's root - Kaniko's, a step's that sets no user - is an unprivileged uid on ten, never
+    # ten's root. ten runs containerd 2.3, Linux 6.12 (idmapped mounts on its ext4) and Kubernetes 1.36 (on by default)
+    WOODPECKER_BACKEND_K8S_USER_NAMESPACES: "true"
   resources:
     requests:
       cpu: 50m
