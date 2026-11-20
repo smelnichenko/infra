@@ -10,6 +10,11 @@ kind: Job
 metadata:
   name: ci-cache-owner-uid1000
   namespace: woodpecker
+  annotations:
+    # Step one of two of its retirement: once the live Job carries these, its manifest leaves git (step two) - and the
+    # app stays Synced (an object no longer in git, extraneous, ignored) with nothing ever re-running it.
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    argocd.argoproj.io/sync-options: Prune=false
 spec:
   backoffLimit: 1
   template:
