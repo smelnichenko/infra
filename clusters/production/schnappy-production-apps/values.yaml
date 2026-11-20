@@ -256,7 +256,7 @@ masiService:
     githubToken: ""
     # the operator's LinkedIn session cookie (li_at): with it the wildcard reads the company pages themselves
   alerts:
-    # on: one daily digest at 06:00 — pipeline ERRORs and matches above the score
+    # on: one daily digest at 06:00 — matches above the score (a source's trouble is the Sources page's, never an alert)
     enabled: true
     to: sergei.melnichenko@gmail.com
     matchScore: 0.8
