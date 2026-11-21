@@ -210,9 +210,11 @@ masiService:
   tuning:
     auto: false
   analysis:
-    auto: true
+    # off from 2026-11-21 (operator: the prepaid credit ran out - "both, switches in ui"): the analysis and matching lanes
+    # spend the most; the web UI's switches (masi /lanes, on the Sources page) override these once they ship
+    auto: false
     perTick: 10
-    matchAuto: true
+    matchAuto: false
     matchPerTick: 10
   census:
     # on from 2026-11-09 (plan 109 PR 2b, approved "ok to all ... go"): the monthly board census - paced per vendor,
