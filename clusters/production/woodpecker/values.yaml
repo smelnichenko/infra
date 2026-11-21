@@ -75,8 +75,8 @@ server:
     size: 1Gi
     storageClass: local-path
 agent:
-  # one agent, one workflow: one CI job at a time on ten, so a pipeline never competes with another for CPU (each
-  # container gets the woodpecker namespace's LimitRange: 4 CPUs; no pipeline sets one). Not what keeps the apps' shared
+  # one agent, two workflows (WOODPECKER_MAX_WORKFLOWS below): two CI jobs at once on ten (each container gets the
+  # woodpecker namespace's LimitRange: 4 CPUs; no pipeline sets one). Not what keeps the apps' shared
   # Gradle home safe - each Gradle step's flock on /cache/gradle-shared.flock does, whatever runs at once (a cancelled
   # step's pod dying in its grace included). Raise either and Gradle steps queue on that flock: each waits 30 min at
   # most, then fails naming the holder - a long pitest ahead can do that.
@@ -105,6 +105,9 @@ agent:
     # for all CI pods"): a container's root - Kaniko's, a step's that sets no user - is an unprivileged uid on ten, never
     # ten's root. ten runs containerd 2.3, Linux 6.12 (idmapped mounts on its ext4) and Kubernetes 1.36 (on by default)
     WOODPECKER_BACKEND_K8S_USER_NAMESPACES: "true"
+    # every build pod (steps and services) below production: ci-low (cluster-config/priority-classes.yaml) - evicted
+    # first when ten runs out of room, never evicting anything itself (operator 2026-11-21)
+    WOODPECKER_BACKEND_K8S_PRIORITY_CLASS: "ci-low"
   resources:
     requests:
       cpu: 50m
