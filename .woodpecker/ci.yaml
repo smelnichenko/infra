@@ -30,6 +30,16 @@ clone:
         securityContext: { runAsNonRoot: true, runAsUser: 1000, runAsGroup: 1000 }
 
 steps:
+  - name: cpu-budget
+    image: git.pmon.dev/schnappy/ci-tools:latest
+    commands:
+      - ci-cpu-budget .woodpecker
+    backend_options:
+      kubernetes:
+        securityContext: { runAsNonRoot: true }  # the image's USER 1000:1000
+        resources:
+          limits: { cpu: 500m }
+
   - name: kubeconform
     image: ghcr.io/yannh/kubeconform:v0.7.0-alpine
     commands:
