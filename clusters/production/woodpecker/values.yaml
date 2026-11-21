@@ -7,8 +7,11 @@ server:
   # ops/backups/woodpecker/, not in git; allow a few minutes of downtime). v3.19.0
   # waits for its pod informer's sync before judging a step's pod gone (#7158):
   # on v3.18.1 a service that stopped within moments of its delete was never
-  # seen to finish and hung its pipeline until the repo timeout (masi CD 525).
+  # seen to finish and hung its pipeline until the repo timeout (masi CD 525). registry and repository are the chart's
+  # own defaults, named so Renovate's helm-values manager reads this tag (a tag alone it cannot place; 2026-11-21).
   image:
+    registry: docker.io
+    repository: woodpeckerci/woodpecker-server
     tag: v3.20.1
   env:
     # SQLite was a file on one node's volume, locked for writes: two webhooks arriving together lost one of them, and
@@ -82,6 +85,8 @@ agent:
   # most, then fails naming the holder - a long pitest ahead can do that.
   replicaCount: 1
   image:
+    registry: docker.io  # the chart's defaults, named for Renovate (as the server's)
+    repository: woodpeckerci/woodpecker-agent
     tag: v3.20.1
   env:
     WOODPECKER_SERVER: "woodpecker-server:9000"
