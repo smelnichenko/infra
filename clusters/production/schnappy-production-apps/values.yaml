@@ -13,7 +13,7 @@ app:
   image:
     pullPolicy: IfNotPresent
     repository: git.pmon.dev/schnappy/monitor
-    tag: "6a99194"  # monitor
+    tag: "5eca586"  # monitor
   ingress:
     enabled: false
   hikari:
@@ -39,7 +39,7 @@ site:
   image:
     pullPolicy: IfNotPresent
     repository: git.pmon.dev/schnappy/site
-    tag: "99e8d45"  # site
+    tag: "2a9218f"  # site
   resources:
     requests: { cpu: 50m, memory: 64Mi }
     limits: { cpu: 2000m, memory: 256Mi }
@@ -118,7 +118,7 @@ admin:
   image:
     repository: git.pmon.dev/schnappy/admin
     pullPolicy: IfNotPresent
-    tag: "fe31031"  # admin
+    tag: "84c93e8"  # admin
   replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
@@ -130,7 +130,7 @@ chatService:
   image:
     repository: git.pmon.dev/schnappy/chat
     pullPolicy: IfNotPresent
-    tag: "14f9e45"  # chat
+    tag: "e2eb23a"  # chat
   replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
@@ -142,7 +142,7 @@ chessService:
   image:
     repository: git.pmon.dev/schnappy/chess
     pullPolicy: IfNotPresent
-    tag: "260e33d"  # chess
+    tag: "5d6630a"  # chess
   replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
@@ -168,7 +168,7 @@ masiService:
   image:
     repository: git.pmon.dev/schnappy/masi
     pullPolicy: IfNotPresent
-    tag: "68f4b7f"  # masi
+    tag: "d37062a"  # masi
   http:
     # any public host (plan 104 PR 1, masi #124; operator 2026-10-19 of the exact-name list: "fuck that guard...
     # idiocy"): a new source needs no host entry. Internal addresses stay refused by masi's UrlValidator and by the
@@ -210,9 +210,11 @@ masiService:
   tuning:
     auto: false
   analysis:
-    auto: true
+    # off from 2026-11-21 (operator: the prepaid credit ran out - "both, switches in ui"): the analysis and matching lanes
+    # spend the most; the web UI's switches (masi /lanes, on the Sources page) override these once they ship
+    auto: false
     perTick: 10
-    matchAuto: true
+    matchAuto: false
     matchPerTick: 10
   census:
     # on from 2026-11-09 (plan 109 PR 2b, approved "ok to all ... go"): the monthly board census - paced per vendor,
@@ -256,7 +258,7 @@ masiService:
     githubToken: ""
     # the operator's LinkedIn session cookie (li_at): with it the wildcard reads the company pages themselves
   alerts:
-    # on: one daily digest at 06:00 — pipeline ERRORs and matches above the score
+    # on: one daily digest at 06:00 — matches above the score (a source's trouble is the Sources page's, never an alert)
     enabled: true
     to: sergei.melnichenko@gmail.com
     matchScore: 0.8

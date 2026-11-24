@@ -22,8 +22,12 @@ clone:
   - name: git
     image: woodpeckerci/plugin-git
     settings:
+      home: /tmp  # non-root: its credentials file in a home it can write
       partial: false
       depth: 50
+    backend_options:
+      kubernetes:
+        securityContext: { runAsNonRoot: true, runAsUser: 1000, runAsGroup: 1000 }
 
 steps:
   - name: kubeconform
@@ -38,6 +42,11 @@ steps:
         clusters/production/cluster-config
         clusters/production/argocd
         clusters/production/kagent
+    backend_options:
+      kubernetes:
+        securityContext: { runAsNonRoot: true, runAsUser: 1000, runAsGroup: 1000 }
+    environment:
+      HOME: /tmp  # no user of its own in the image: a home it can write
   # every Job's and CronJob's pods out of Velero's backups (the script says why)
   - name: velero-exclude
     image: ghcr.io/yannh/kubeconform:v0.7.0-alpine
@@ -53,6 +62,11 @@ steps:
       - sh .woodpecker/hook-retry-check.sh
       # ScyllaDB's version said once in each data environment, and Renovate able to move it (the script says why)
       - sh .woodpecker/scylla-version-check.sh
+    backend_options:
+      kubernetes:
+        securityContext: { runAsNonRoot: true, runAsUser: 1000, runAsGroup: 1000 }
+    environment:
+      HOME: /tmp  # no user of its own in the image: a home it can write
 
   # the stale PR env sweeper's script run as its CronJob runs it - in its image (the test checks it is the CronJob's),
   # busybox sh - against stub kubectl and curl
@@ -60,12 +74,21 @@ steps:
     image: alpine/k8s:1.35.10
     commands:
       - bash tests/stale-pr-envs-sweeper/run.sh
+    backend_options:
+      kubernetes:
+        securityContext: { runAsNonRoot: true, runAsUser: 1000, runAsGroup: 1000 }
+    environment:
+      HOME: /tmp  # no user of its own in the image: a home it can write
 
   # the restore check's age check run as its CronJob runs it - in its image (the test checks it is the CronJob's), busybox
   # sh - against a stub rclone
   - name: restore-check-age
     image: rclone/rclone:1.75.2@sha256:2687085f718d3c628f7fdfb77c52a1d344332aed543110bb88088f2c70d43eb5
     environment:
+      HOME: /tmp  # no user of its own in the image: a home it can write
       CI_STEP_IMAGE_CHECK: rclone/rclone:1.75.2@sha256:2687085f718d3c628f7fdfb77c52a1d344332aed543110bb88088f2c70d43eb5
     commands:
       - sh tests/restore-check-age/run.sh
+    backend_options:
+      kubernetes:
+        securityContext: { runAsNonRoot: true, runAsUser: 1000, runAsGroup: 1000 }
