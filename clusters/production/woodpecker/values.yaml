@@ -7,8 +7,11 @@ server:
   # ops/backups/woodpecker/, not in git; allow a few minutes of downtime). v3.19.0
   # waits for its pod informer's sync before judging a step's pod gone (#7158):
   # on v3.18.1 a service that stopped within moments of its delete was never
-  # seen to finish and hung its pipeline until the repo timeout (masi CD 525).
+  # seen to finish and hung its pipeline until the repo timeout (masi CD 525). registry and repository are the chart's
+  # own defaults, named so Renovate's helm-values manager reads this tag (a tag alone it cannot place; 2026-11-21).
   image:
+    registry: docker.io
+    repository: woodpeckerci/woodpecker-server
     tag: v3.20.1
   env:
     # SQLite was a file on one node's volume, locked for writes: two webhooks arriving together lost one of them, and
@@ -75,10 +78,15 @@ server:
     size: 1Gi
     storageClass: local-path
 agent:
-  # one agent, one workflow: one CI job at a time on ten, so a pipeline never competes with another for CPU (each
-  # container gets the woodpecker namespace's LimitRange: 4 CPUs; no pipeline sets one)
+  # one agent, two workflows (WOODPECKER_MAX_WORKFLOWS below): two CI jobs at once on ten (each container gets the
+  # woodpecker namespace's LimitRange: 4 CPUs; no pipeline sets one). Not what keeps the apps' shared
+  # Gradle home safe - each Gradle step's flock on /cache/gradle-shared.flock does, whatever runs at once (a cancelled
+  # step's pod dying in its grace included). Raise either and Gradle steps queue on that flock: each waits 30 min at
+  # most, then fails naming the holder - a long pitest ahead can do that.
   replicaCount: 1
   image:
+    registry: docker.io  # the chart's defaults, named for Renovate (as the server's)
+    repository: woodpeckerci/woodpecker-agent
     tag: v3.20.1
   env:
     WOODPECKER_SERVER: "woodpecker-server:9000"
@@ -92,10 +100,19 @@ agent:
     # one node.
     WOODPECKER_BACKEND_K8S_STORAGE_RWX: "false"
     WOODPECKER_BACKEND_K8S_VOLUME_SIZE: "2Gi"
-    WOODPECKER_MAX_WORKFLOWS: "1"
+    # two builds side by side (the operator, 2026-11-21: "4 CPUs + 2 workflows"): one at a time, builds queued 25-29 min
+    # behind each other while ten sat ~67% idle; each step container keeps its 4 CPUs (the ci-cpu LimitRange)
+    WOODPECKER_MAX_WORKFLOWS: "2"
     WOODPECKER_CONNECT_RETRY_COUNT: "30"
     WOODPECKER_LOG_LEVEL: "warn"
     WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES: "forgejo-registry"
+    # every CI pod in a user namespace of its own (hostUsers: false; operator 2026-11-20 "use user namespaces
+    # for all CI pods"): a container's root - Kaniko's, a step's that sets no user - is an unprivileged uid on ten, never
+    # ten's root. ten runs containerd 2.3, Linux 6.12 (idmapped mounts on its ext4) and Kubernetes 1.36 (on by default)
+    WOODPECKER_BACKEND_K8S_USER_NAMESPACES: "true"
+    # every build pod (steps and services) below production: ci-low (cluster-config/priority-classes.yaml) - evicted
+    # first when ten runs out of room, never evicting anything itself (operator 2026-11-21)
+    WOODPECKER_BACKEND_K8S_PRIORITY_CLASS: "ci-low"
   resources:
     requests:
       cpu: 50m

@@ -22,3 +22,15 @@ value: 100000
 globalDefault: true
 preemptionPolicy: PreemptLowerPriority
 description: "Application workloads"
+---
+# CI builds (every pod Woodpecker's agent starts - WOODPECKER_BACKEND_K8S_PRIORITY_CLASS in woodpecker/values.yaml)
+# below every workload: when ten has no room left, the scheduler evicts a build pod for a production pod, never the
+# other way round (before, builds ran at app-default, and a production pod restarting during a big build - masi's
+# CI reserves ~10 GiB - could sit Pending behind it). Never: a build pod waits for room, it never evicts anything.
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: ci-low
+value: 1000
+preemptionPolicy: Never
+description: "CI build pods (Woodpecker): evicted first, never evict"

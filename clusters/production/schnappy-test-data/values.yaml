@@ -24,7 +24,7 @@ postgres:
 valkey:
   enabled: true
   existingSecret: schnappy-test-valkey
-  image: valkey/valkey:9.1.3-alpine
+  image: valkey/valkey:9.2.0-alpine
   resources:
     requests: { cpu: 10m, memory: 32Mi }
     limits: { cpu: 100m, memory: 128Mi }
@@ -45,7 +45,7 @@ kafka:
 scylla:
   enabled: false
   # the schema Job's cqlsh, the cluster's own version
-  image: scylladb/scylla:2026.1.15
+  image: scylladb/scylla:2026.1.16
   # ScyllaDB sizes itself to its memory limit (one shard here, --smp=1): under Seastar's reserve (1.5 GiB) plus 500 MB
   # it takes a flat 500 MB (its log's max_repair_memory, 10 % of a shard: 49.9 MB on 2026-10-14) - at 512Mi that left
   # 36 MiB outside the shard; 1 GiB leaves ~500 MiB. Its request the same - the memory it plans with is then the memory
@@ -60,7 +60,7 @@ scyllaOperator:
   # the ScyllaCluster's version, scylla.image's too: one depName, Renovate moves both in one unit
   # (.woodpecker/scylla-version-check.sh)
   # renovate: datasource=docker depName=scylladb/scylla
-  version: "2026.1.15"
+  version: "2026.1.16"
   agentVersion: "3.12.1"
   developerMode: true
 
@@ -72,7 +72,7 @@ cnpg:
   enabled: true
   import: false
   backup: false
-  imageName: ghcr.io/cloudnative-pg/postgresql:18.6-system-bullseye@sha256:899d3ed526b659d77935dde0e6bf2d69dbbf17d3d8c6486ca8cfd04bd3c18533
+  imageName: ghcr.io/cloudnative-pg/postgresql:19.0-system-trixie@sha256:04aba475dfd2ee7ad4a8ad22e77a3b5597cba7f48437ba014e9730e87d00ae4b
 
 aptCache:
   enabled: false
