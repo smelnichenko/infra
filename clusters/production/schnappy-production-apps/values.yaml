@@ -13,7 +13,7 @@ app:
   image:
     pullPolicy: IfNotPresent
     repository: git.pmon.dev/schnappy/monitor
-    tag: "d9f5e3d"  # monitor
+    tag: "5eca586"  # monitor
   ingress:
     enabled: false
   hikari:
@@ -39,7 +39,7 @@ site:
   image:
     pullPolicy: IfNotPresent
     repository: git.pmon.dev/schnappy/site
-    tag: "3fac880"  # site
+    tag: "2a9218f"  # site
   resources:
     requests: { cpu: 50m, memory: 64Mi }
     limits: { cpu: 2000m, memory: 256Mi }
@@ -118,7 +118,7 @@ admin:
   image:
     repository: git.pmon.dev/schnappy/admin
     pullPolicy: IfNotPresent
-    tag: "e13df8c"  # admin
+    tag: "84c93e8"  # admin
   replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
@@ -130,7 +130,7 @@ chatService:
   image:
     repository: git.pmon.dev/schnappy/chat
     pullPolicy: IfNotPresent
-    tag: "2a3de60"  # chat
+    tag: "e2eb23a"  # chat
   replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
@@ -142,7 +142,7 @@ chessService:
   image:
     repository: git.pmon.dev/schnappy/chess
     pullPolicy: IfNotPresent
-    tag: "c2b6616"  # chess
+    tag: "5d6630a"  # chess
   replicas: 1
   javaOpts: -Xmx1g -XX:+UseZGC
   resources:
@@ -168,7 +168,7 @@ masiService:
   image:
     repository: git.pmon.dev/schnappy/masi
     pullPolicy: IfNotPresent
-    tag: "4abdf22"  # masi
+    tag: "8886de0"  # masi
   http:
     # any public host (plan 104 PR 1, masi #124; operator 2026-10-19 of the exact-name list: "fuck that guard...
     # idiocy"): a new source needs no host entry. Internal addresses stay refused by masi's UrlValidator and by the

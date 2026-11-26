@@ -1,4 +1,4 @@
-# CI: validate the GitOps manifests on every push / PR.
+# CI: validate the GitOps manifests on every push.
 #
 # The only other gate for this repo is Argo CD applying to the live cluster.
 # kubeconform checks every plain manifest (cluster-config, argocd apps, …)
@@ -6,17 +6,15 @@
 # (the class of typo that would otherwise silently widen a NetworkPolicy).
 # Helm values files carry no kind and are skipped by kubeconform.
 
-# ONE run per change: the pull request's. Listing `push` as well fired a second pipeline - first for
-# every push to a branch with an open PR (two identical runs on the same sha), then, once that was
-# narrowed to main, for the merge commit as well. Nothing lands here without a PR, so the PR run is
-# the gate; the merge commit carries the same tree that just passed it.
+# Every PUSH runs it, a branch's and main's; no pull request does (2026-11-24). A change is built on its
+# branch (a change of ours on its way, a Renovate unit) and its pull request opened to merge a head already
+# green - one run per push, never two on the same sha (pull_request beside push ran both). A red branch
+# shows on its commit and pages nobody: WoodpeckerBuildFailed counts failed pipelines on main alone, and a
+# branch push's pipeline carries its own branch (a pull request's carried main, so every red PR paged).
+# Main's own pushes run it too - the merge commit (two branches each green apart can still break main
+# together) and CD's app promotions: Argo applies main to the live cluster, so what lands is checked here.
 when:
-  - event: pull_request
-  # AND the merge commit on main. Not a duplicate: the pull_request run tests the PR's own head, and two
-  # PRs that were each green apart can still break main together. This repo has no other gate - Argo
-  # applies main to the live cluster - so the tree that actually lands is checked here.
   - event: push
-    branch: main
 
 clone:
   - name: git

@@ -10,7 +10,7 @@ app:
   image:
     pullPolicy: IfNotPresent
     repository: git.pmon.dev/schnappy/monitor
-    tag: "708966f"  # monitor
+    tag: "5eca586"  # monitor
   ingress:
     enabled: false
   resources:
@@ -25,7 +25,7 @@ site:
   image:
     pullPolicy: IfNotPresent
     repository: git.pmon.dev/schnappy/site
-    tag: "3fac880"  # site
+    tag: "2a9218f"  # site
   resources:
     requests: { cpu: 10m, memory: 32Mi }
     limits: { cpu: 500m, memory: 128Mi }
@@ -99,7 +99,7 @@ admin:
   image:
     repository: git.pmon.dev/schnappy/admin
     pullPolicy: IfNotPresent
-    tag: "6641740"  # admin
+    tag: "84c93e8"  # admin
   replicas: 1
   javaOpts: -Xmx512m -XX:+UseZGC
   resources:
@@ -111,7 +111,7 @@ chatService:
   image:
     repository: git.pmon.dev/schnappy/chat
     pullPolicy: IfNotPresent
-    tag: "ef8ce3a"  # chat
+    tag: "e2eb23a"  # chat
   replicas: 1
   javaOpts: -Xmx512m -XX:+UseZGC
   resources:
@@ -123,7 +123,7 @@ chessService:
   image:
     repository: git.pmon.dev/schnappy/chess
     pullPolicy: IfNotPresent
-    tag: "fcdb33a"  # chess
+    tag: "5d6630a"  # chess
   replicas: 1
   javaOpts: -Xmx512m -XX:+UseZGC
   resources:
@@ -138,7 +138,7 @@ masiService:
   image:
     repository: git.pmon.dev/schnappy/masi
     pullPolicy: IfNotPresent
-    tag: "4abdf22"  # masi
+    tag: "8886de0"  # masi
   replicas: 1
   # two carriers for virtual threads on one CPU: a request thread is never left waiting behind one busy virtual thread
   # (2026-09-26: two collectors parsing on the only carrier starved the health endpoint; collectors now have platform
