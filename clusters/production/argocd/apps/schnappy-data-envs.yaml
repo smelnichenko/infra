@@ -75,8 +75,8 @@ spec:
             - .spec.postgresGID
             - .spec.postgresUID
             # not .spec.primaryUpdateMethod: platform's chart names it (switchover) - ignored, CNPG's default (restart)
-            # filled in by its webhook would stay, and production's primary restart for every update
-            - .spec.primaryUpdateStrategy
+            # filled in by its webhook would stay, and production's primary restart for every update. Nor
+            # .spec.primaryUpdateStrategy: platform's chart names it (unsupervised, the live value) - a change shows
             - .spec.probes
             - .spec.replicationSlots
             - .spec.smartShutdownTimeout

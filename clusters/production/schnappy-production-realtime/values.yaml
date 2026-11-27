@@ -20,6 +20,12 @@ gateway:
 
 centrifugo:
   enabled: true
+  # 6.10's changes checked (2026-11-27, the wave-patches review): its async consumers drop a non-temporary error
+  # rather than retry it (a retry held the partition), and invalid UTF-8 disconnects a JSON subscriber - chat and
+  # chess publish Jackson JSON (UTF-8; a lone surrogate fails at the producer) to chat:room:<id> and
+  # chess:game:<uuid> only, configured namespaces; nothing produces to events.notifications. Valkey (emptyDir, no
+  # AOF) loses Centrifugo's history and presence on any restart: the chat and chess pages poll their services every
+  # 30 s (site's MessageArea.tsx, Chess.tsx) - a restart costs that at most
   image: centrifugo/centrifugo:v6.9.7
   replicas: 2
   resources:
