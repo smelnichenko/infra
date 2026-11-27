@@ -5,8 +5,9 @@ metadata:
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
+  # no resources finalizer: deleting this Application (a root prune, by hand) must never cascade to its CRDs and
+  # every Cluster - each database with them. Its chart offers no CRD annotations (external-secrets' carry Prune=false,Delete=false),
+  # and automated prune is off (the wave-patches review, 2026-11-27)
 spec:
   project: default
   sources:
