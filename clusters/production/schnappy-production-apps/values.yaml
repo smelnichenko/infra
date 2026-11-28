@@ -289,7 +289,7 @@ tracing:
 smokeTest:
   enabled: true
   # by digest as well as tag (a Docker Hub tag can move): Renovate moves both
-  image: grafana/k6:1.7.1@sha256:4fd3a694926b064d3491d9b02b01cde886583c4931f1223816e3d9a7bdfa7e0f
+  image: grafana/k6:1.8.3@sha256:2cd9cd09e4119340a122aaf06f30cf3009c19db23b87954909fba0d3eda58e08
   baseUrl: https://pmon.dev
   clientSecretName: schnappy-k6-smoke
 
