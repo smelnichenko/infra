@@ -90,3 +90,15 @@ steps:
     backend_options:
       kubernetes:
         securityContext: { runAsNonRoot: true, runAsUser: 1000, runAsGroup: 1000 }
+  # etcd-backup's upload container run as its CronJob runs it - in its image (the test checks it is the CronJob's), a
+  # real rclone against a local remote: the snapshot uploaded, the old pruned, a prune that fails failing the Job
+  - name: etcd-backup-upload
+    image: rclone/rclone:1.75.2@sha256:2687085f718d3c628f7fdfb77c52a1d344332aed543110bb88088f2c70d43eb5
+    environment:
+      HOME: /tmp  # no user of its own in the image: a home it can write
+      CI_STEP_IMAGE_CHECK: rclone/rclone:1.75.2@sha256:2687085f718d3c628f7fdfb77c52a1d344332aed543110bb88088f2c70d43eb5
+    commands:
+      - sh tests/etcd-backup-upload/run.sh
+    backend_options:
+      kubernetes:
+        securityContext: { runAsNonRoot: true, runAsUser: 1000, runAsGroup: 1000 }

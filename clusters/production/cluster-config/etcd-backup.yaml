@@ -152,8 +152,11 @@ spec:
                   TS=$(date +%Y%m%d-%H%M%S)
                   rclone mkdir pi:etcd-backups
                   rclone copyto /backup/etcd.db "pi:etcd-backups/etcd-${TS}.db"
-                  # age is the object's modtime: a fresh snapshot is now; an mc-era upload, its upload time
-                  rclone delete --min-age 7d pi:etcd-backups || true
+                  # age is the object's modtime: a fresh snapshot is now; an mc-era upload, its upload time. A prune that
+                  # fails fails the Job (KubeJobFailed) after the upload: the bucket never grows unseen (|| true hid it,
+                  # carried from mc's era - the wave-patches review, 2026-11-28; rclone delete with nothing old exits 0)
+                  rclone delete --min-age 7d pi:etcd-backups \
+                    || { echo "etcd-backup: etcd-${TS}.db uploaded, but pruning the 7-day-old backups FAILED"; exit 1; }
                   echo "etcd-backup OK: etcd-${TS}.db uploaded; current backups:"
                   rclone lsl pi:etcd-backups | sort -k2,3 | tail -5
               env:

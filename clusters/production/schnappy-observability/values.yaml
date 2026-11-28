@@ -156,6 +156,9 @@ grafana:
 
 alertmanager:
   enabled: true
+  # production's own, as Grafana's, Mimir's and Tempo's above: a chart default moved it unseen in this repo's diff
+  # (wave-patches would have taken it to 0.35 - the review, 2026-11-28)
+  image: prom/alertmanager:v0.34.2
   logLevel: debug
   existingSecret: schnappy-alertmanager
   alertEmailTo: sergei.melnichenko@gmail.com
