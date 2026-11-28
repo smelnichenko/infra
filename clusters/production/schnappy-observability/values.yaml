@@ -7,7 +7,7 @@ networkPolicies:
 clickhouse:
   enabled: true
   existingSecret: schnappy-clickhouse
-  image: clickhouse/clickhouse-server:26.8.41.14-alpine
+  image: clickhouse/clickhouse-server:26.8.49.6-alpine
   resources:
     requests: { cpu: "50m", memory: "512Mi" }
     limits:   { cpu: "2",    memory: "8Gi" }
@@ -86,7 +86,7 @@ gateway:
 
 mimir:
   enabled: true
-  image: grafana/mimir:3.2.5
+  image: grafana/mimir:3.2.6
   retention: 90d
   minioSecret: schnappy-infra-s3
   accessKeyName: ACCESS_KEY
@@ -115,7 +115,7 @@ tempo:
 grafana:
   enabled: true
   existingSecret: schnappy-grafana
-  image: grafana/grafana:13.2.6
+  image: grafana/grafana:13.2.7
   # Grafana 13's update of its preinstalled plugins at start fails on the read-only root and leaves the Mimir
   # datasource unregistered - off: the image's own plugin versions (platform's grafana-deployment.yaml says why)
   pluginsPreinstallAutoUpdate: false
@@ -179,12 +179,12 @@ pushgateway:
 
 reports:
   enabled: true
-  image: nginx:1.27-alpine
+  image: nginx:1.31-alpine
   minioEndpoint: schnappy-infra-s3gw.schnappy-infra.svc:9000
 
 runbooks:
   enabled: true
-  image: nginx:1.27-alpine
+  image: nginx:1.31-alpine
 
 smartctl:
   enabled: true

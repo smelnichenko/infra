@@ -81,10 +81,10 @@ steps:
   # the restore check's age check run as its CronJob runs it - in its image (the test checks it is the CronJob's), busybox
   # sh - against a stub rclone
   - name: restore-check-age
-    image: rclone/rclone:1.75.2@sha256:2687085f718d3c628f7fdfb77c52a1d344332aed543110bb88088f2c70d43eb5
+    image: rclone/rclone:1.76.0@sha256:7cbeec24a44f206067597c0368be4de90ae19a64d5113c7d1938bd737a81e466
     environment:
       HOME: /tmp  # no user of its own in the image: a home it can write
-      CI_STEP_IMAGE_CHECK: rclone/rclone:1.75.2@sha256:2687085f718d3c628f7fdfb77c52a1d344332aed543110bb88088f2c70d43eb5
+      CI_STEP_IMAGE_CHECK: rclone/rclone:1.76.0@sha256:7cbeec24a44f206067597c0368be4de90ae19a64d5113c7d1938bd737a81e466
     commands:
       - sh tests/restore-check-age/run.sh
     backend_options:

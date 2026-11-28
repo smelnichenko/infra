@@ -44,7 +44,7 @@ postgres:
 valkey:
   enabled: true
   existingSecret: schnappy-production-valkey
-  image: valkey/valkey:9.1.3-alpine
+  image: valkey/valkey:9.1.4-alpine
   resources:
     requests: { cpu: 50m, memory: 64Mi, ephemeral-storage: 64Mi }
     limits: { cpu: 1000m, memory: 512Mi, ephemeral-storage: 256Mi }
@@ -169,7 +169,7 @@ cnpg:
   instances: 2   # primary + 1 streaming replica — pod-level HA; CNPG manages PDB/failover
   import: false
   recovery: false
-  imageName: ghcr.io/cloudnative-pg/postgresql:18.7-system-trixie@sha256:b4bbd2e623f1a8833e9a2a4210480ef215b6d13fc0988b06786a778a5c699a20
+  imageName: ghcr.io/cloudnative-pg/postgresql:18.7-system-trixie@sha256:c437b7c6c00aa7e66f5d6de1dd83602391fdebd4ff776ffb1ab7aaba5e7351ad
   backup: true
   backupEndpoint: http://192.168.11.5:9000
   # PostgreSQL 18 archives under its own name: pg_upgrade starts the new major at timeline 1, and the 17 history
