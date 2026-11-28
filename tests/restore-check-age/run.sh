@@ -73,5 +73,29 @@ case_ "the store unreachable" 1 "" "" 1 "FAILED: pi1 pi2"
 case_ "  the store's own error shown" 1 "" "" 1 "SignatureDoesNotMatch"
 # "could not ask" is not "fresh": rclone failing after it printed a value
 case_ "rclone fails after printing fresh values" 1 "$F" "$F" 1 "FAILED: pi1 pi2"
+# the real rclone of the image, no stub on PATH: a local remote named pi (RCLONE_CONFIG_PI_TYPE=local - the CronJob's is
+# the Pi store) seeded with each Pi's files - the script works with the binary it ships with, not only with the stub's
+# answers (the wave-patches review, 2026-11-28: the stub would pass with rclone gone from the image, and the copy skips
+# this CronJob)
+real_() { # name, want, pi1's last-success ("" - none), pi2's, [output must contain]
+  rm -rf "$W/real"; mkdir -p "$W/real/restore-checks/pi1" "$W/real/restore-checks/pi2"
+  for p in 1 2; do
+    v=$(eval echo "\${$((p + 2))}")
+    [ -z "$v" ] || echo "$v" > "$W/real/restore-checks/pi$p/last-success"
+    printf 'REPORT pi%s\nline 2\n' "$p" > "$W/real/restore-checks/pi$p/last-report"
+  done
+  out=$(cd "$W/real" && RCLONE_CONFIG_PI_TYPE=local sh -e "$W/check.sh" 2>&1); rc=$?
+  if [ "$rc" = "$2" ] && { [ -z "${5:-}" ] || printf '%s\n' "$out" | grep -qF -- "$5"; }; then echo "PASS $1"
+  else echo "FAIL $1 (rc $rc, want $2)"; printf '%s\n' "$out" | sed 's/^/    /'; fails=$((fails + 1)); fi
+}
+if command -v rclone > /dev/null 2>&1; then
+  real_ "the real rclone: both fresh - passes, each Pi's report read" 0 "$(at -7200)" "$F" "REPORT pi2"
+  real_ "  the real rclone: pi2's last-success missing - fails, named" 1 "$(at -7200)" "" "pi2's last-success missing or unreadable"
+  real_ "  the real rclone: pi1 61 h old - fails" 1 "$(at -219600)" "$F" "FAILED: pi1"
+elif [ -n "${CI_STEP_IMAGE_CHECK:-}" ]; then
+  echo "FAIL no rclone in the CronJob's image (the CI step's): the script cannot run there"; fails=$((fails + 1))
+else
+  echo "SKIP the real rclone's cases: none on this host (run in the CronJob's image, as CI does)"
+fi
 echo "restore-check-age: $([ $fails = 0 ] && echo ALL-PASS || echo "$fails FAILED")"
 [ $fails = 0 ]
